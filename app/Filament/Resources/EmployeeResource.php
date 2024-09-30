@@ -117,7 +117,7 @@ class EmployeeResource extends Resource
 
 
 
-                Section::make()
+                Section::make(heading: 'Other Details')
                 ->schema([
                     // Select::make('position_id')
                     //         ->label('Position')
