@@ -190,6 +190,7 @@ class EmployeeResource extends Resource
                         ->required(fn (string $context) => $context === 'create')
                         ->options([
                             'Regular' => 'Regular',
+                            'Non-Regular' => 'Non-Regular',
                             'Project Based' => 'Project Based',
                         ])->native(false),
 
