@@ -28,10 +28,15 @@ class WorkSchedResource extends Resource
     protected static ?string $model = WorkSched::class;
 
     protected static ?string $navigationLabel = 'Work Schedule';
+    protected static ?string $navigationGroup = "Employee Details";
+
+    protected static ?string $title = 'Work Schedule';
+
+    protected static ?string $breadcrumb = "Work Schedule";
+
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $title = 'Work Schedules';
 
     // protected static ?string $navigationGroup = "Projects/Assign";
 
