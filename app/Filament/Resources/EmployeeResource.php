@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Employee;
+use App\Models\Position;
+use App\Models\WorkSched;
 use Faker\Provider\ar_EG\Text;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Forms;
@@ -115,7 +117,49 @@ class EmployeeResource extends Resource
                         ])->native(false),
                 ])->columns(4)->collapsible(true),
 
+								Section::make(heading: 'Employment Details')
+                ->schema([
+                    Select::make('schedule_id')
+                    ->label('Work Schedule')
+										->options(
+											WorkSched::query()
+											->pluck('ScheduleName', 'id')
+											->toArray()
+										)
+                    ->required(fn (string $context) => $context === 'create')
+                    ->unique(ignoreRecord: true),
 
+										Select::make('position_id')
+										->label('Position')
+										->options(
+											Position::query()
+											->pluck('PositionName', 'id')
+											->toArray()
+										)
+										->required(fn (string $context) => $context === 'create')
+										->unique(ignoreRecord: true),
+
+									// Select::make('project_id')
+									//     ->label('Project')
+											
+									//     ->relationship('project', 'ProjectName')
+									//     ->native(false)
+									//     ->reactive()
+									//     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
+									//     ,
+
+									// Select::make('schedule_id')
+									//     ->label('Work Schedule')
+											
+									//     ->relationship('schedule', 'ScheduleName')
+									//     ->native(false),
+
+									// Select::make('overtime_id')
+									//     ->label('Overtime')
+									//     ->relationship('overtime', 'Reason')
+									//     ->native(false),
+
+                ])->columns(4)->collapsible(true),
 
                 Section::make(heading: 'Other Details')
                 ->schema([
