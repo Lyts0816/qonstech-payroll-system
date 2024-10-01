@@ -25,7 +25,6 @@ class LoanResource extends Resource
 
     protected static ?string $title = 'Loan';
 
-
     public static function form(Form $form): Form
     {
         return $form
@@ -37,8 +36,21 @@ class LoanResource extends Resource
                             ->options(Employee::all()->pluck('full_name', 'id'))
                             ->required(fn (string $context) => $context === 'create')
                             ->preload()
-                            ->searchable(),
-
+                            ->searchable()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                $employee = Employee::find($state);
+    
+                                // Assuming there's an 'is_regular' attribute to determine the employee's status
+                            if ($employee && $employee->employment_type === 'Regular') {
+                                    // Regular employee, use Kinsenas
+                                    $set('DeductionPeriod', 'Kinsenas');
+                                } else {
+                                    // Non-regular employee, use Weekly
+                                    $set('DeductionPeriod', 'Weekly');
+                                }
+                            }),
+    
                         Select::make('LoanType')
                             ->label('Loan Type')
                             ->options([
@@ -47,33 +59,58 @@ class LoanResource extends Resource
                                 'Pagibig Loan' => 'Pagibig Loan',
                             ])
                             ->required(),
-
+    
                         TextInput::make('LoanAmount')
                             ->label('Loan Amount')
                             ->required(fn (string $context) => $context === 'create')
-                            ->numeric(),
-
-                        TextInput::make('Balance')
-                            ->label('Balance')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->numeric(),
-
-                        TextInput::make('MonthlyDeduction')
-                            ->label('Monthly Deduction')
+                            ->numeric()
+                            ->reactive() // Make reactive
+                            ->afterStateUpdated(function (callable $get, callable $set) {
+                                $set('Deduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
+                            }),
+    
+                        TextInput::make('NumberOfPayments')
+                            ->label('Number of Payments')
                             ->required()
-                            ->numeric(),
-
+                            ->numeric()
+                            ->reactive() // Make reactive
+                            ->afterStateUpdated(function (callable $get, callable $set) {
+                                $set('Deduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
+                            }),
+    
+                        Select::make('DeductionPeriod')
+                            ->label('Deduction Period')
+                            ->options([
+                                'Kinsenas' => 'Kinsenas',
+                                'Weekly' => 'Weekly',
+                            ])
+                            ->disabled(), // Set dynamically based on employee status
+    
+                        TextInput::make('Deduction')
+                            ->label('Deduction Amount')
+                            ->disabled()
+                            ->numeric()
+                            ->dehydrated(true), // Ensure it is submitted
+    
                         TextInput::make('StartDate')
-                            ->label('Start Date')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->type('date'),
-
-                        TextInput::make('EndDate')
-                            ->label('End Date')
+                            ->label('Start Paying')
                             ->required(fn (string $context) => $context === 'create')
                             ->type('date'),
                     ])->columns(4)->collapsible(true),
             ]);
+    }
+
+    public static function calculateDeduction($loanAmount, $numberOfPayments, $deductionPeriod)
+    {
+        if ($deductionPeriod === 'Kinsenas') {
+            // Kinsenas deduction calculation (twice a month)
+            return $loanAmount / ($numberOfPayments * 2);
+        } elseif ($deductionPeriod === 'Weekly') {
+            // Weekly deduction calculation
+            return $loanAmount / ($numberOfPayments * 4);
+        }
+        
+        return 0;
     }
 
     public static function table(Table $table): Table
@@ -88,20 +125,21 @@ class LoanResource extends Resource
                 Tables\Columns\TextColumn::make('LoanType')
                     ->label('Loan Type'),
 
+                Tables\Columns\TextColumn::make('StartDate')
+                    ->label('Start Date'),
+
                 Tables\Columns\TextColumn::make('LoanAmount')
                     ->label('Loan Amount'),
+
+                Tables\Columns\TextColumn::make('NumberOfPayments')
+                    ->label('Number Of Payments'),
+
+                Tables\Columns\TextColumn::make('WeeklyDeduction')
+                    ->label('Weekly Deduction'),
 
                 Tables\Columns\TextColumn::make('Balance')
                     ->label('Balance'),
 
-                Tables\Columns\TextColumn::make('MonthlyDeduction')
-                    ->label('Monthly Deduction'),
-
-                Tables\Columns\TextColumn::make('StartDate')
-                    ->label('Start Date'),
-
-                Tables\Columns\TextColumn::make('EndDate')
-                    ->label('End Date'),
             ])
             ->filters([
                 

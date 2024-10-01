@@ -16,9 +16,11 @@ class Loan extends Model
         'LoanType',
         'LoanAmount',
         'Balance',
-        'MonthlyDeduction',
+        //'MonthlyDeduction',
+        'WeeklyDeduction',
+        'NumberOfPayments',
         'StartDate',
-        'EndDate',
+        //'EndDate',
     ];
 
     public function employee()
