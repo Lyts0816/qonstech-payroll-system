@@ -29,7 +29,7 @@ class DeductionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = "Employee/Deduction/Earnings";
+    protected static ?string $navigationGroup = "Employee Payroll";
 
     protected static ?int $navigationSort = 2;
 

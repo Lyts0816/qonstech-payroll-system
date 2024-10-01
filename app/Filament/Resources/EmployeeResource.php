@@ -31,9 +31,9 @@ class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-c-user-group';
 
-    protected static ?string $navigationGroup = "Employee/Deduction/Earnings";
+    protected static ?string $navigationGroup = "Employee Details";
 
     protected static ?int $navigationSort = 1;
 
@@ -234,6 +234,7 @@ class EmployeeResource extends Resource
                         ->required(fn (string $context) => $context === 'create')
                         ->options([
                             'Regular' => 'Regular',
+                            'Non-Regular' => 'Non-Regular',
                             'Project Based' => 'Project Based',
                         ])->native(false),
 

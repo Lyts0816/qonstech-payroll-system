@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('Holiday', 10, 2); 
             $table->decimal('Leave', 10, 2);
             $table->decimal('Total', 10, 2);
+            $table->varchar('EarningType' , 255); 
+            $table->decimal('Amount', 15, 2);
             $table->timestamps();
 
 
