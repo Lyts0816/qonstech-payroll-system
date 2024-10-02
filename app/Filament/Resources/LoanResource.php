@@ -66,7 +66,7 @@ class LoanResource extends Resource
                             ->numeric()
                             ->reactive() // Make reactive
                             ->afterStateUpdated(function (callable $get, callable $set) {
-                                $set('Deduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
+                                $set('WeeklyDeduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
                             }),
     
                         TextInput::make('NumberOfPayments')
@@ -75,7 +75,7 @@ class LoanResource extends Resource
                             ->numeric()
                             ->reactive() // Make reactive
                             ->afterStateUpdated(function (callable $get, callable $set) {
-                                $set('Deduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
+                                $set('WeeklyDeduction', self::calculateDeduction($get('LoanAmount'), $get('NumberOfPayments'), $get('DeductionPeriod')));
                             }),
     
                         Select::make('DeductionPeriod')
@@ -86,7 +86,7 @@ class LoanResource extends Resource
                             ])
                             ->disabled(), // Set dynamically based on employee status
     
-                        TextInput::make('Deduction')
+                        TextInput::make('WeeklyDeduction')
                             ->label('Deduction Amount')
                             ->disabled()
                             ->numeric()
