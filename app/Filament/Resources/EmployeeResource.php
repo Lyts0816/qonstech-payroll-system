@@ -46,7 +46,6 @@ class EmployeeResource extends Resource
                     TextInput::make('first_name')
                     ->label('First Name')
                     ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->unique(ignoreRecord: true)
                     ->rules('regex:/^[^\d]*$/'),
 
                     TextInput::make('middle_name')
