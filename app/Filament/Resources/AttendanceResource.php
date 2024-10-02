@@ -76,6 +76,9 @@ class AttendanceResource extends Resource
                 ->sortable()
             
             ])
+            ->recordUrl(function ($record) {
+                return null;
+            })
             ->filters([
                 SelectFilter::make('project_id')
                 ->label('Select Project')
@@ -143,7 +146,7 @@ class AttendanceResource extends Resource
 
 
             ->actions([
-                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
 
