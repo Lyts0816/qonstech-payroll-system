@@ -35,19 +35,54 @@ class PagibigResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('MonthlySalary')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->unique(ignoreRecord: true)
-                ,
-
-                TextInput::make('Rate')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->unique(ignoreRecord: true)
-                ,
+                // Minimum Salary
+                TextInput::make('MinimumSalary')
+                    ->label('Minimum Salary')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter minimum salary for this bracket'),
+    
+                // Maximum Salary
+                TextInput::make('MaximumSalary')
+                    ->label('Maximum Salary')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter maximum salary for this bracket'),
+    
+                // Employee Share Percentage
+                TextInput::make('EmployeeRate')
+                    ->label('Employee Contribution (%)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter employee share percentage for this bracket'),
+    
+                // Employer Share Percentage
+                TextInput::make('EmployerRate')
+                    ->label('Employer Contribution (%)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter employer share percentage for this bracket'),
+    
             ]);
     }
+    
+    // public static function form(Form $form): Form
+    // {
+    //     return $form
+    //         ->schema([
+    //             TextInput::make('MonthlySalary')
+    //             ->required(fn (string $context) => $context === 'create')
+    //             ->numeric()
+    //             ->unique(ignoreRecord: true)
+    //             ,
+
+    //             TextInput::make('Rate')
+    //             ->required(fn (string $context) => $context === 'create')
+    //             ->numeric()
+    //             ->unique(ignoreRecord: true)
+    //             ,
+    //         ]);
+    // }
 
     public static function table(Table $table): Table
     {
@@ -57,10 +92,16 @@ class PagibigResource extends Resource
                 ->label('PAGIBIG ID')
                 ->searchable(),
 
-                TextColumn::make('MonthlySalary')
+                TextColumn::make('MinimumSalary')
                 ->searchable(),
 
-                TextColumn::make('Rate')
+                TextColumn::make('MaximumSalary')
+                ->searchable(),
+
+                TextColumn::make('EmployeeRate')
+                ->searchable(),
+
+                TextColumn::make('EmployerRate')
                 ->searchable(),
             ])
             ->filters([
