@@ -51,6 +51,9 @@ class AttendanceResource extends Resource
                 TextColumn::make('employee.project.ProjectName')
                 ->Label('Project Name'),
 
+                TextColumn::make('employee.schedule.ScheduleName')
+                ->Label('Schedule'),
+
                 TextColumn::make('Checkin_One')
                 ->label('Morning Check-in')
                 ,
