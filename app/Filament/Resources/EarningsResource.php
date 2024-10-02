@@ -26,7 +26,7 @@ class EarningsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = "Employee/Deduction/Earnings";
+    protected static ?string $navigationGroup = "Employee Payroll";
 
     public static function calculateTotal($holiday, $leave, $overtimeRate)
     {

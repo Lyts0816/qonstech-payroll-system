@@ -20,7 +20,7 @@ class PayrollResource extends Resource
 {
     protected static ?string $model = Payroll::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-c-bars-3-center-left';
 
     protected static ?string $title = 'PHILHEALTH';
 

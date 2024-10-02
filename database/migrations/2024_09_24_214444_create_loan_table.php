@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('LoanAmount', 15, 2);
             $table->decimal('Balance', 15, 2);
             $table->decimal('MonthlyDeduction', 15, 2);
+            $table->integer('NumberOfPayments ');
+            $table->decimal('WeeklyDeduction ', 15, 2);
             $table->date('StartDate');
             $table->date('EndDate');
 
