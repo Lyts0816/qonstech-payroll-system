@@ -34,69 +34,45 @@ class EarningsResource extends Resource
     }
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Section::make('Earnings Information')
-                    ->schema([
-                        Select::make('EmployeeID')
+{
+    return $form
+        ->schema([
+            Section::make('Earnings Information')
+                ->schema([
+                    // Employee Select Field
+                    Select::make('EmployeeID')
                         ->label('Employee')
                         ->options(Employee::all()->pluck('full_name', 'id'))
                         ->required()
                         ->preload()
                         ->searchable(),
-                
-                    Select::make('OvertimeID')
-                        ->label('Overtime')
-                        ->relationship('overtime', 'Reason')
-                        ->required()
-                        ->preload()
-                        ->searchable()
-                        ->reactive()  
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                           
-                            $overtimeRate = Overtime::find($state)?->OvertimeRate ?? 0;
-                            $set('OvertimeRate', $overtimeRate);  
-                            
-                            $set('Total', self::calculateTotal($get('Holiday'), $get('Leave'), $overtimeRate));
-                        }),
-                
-                    TextInput::make('OvertimeRate')
-                        ->label('Overtime Rate')
-                        ->readOnly()  
-                        ->numeric()
-                        ->default(0),
-                
-                    TextInput::make('Holiday')
-                        ->label('Holiday Pay')
-                        ->required()
-                        ->numeric()
-                        ->reactive()  
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            
-                            $set('Total', self::calculateTotal($state, $get('Leave'), $get('OvertimeRate')));
-                        }),
-                
-                    TextInput::make('Leave')
-                        ->label('Leave Pay')
-                        ->required()
-                        ->numeric()
-                        ->reactive() 
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            
-                            $set('Total', self::calculateTotal($get('Holiday'), $state, $get('OvertimeRate')));
-                        }),
-                
-                    TextInput::make('Total')
-                        ->label('Total')
-                        ->readOnly(),
 
-                        
-                    ])->columns(2)->collapsible(true),
-                
-            ]);
-    }
-    
+                    // Earnings Type Select Field
+                    Select::make('EarningType')
+                        ->label('Earnings Type')
+                        ->options([
+                            'Other Allowance' => 'Other Allowance',
+                        ])
+                        ->required()
+                        ->default('Other Allowance'), // Pre-select 'Other Allowance'
+                  
+
+                    // Amount Input Field
+                    TextInput::make('Amount')
+                        ->label(label: 'Amount')
+                        ->required()
+                        ->numeric()
+                        ->minValue(0), // Ensure no negative amounts are input
+
+                    TextInput::make('StartDate')
+                        ->label('Start Paying')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->type('date'),
+                ])
+                ->columns(2) // Set the layout to two columns for better UI alignment
+                ->collapsible(true), // Allow the section to collapse for better user experience
+        ]);
+}
 
     public static function table(Table $table): Table
     {
@@ -105,16 +81,14 @@ class EarningsResource extends Resource
                 TextColumn::make('employee.full_name')
                     ->label('Employee'),
 
-                TextColumn::make('overtime.OvertimeRate')
-                    ->label('Overtime Rate Total'),
+                TextColumn::make('EarningType')
+                    ->label('Earning Type'),
+
+                TextColumn::make('StartDate')
+                    ->label('Start Paying'),
                 
-                TextColumn::make('Holiday')
-                    ->label('Holiday Pay'),
-
-                TextColumn::make('Leave')
-                    ->label('Leave Pay'),
-
-                    TextColumn::make('Total')
+                TextColumn::make('Amount')
+                    ->label('Amount'),
             ])
             ->filters([
                 
