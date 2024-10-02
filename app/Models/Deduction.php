@@ -16,6 +16,7 @@ class Deduction extends Model
         'employeeID',
         'DeductionType',
         'Amount',
+        'StartDate',
     ];
 
     // Define the relationships

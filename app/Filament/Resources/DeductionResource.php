@@ -38,80 +38,67 @@ class DeductionResource extends Resource
     {
         return $form
             ->schema([
+                // Employee Select Field
                 Select::make('employeeID')
-                ->options(
-                    Employee::all()->pluck('full_name', 'id')
-                )
-                ->reactive() 
-                ->required(),
-
-            Select::make('DeductionType')
-                ->options([
-                    'SSS' => 'SSS',
-                    'PhilHealth' => 'PhilHealth',
-                    'Pagibig' => 'Pagibig',
-                    'CashAdvance' => 'CashAdvance',
-                    'Undertime' => 'Undertime',
-                    'SalaryAdjustment' => 'SalaryAdjustment',
-                    'Loan' => 'Loan',
-                ])
-                ->reactive()
-                ->afterStateUpdated(function (callable $get, callable $set) {
-                    $employeeID = $get('employeeID');
-                    $deductionType = $get('DeductionType');
-                    
-                    if ($employeeID && in_array($deductionType, ['SSS', 'PhilHealth', 'Pagibig'])) {
-                        $employee = Employee::find($employeeID);
-                        $position = $employee->position;
-
-                        if ($position) {
-                            
-                            $sss = SSS::where('MinSalary', '<=', $position->MonthlySalary)
-                                      ->where('MaxSalary', '>=', $position->MonthlySalary)
-                                      ->first();
-                            $philhealth = Philhealth::where('MinSalary', '<=', $position->MonthlySalary)
-                                                    ->where('MaxSalary', '>=', $position->MonthlySalary)
-                                                    ->first();
-                            $pagibig = Pagibig::first(); 
-
-                            
-                            if ($deductionType === 'SSS') {
-                                $sssMonthlyPayment = $sss->EmployeeShare ?? 0;
-                                $set('Amount', number_format($sssMonthlyPayment, 2, '.', ''));
-                            }
-
-                            if ($deductionType === 'PhilHealth') {
-                                $philhealthMonthlyPayment = $position->MonthlySalary <= 10000
-                                    ? ($philhealth->MonthlyRate ?? 0)
-                                    : ($position->MonthlySalary * ($philhealth->PremiumRate / 100));
-                                $set('Amount', number_format($philhealthMonthlyPayment, 2, '.', ''));
-                            }
-
-                            if ($deductionType === 'Pagibig') {
-                                $pagibigMonthlyPayment = $position->MonthlySalary < 1500
-                                    ? ($position->MonthlySalary * 0.01)
-                                    : ($position->MonthlySalary * 0.02);
-                                $set('Amount', number_format($pagibigMonthlyPayment, 2, '.', ''));
+                    ->label('Employee')
+                    ->options(Employee::all()->pluck('full_name', 'id'))
+                    ->reactive()
+                    ->required()
+                    ->afterStateUpdated(function (callable $get, callable $set) {
+                        $employeeID = $get('employeeID');
+                        if ($employeeID) {
+                            $employee = Employee::find($employeeID);
+    
+                            if ($employee) {
+                                if ($employee->employment_type === 'Regular') {
+                                    // Regular employee, use Kinsenas
+                                    $set('Period', 'Kinsenas');
+                                } else {
+                                    // Non-regular employee, use Weekly
+                                    $set('Period', 'Weekly');
+                                }
                             }
                         }
-                    }
-                })
-                ->required(),
+                    }),
+    
+                // Deduction Type - Leave only Salary Adjustment
+                Select::make('DeductionType')
+                    ->label('Deduction Type')
+                    ->options([
+                        'SalaryAdjustment' => 'Salary Adjustment',
+                    ])
+                    ->default('SalaryAdjustment'),
+                                         
+                // Amount Field
+                TextInput::make('Amount')
+                    ->label('Amount')
+                    ->required()
+                    ->numeric(),
 
-            TextInput::make('Amount')
-                ->required(),
+                TextInput::make('StartDate')
+                    ->label('Start Paying')
+                    ->required(fn (string $context) => $context === 'create')
+                    ->type('date'),
             ]);
     }
-
+    
 
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('employee.full_name'),
-                TextColumn::make('DeductionType'),
-                TextColumn::make('Amount'),
+                TextColumn::make('employee.full_name')
+                ->label('Employee'),
+
+            TextColumn::make('DeductionType')
+                ->label('Deduction Type'),
+
+            TextColumn::make('StartDate')
+                ->label('Start Paying'),
+            
+            TextColumn::make('Amount')
+                ->label('Amount'),               
             ])
             ->filters([
                 //
