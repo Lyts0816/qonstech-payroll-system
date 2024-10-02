@@ -42,7 +42,7 @@ class ListAttendances extends ListRecords
             $now = Carbon::now();
             $currentDate = $now->toDateString(); // Current date in Y-m-d format
             $currentTime = $now->format('H:i:s'); // Current time in H:i:s format
-
+            
             // Determine if the current time is morning or afternoon
             $isMorning = $now->isBefore($now->copy()->setTime(12, 0));
             $isAfternoon = !$isMorning;
@@ -101,7 +101,7 @@ class ListAttendances extends ListRecords
                         Log::error('Checkout time is earlier than checkin time for afternoon shift.');
                     }
                 }
-
+                
                 // Convert minutes to hours and update Total Hours
                 $attendance->Total_Hours = $totalMinutes / 60;
                 $attendance->save();
@@ -128,11 +128,6 @@ class ListAttendances extends ListRecords
         ->send();
         }
     }),
-
-
-
-
-
 
 
             ])->label('Attendance')->button()->size(ActionSize::Medium),
