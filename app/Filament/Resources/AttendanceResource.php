@@ -44,6 +44,9 @@ class AttendanceResource extends Resource
             ->columns([
                 TextColumn::make('employee.full_name')
                 ->label('Employee Name'),
+
+                TextColumn::make('employee.employment_type')
+                ->label('Employment Type'),
                 
                 TextColumn::make('employee.project.ProjectName')
                 ->Label('Project Name'),
@@ -100,6 +103,38 @@ class AttendanceResource extends Resource
                     return $query->whereHas('employee.schedule', function (Builder $query) use ($data) {
                         $query->where('id', $data['value']);
                     });
+                }),
+
+                SelectFilter::make('employment_type')
+                ->label('Select Employment Type')
+                ->options([
+                    'Regular' => 'Regular',
+                    'Project Based' => 'Project Based',
+                ])
+                ->query(function (Builder $query, array $data) {
+                    if (empty($data['value'])) {
+                        return $query;
+                    }
+                    return $query->whereHas('employee', function (Builder $query) use ($data) {
+                        $query->where('employment_type', $data['value']);
+                    });
+                }),
+
+                SelectFilter::make('date_filter')
+                ->label('Select Date Filter')
+                ->options([
+                    'daily' => 'Daily',
+                    'weekly' => 'Weekly',
+                ])
+                ->query(function (Builder $query, array $data) {
+                    if (empty($data['value'])) {
+                        return $query;
+                    }
+                    if ($data['value'] === 'daily') {
+                        return $query->whereDate('Date', now()->toDateString());
+                    } elseif ($data['value'] === 'weekly') {
+                        return $query->whereBetween('Date', [now()->startOfWeek(), now()->endOfWeek()]);
+                    }
                 }),
 
 
