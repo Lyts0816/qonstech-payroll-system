@@ -18,7 +18,9 @@ class Attendance extends Model
         'Checkin_Two',
         'Checkout_Two',
         'Date',
-        'Total_Hours'
+        'Total_Hours',
+        'overtime_in',
+        'overtime_out',
     ];
 
     public function employee()
