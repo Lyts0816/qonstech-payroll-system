@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('philhealth', function (Blueprint $table) {
             $table->id();
-            $table->decimal('MinSalary', 15, 2);
-            $table->decimal('MaxSalary', 15, 2);
-            $table->decimal('PremiumRate', 15, 2);
-            $table->decimal('MonthlyRate',15, 2);
+            $table->decimal('MinSalary', 15, 2)->nullable();
+            $table->decimal('MaxSalary', 15, 2)->nullable();
+            
+            $table->decimal('PremiumRate', 15, 2)->nullable();
+            $table->decimal('MonthlyRate',15, 2)->nullable();
+            $table->decimal('ContributionAmount',15, 2)->nullable();
             $table->timestamps();
         });
     }
