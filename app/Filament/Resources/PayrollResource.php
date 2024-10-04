@@ -41,145 +41,156 @@ class PayrollResource extends Resource
 			->schema([
 				Grid::make(2) // Create a two-column grid layout for the first two fields
 					->schema([
-						Select::make('EmployeeStatus')
-							->label('Employee Status')
-							->required(fn(string $context) => $context === 'create' || $context === 'edit')
-							->options([
-								'Regular' => 'Regular',
-								'Non-Regular' => 'Non-Regular',
-								'Project Based' => 'Project Based',
-							])
-							// ->native(false)
-							->default(request()->query('employee'))
-							->reactive()
-							->afterStateUpdated(function (callable $set, $state) {
-								if ($state === 'Regular' || $state === 'Non-Regular') {
-									// If so, set ProjectID to null
-									$set('ProjectID', null);
-								}
-							}),
+					// EmployeeStatus Select Field
+  // EmployeeStatus Select Field
+	Select::make('EmployeeStatus')
+	->label('Employee Status')
+	->required(fn(string $context) => $context === 'create' || $context === 'edit')
+	->options([
+			'Regular' => 'Regular',
+			'Non-Regular' => 'Non-Regular',
+			'Project Based' => 'Project Based',
+	])
+	->default(request()->query('employee'))
+	->reactive()
+	->afterStateUpdated(function (callable $set, $state) {
+			// Automatically set PayrollFrequency based on EmployeeStatus
+			if ($state === 'Regular') {
+					$set('PayrollFrequency', 'Kinsenas');
+			} elseif ($state === 'Non-Regular' || $state === 'Project Based') {
+					$set('PayrollFrequency', 'Weekly');
+			}
 
-						Select::make('ProjectID')
-							->label('Project')
-							->required(fn(callable $get) => $get('EmployeeStatus') === 'Project Based')
-							->options(
-								function (callable $get) {
-									// dd($get('EmployeeStatus') === 'Project Based');
-									return $get('EmployeeStatus') === 'Project Based'
-										? Project::query()->pluck('ProjectName', 'id')->toArray()
-										: [];
-								}
-							)
-							// ->options(
-							// 		Project::query()
-							// 		->pluck('ProjectName', 'id')
-							// 		->toArray()
-							// 		)
-							// ->native(false)
-							->disabled(fn(callable $get) => $get('EmployeeStatus') !== 'Project Based')
-							->default(null) // Reset default if not project based
-							->nullable()
-						,
+			// If EmployeeStatus is 'Regular' or 'Non-Regular', set ProjectID to null
+			if ($state === 'Regular' || $state === 'Non-Regular') {
+					$set('ProjectID', null);
+			}
+	}),
+	Select::make('ProjectID')
+	->label('Project')
+	->required(fn(callable $get) => $get('EmployeeStatus') === 'Project Based')
+	->options(function (callable $get) {
+			return $get('EmployeeStatus') === 'Project Based'
+					? Project::query()->pluck('ProjectName', 'id')->toArray()
+					: [];
+	})
+	->disabled(fn(callable $get) => $get('EmployeeStatus') !== 'Project Based')
+	->default(null) // Reset default if not project based
+	->nullable(),
+]),
 
-					]),
+// PayrollFrequency Select Field
+Select::make('PayrollFrequency')
+->label('Payroll Frequency')
+->required(fn(string $context) => $context === 'create' || $context === 'edit')
+->options([
+'Kinsenas' => 'Kinsenas (Bi-monthly)',
+'Weekly' => 'Weekly',
+])
+->native(false)
+->disabled()
+->reactive(),
 
-				// The rest of the fields below in a single-column layout
-				Select::make('PayrollFrequency')
-					->label('Payroll Frequency')
-					->required(fn(string $context) => $context === 'create' || $context === 'edit')
-					->options([
-						'Kinsenas' => 'Kinsenas (Bi-monthly)',
-						'Weekly' => 'Weekly',
-					])
-					// ->default('Kinsenas')
-					->native(false)
-					->reactive(),
+// PayrollDate Select Field
+Select::make('PayrollDate2')
+->label('Payroll Date')
+->required(fn(string $context) => $context === 'create' || $context === 'edit')
+->options(function (callable $get) {
+$frequency = $get('PayrollFrequency');
 
-				Select::make('PayrollDate2')
-					->label('Payroll Date')
-					->required(fn(string $context) => $context === 'create' || $context === 'edit')
-					->options(function (callable $get) {
-						$frequency = $get('PayrollFrequency');
+if ($frequency == 'Kinsenas') {
+	return [
+			'1st Kinsena' => '1st-15th',
+			'2nd Kinsena' => '16th-End of the Month',
+	];
+} elseif ($frequency == 'Weekly') {
+	return [
+			'Week 1' => 'Week 1',
+			'Week 2' => 'Week 2',
+			'Week 3' => 'Week 3',
+			'Week 4' => 'Week 4',
+	];
+}
 
-						if ($frequency == 'Kinsenas') {
+return [];
+})
+->reactive(),
+
+// PayrollMonth Select Field
+Select::make('PayrollMonth')
+->label('Payroll Month')
+->required(fn(string $context) => $context === 'create' || $context === 'edit')
+->options([
+'January' => 'January',
+'February' => 'February',
+'March' => 'March',
+'April' => 'April',
+'May' => 'May',
+'June' => 'June',
+'July' => 'July',
+'August' => 'August',
+'September' => 'September',
+'October' => 'October',
+'November' => 'November',
+'December' => 'December',
+])
+->native(false)
+->reactive(),
+
+// PayrollYear Select Field
+Select::make('PayrollYear')
+->label('Payroll Year')
+->required(fn(string $context) => $context === 'create' || $context === 'edit')
+->options(function () {
+$currentYear = date('Y');
+$years = [];
+for ($i = $currentYear - 5; $i <= $currentYear + 5; $i++) {
+	$years[$i] = $i;
+}
+return $years;
+})
+->native(false)
+->reactive(),
+
+// weekPeriodID Select Field
+Select::make('weekPeriodID')
+->label('Period')
+->required(fn(string $context) => $context === 'create' || $context === 'edit')
+->options(function (callable $get) {
+// Fetch selected values from other fields
+$month = $get('PayrollMonth');
+$frequency = $get('PayrollFrequency');
+$payrollDate = $get('PayrollDate2');
+$year = $get('PayrollYear');
+
+// Ensure that all necessary fields are filled before proceeding
+if ($month && $frequency && $payrollDate && $year) {
+	try {
+			// Convert month name to month number (e.g., 'January' to '01')
+			$monthId = Carbon::createFromFormat('F', $month)->format('m');
+
+			// Fetch WeekPeriod entries based on the selected criteria
+			return WeekPeriod::where('Month', $monthId)
+					->where('Category', $frequency)
+					->where('Type', $payrollDate)
+					->where('Year', $year)
+					->get()
+					->mapWithKeys(function ($period) {
 							return [
-								'1st Kinsena' => '1st-15th',
-								'2nd Kinsena' => '16th-End of the Month',
+									$period->id => $period->StartDate . ' - ' . $period->EndDate,
 							];
-						} elseif ($frequency == 'Weekly') {
-							return [
-								'Week 1' => 'Week 1',
-								'Week 2' => 'Week 2',
-								'Week 3' => 'Week 3',
-								'Week 4' => 'Week 4',
-							];
-						}
+					});
+	} catch (\Exception $e) {
+			// In case there is an issue with parsing the date or any other issue
+			return [];
+	}
+}
 
-						return [];
-					})
-					->disabled(false)
-					// ->default(request()->query('date'))
-					,
-
-				Select::make('PayrollMonth')
-					->label('Payroll Month')
-					->required(fn(string $context) => $context === 'create' || $context === 'edit')
-					->options([
-						'January' => 'January',
-						'February' => 'February',
-						'March' => 'March',
-						'April' => 'April',
-						'May' => 'May',
-						'June' => 'June',
-						'July' => 'July',
-						'August' => 'August',
-						'September' => 'September',
-						'October' => 'October',
-						'November' => 'November',
-						'December' => 'December',
-					])
-					->native(false)
-					// ->default(date('F'))
-					,
-
-				Select::make('PayrollYear')
-					->label('Payroll Year')
-					->required(fn(string $context) => $context === 'create' || $context === 'edit')
-					->options(function () {
-						$currentYear = date('Y');
-						$years = [];
-						for ($i = $currentYear - 5; $i <= $currentYear + 5; $i++) {
-							$years[$i] = $i;
-						}
-						return $years;
-					})
-					->native(false)
-					// ->default(date('Y'))
-					,
-
-				Select::make('weekPeriodID')
-					->label('Period')
-					->required(fn(string $context) => $context === 'create' || $context === 'edit')
-					->options(function (callable $get) {
-						// Ensure PeriodID is reactive to EmployeeID
-						$month = $get('PayrollMonth');
-
-						if ($month) {
-							$monthId = DateTime::createFromFormat('F', $month)->format('m');
-							return WeekPeriod::where('Month', $monthId)
-								->where('Category', $get('PayrollFrequency'))
-								->where('Type', $get('PayrollDate2'))
-								->where('Year', $get('PayrollYear'))
-								->get()
-								->mapWithKeys(function ($period) {
-									return [
-										$period->id => $period->StartDate . ' - ' . $period->EndDate
-									];
-								});
-						}
-						return [];
-					})
-					->reactive() // Add reactivity here,
+// If any of the fields are not set, return an empty array
+return [];
+})
+->reactive() // Make this field reactive to other fields
+->placeholder('Select the payroll period'),
 
 			]);
 	}
