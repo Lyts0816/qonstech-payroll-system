@@ -17,6 +17,7 @@
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
+            background-color: white;
         }
 
         .container {
@@ -48,9 +49,9 @@
 
         /* Additional styling for logo */
         .logo {
-            width: 100px;
+            width: 400px;
             /* Adjust logo size as needed */
-            margin-bottom: 20px;
+            height: auto;
             /* Space below the logo */
         }
 
@@ -60,12 +61,14 @@
             padding: 10px 20px;
             font-size: 16px;
             color: white;
-            background-color: grey;
+            background-color: black;
             /* Bootstrap primary color */
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-bottom: 20px;
         }
+
 
         h2 {
             margin-top: -20px;
@@ -79,50 +82,64 @@
 </head>
 
 <body>
-    <div class="container" id="dtr-container">
-        <!-- Company Logo -->
-        <img src="/qonstech.png" alt="Company Logo" class="logo">
-        <!-- Update path accordingly -->
+    <div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <button class="download-button" id="download-btn">Download DTR</button>
+        </div>
+        <div class="container" id="dtr-container">
+            <!-- Company Logo -->
+            <img src="{{ asset('images/qonstech.png') }}" alt="Company Logo" class="logo">
 
-        <h4 class="text-2xl font-bold">Daily Time Record for</h4>
-        <h2>{{ $employee->full_name }}</h2>
+            <!-- Update path accordingly -->
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Morning Check-in</th>
-                    <th>Morning Checkout</th>
-                    <th>Afternoon Check-in</th>
-                    <th>Afternoon Checkout</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($data as $row)
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($row->Date)->format('F j, Y') }}</td>
-                    <td>{{ $row->Checkin_One }}</td>
-                    <td>{{ $row->Checkout_One }}</td>
-                    <td>{{ $row->Checkin_Two }}</td>
-                    <td>{{ $row->Checkout_Two }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+            <h4 class="text-2xl font-bold">DAILY TIME RECORD</h4>
+            <h2>{{ $employee->full_name }}</h2>
 
-        <button class="download-button" id="download-btn">Download DTR</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Morning Check-in</th>
+                        <th>Morning Checkout</th>
+                        <th>Afternoon Check-in</th>
+                        <th>Afternoon Checkout</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data as $row)
+                        <tr>
+                            <td>{{ \Carbon\Carbon::parse($row->Date)->format('F j, Y') }}</td>
+                            <td>{{ $row->Checkin_One }}</td>
+                            <td>{{ $row->Checkout_One }}</td>
+                            <td>{{ $row->Checkin_Two }}</td>
+                            <td>{{ $row->Checkout_Two }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+        </div>
+
     </div>
+
+
 
     <script>
         document.getElementById('download-btn').addEventListener('click', function () {
+            const downloadBtn = document.getElementById('download-btn');
+            downloadBtn.style.display = 'none'; // Hide the button before capturing the canvas
+
             html2canvas(document.querySelector("#dtr-container")).then(canvas => {
                 const link = document.createElement('a');
                 link.download = '{{ $employee->full_name }}_DTR.png'; // Set download filename
                 link.href = canvas.toDataURL(); // Convert canvas to data URL
                 link.click(); // Trigger the download
+
+                downloadBtn.style.display = 'block'; // Show the button again after download
             });
         });
     </script>
+
 </body>
 
 </html>
