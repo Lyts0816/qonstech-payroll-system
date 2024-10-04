@@ -26,4 +26,9 @@ class Project extends Model
         return $this->hasMany(Employee::class);
     }
 
+    public function payroll()
+    {
+        return $this->hasMany(Payroll::class);
+    }
+
 }
