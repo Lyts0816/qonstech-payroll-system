@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('sss', function (Blueprint $table) {
             $table->id();
-            $table->decimal('MinSalary', 15, 2);
-            $table->decimal('MaxSalary', 15, 2);
-            $table->decimal('EmployeeShare', 15, 2);
-            $table->decimal('EmployerShare',15, 2);
+            $table->decimal('MinSalary', 15, 2)->nullable();
+            $table->decimal('MaxSalary', 15, 2)->nullable();
+            $table->decimal('EmployeeShare', 15, 2)->nullable();
+            $table->decimal('EmployerShare',15, 2)->nullable();
             $table->timestamps();
         });
     }

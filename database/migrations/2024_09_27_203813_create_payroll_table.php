@@ -13,12 +13,19 @@ return new class extends Migration
     {
         Schema::create('payroll', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('EmployeeID');
-            $table->date('PayrollDate');
-            $table->decimal('TotalEarnings', 10, 2);
-            $table->decimal('GrossPay', 10, 2);
-            $table->decimal('TotalDeductions', 10, 2);
-            $table->decimal('NetPay', 10, 2);
+            $table->unsignedBigInteger('EmployeeID')->nullable();
+            $table->date('PayrollDate')->nullable();
+            $table->decimal('TotalEarnings', 10, 2)->nullable();
+            $table->decimal('GrossPay', 10, 2)->nullable();
+            $table->decimal('TotalDeductions', 10, 2)->nullable();
+            $table->decimal('NetPay', 10, 2)->nullable();
+
+            $table->varchar('EmployeeStatus', 100)->nullable();
+            $table->varchar('PayrollFrequency', 60)->nullable();
+            $table->varchar('PayrollMonth', 30)->nullable();
+            $table->varchar('PayrollYear', 255)->nullable();
+            $table->varchar('PayrollDate2', 255)->nullable();
+            $table->integer('ProjectID')->nullable();
 
             $table->foreign('EmployeeID')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
