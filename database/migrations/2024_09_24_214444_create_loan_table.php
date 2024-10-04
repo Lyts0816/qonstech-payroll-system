@@ -16,12 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('EmployeeID');
             $table->string('LoanType', 15);
             $table->decimal('LoanAmount', 15, 2);
-            $table->decimal('Balance', 15, 2);
+            
             
             $table->integer('NumberOfPayments');
-            $table->decimal('WeeklyDeduction ', 15, 2)->nullable();
-            $table->decimal('MonthlyDeduction', 15, 2)->nullable();
-            $table->decimal('Balance ', 15, 2)->nullable();
+            $table->decimal('WeeklyDeduction', 15, 2)->nullable();
+            
+            $table->decimal('Balance', 15, 2)->nullable();
             $table->date('StartDate')->nullable();
             $table->date('EndDate')->nullable();
 

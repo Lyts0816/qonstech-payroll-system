@@ -28,7 +28,9 @@ class WeekPeriodResource extends Resource
                 Forms\Components\TextInput::make('Month')
                     ->required()
                     ->numeric()
-                    ->label('Month'),
+                    ->label('Month')
+                    ->maxValue(12),
+                    // ->maxLength(2),
                 Forms\Components\TextInput::make('Year')
                     ->required()
                     ->numeric()
@@ -105,10 +107,10 @@ class WeekPeriodResource extends Resource
                     }),
                 Forms\Components\DatePicker::make('StartDate')
                     ->required()
-                    ->label('Start Date'),
+                    ->label('Start Date')->readOnly(),
                 Forms\Components\DatePicker::make('EndDate')
                     ->required()
-                    ->label('End Date'),
+                    ->label('End Date')->readOnly(),
             ]);
     }
     

@@ -16,13 +16,13 @@ class DatabaseSeeder extends Seeder
     {
         DB::table('users')->insert([
             'name' => 'John Doe',
-            'email' => 'test@example.com',
+            'email' => 'mackmondejar@gmail.com',
             'email_verified_at' => now(),
-            'password' => bcrypt('password'),
+            'password' => bcrypt('123'),
             'remember_token' => null,
             'created_at' => now(),
             'updated_at' => now(),
-            'Username' => 'admin',
+            
             'Role' => 'Admin',
 
         ]);

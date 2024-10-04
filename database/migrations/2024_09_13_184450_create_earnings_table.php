@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('Holiday', 10, 2)->nullable(); 
             $table->decimal('Leave', 10, 2)->nullable();
             $table->decimal('Total', 10, 2)->nullable();
-            $table->varchar('EarningType' , 255)->nullable(); 
+            $table->string('EarningType' , 255)->nullable(); 
             $table->decimal('Amount', 15, 2)->nullable();
             $table->date('StartDate')->nullable();
             $table->timestamps();

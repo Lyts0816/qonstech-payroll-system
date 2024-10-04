@@ -20,11 +20,11 @@ return new class extends Migration
             $table->decimal('TotalDeductions', 10, 2)->nullable();
             $table->decimal('NetPay', 10, 2)->nullable();
 
-            $table->varchar('EmployeeStatus', 100)->nullable();
-            $table->varchar('PayrollFrequency', 60)->nullable();
-            $table->varchar('PayrollMonth', 30)->nullable();
-            $table->varchar('PayrollYear', 255)->nullable();
-            $table->varchar('PayrollDate2', 255)->nullable();
+            $table->string('EmployeeStatus', 100)->nullable();
+            $table->string('PayrollFrequency', 60)->nullable();
+            $table->string('PayrollMonth', 30)->nullable();
+            $table->string('PayrollYear', 255)->nullable();
+            $table->string('PayrollDate2', 255)->nullable();
             $table->integer('ProjectID')->nullable();
 
             $table->foreign('EmployeeID')->references('id')->on('employees')->onDelete('cascade');

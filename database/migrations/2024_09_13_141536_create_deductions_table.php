@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('DeductionType')->nullable();
             $table->decimal('Amount', 10, 2)->nullable();
             $table->date('StartDate')->nullable();
-            $table->decimal('Amount', 10, 2);
+            
             
             $table->timestamps();
         });

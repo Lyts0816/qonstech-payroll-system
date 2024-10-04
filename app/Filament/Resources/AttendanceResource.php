@@ -17,7 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\ButtonAction;
+use Filament\Tables\Actions\Action;
 use PhpParser\Node\Stmt\Label;
 
 class AttendanceResource extends Resource
@@ -38,37 +38,6 @@ class AttendanceResource extends Resource
 
         return $table
             ->columns([
-<<<<<<< HEAD
-                TextColumn::make('employee.full_name')
-                ->label('Employee Name'),
-
-                TextColumn::make('employee.employment_type')
-                ->label('Employment Type'),
-                
-                TextColumn::make('employee.project.ProjectName')
-                ->Label('Project Name'),
-
-                TextColumn::make('employee.schedule.ScheduleName')
-                ->Label('Schedule'),
-
-                TextColumn::make('Checkin_One')
-                ->label('Morning Check-in')
-                ,
-
-                TextColumn::make('Checkout_One')
-                ->label('Morning Checkout')
-                ,
-
-                TextColumn::make('Checkin_Two')
-                ->label('Afternoon Check-in')
-                ,
-
-                TextColumn::make('Checkout_Two')
-                ->label('Afternoon Checkout')
-                ,
-
-=======
->>>>>>> d822a0f04a7f706c68be290956cfa4304096c82e
                 TextColumn::make('Date')
                     ->label('Date')
                     ->sortable()
@@ -85,70 +54,6 @@ class AttendanceResource extends Resource
                 return null;
             })
             ->filters([
-<<<<<<< HEAD
-                SelectFilter::make('project_id')
-                ->label('Select Project')
-                ->options(Project::all()->pluck('ProjectName', 'id'))
-                
-                ->query(function (Builder $query, array $data) {
-                    if (empty($data['value'])) {
-                        
-                        return $query;
-                    }
-                    return $query->whereHas('employee.project', function (Builder $query) use ($data) {
-                        $query->where('id', $data['value']);
-                    });
-                }),
-
-                SelectFilter::make('schedule_id')
-                ->label('Select Work Schedule')
-                ->options(WorkSched::all()->pluck('ScheduleName', 'id'))
-                
-                ->query(function (Builder $query, array $data) {
-                    if (empty($data['value'])) {
-                        
-                        return $query;
-                    }
-                    return $query->whereHas('employee.schedule', function (Builder $query) use ($data) {
-                        $query->where('id', $data['value']);
-                    });
-                }),
-
-                SelectFilter::make('employment_type')
-                ->label('Select Employment Type')
-                ->options([
-                    'Regular' => 'Regular',
-                    'Project Based' => 'Project Based',
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (empty($data['value'])) {
-                        return $query;
-                    }
-                    return $query->whereHas('employee', function (Builder $query) use ($data) {
-                        $query->where('employment_type', $data['value']);
-                    });
-                }),
-
-                SelectFilter::make('date_filter')
-                ->label('Select Date Filter')
-                ->options([
-                    'daily' => 'Daily',
-                    'weekly' => 'Weekly',
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (empty($data['value'])) {
-                        return $query;
-                    }
-                    if ($data['value'] === 'daily') {
-                        return $query->whereDate('Date', now()->toDateString());
-                    } elseif ($data['value'] === 'weekly') {
-                        return $query->whereBetween('Date', [now()->startOfWeek(), now()->endOfWeek()]);
-                    }
-                }),
-
-
-               
-=======
                 // Employee select filter
                 Filter::make('employee_id')
                     ->form([
@@ -188,10 +93,10 @@ class AttendanceResource extends Resource
                         !empty ($data['start_date']) && !empty ($data['end_date']) ?
                         $query->whereBetween('Date', [$data['start_date'], $data['end_date']]) : null
                     ),
->>>>>>> d822a0f04a7f706c68be290956cfa4304096c82e
             ], layout: FiltersLayout::AboveContent)
+            
             ->headerActions([
-                ButtonAction::make('viewDtr')
+                Action::make('viewDtr')
                     ->label('View DTR')
                     ->color('primary')
                     ->url(fn() => route('dtr.show', [
@@ -200,11 +105,6 @@ class AttendanceResource extends Resource
 
                     ->openUrlInNewTab(),
 
-<<<<<<< HEAD
-            ->actions([
-                // Tables\Actions\DeleteAction::make(),
-=======
->>>>>>> d822a0f04a7f706c68be290956cfa4304096c82e
             ])
 
 

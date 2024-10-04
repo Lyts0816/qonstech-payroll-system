@@ -22,8 +22,6 @@ return new class extends Migration
             $table->time('Overtime_Out')->nullable();
             $table->date('Date');
             
-            $table->time('overtime_in')->nullable();
-            $table->time('overtime_out')->nullable();
             $table->decimal('Total_Hours', 10, 2)->nullable();
             $table->foreign('Employee_ID')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
