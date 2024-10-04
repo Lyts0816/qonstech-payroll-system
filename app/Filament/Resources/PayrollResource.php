@@ -91,7 +91,7 @@ class PayrollResource extends Resource
 						'Kinsenas' => 'Kinsenas (Bi-monthly)',
 						'Weekly' => 'Weekly',
 					])
-					->default('Kinsenas')
+					// ->default('Kinsenas')
 					->native(false)
 					->reactive(),
 
@@ -118,7 +118,8 @@ class PayrollResource extends Resource
 						return [];
 					})
 					->disabled(false)
-					->default(request()->query('date')),
+					// ->default(request()->query('date'))
+					,
 
 				Select::make('PayrollMonth')
 					->label('Payroll Month')
@@ -138,7 +139,8 @@ class PayrollResource extends Resource
 						'December' => 'December',
 					])
 					->native(false)
-					->default(date('F')),
+					// ->default(date('F'))
+					,
 
 				Select::make('PayrollYear')
 					->label('Payroll Year')
@@ -152,7 +154,8 @@ class PayrollResource extends Resource
 						return $years;
 					})
 					->native(false)
-					->default(date('Y')),
+					// ->default(date('Y'))
+					,
 
 				Select::make('weekPeriodID')
 					->label('Period')
