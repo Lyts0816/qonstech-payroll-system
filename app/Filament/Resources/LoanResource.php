@@ -28,30 +28,31 @@ class LoanResource extends Resource
     protected static ?string $navigationGroup = "Employee Payroll";
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Section::make('Loan Information')
-                    ->schema([
-                        Select::make('EmployeeID')
+{
+    return $form
+        ->schema([
+            Section::make('Loan Information')
+                ->schema([
+
+                    Select::make('EmployeeID')
                         ->label('Employee')
                         ->options(Employee::all()->pluck('full_name', 'id'))
                         ->required()
                         ->preload()
                         ->searchable()
-                        ->reactive() // Make this field reactive
+                        ->reactive()
                         ->afterStateUpdated(function ($state, $set) {
-                            // Clear PeriodID when EmployeeID changes
+                            // Clear dependent fields
                             $set('PeriodID', null);
-                    
-                            // Reset LoanAmount, NumberOfPayments, and WeeklyDeduction
                             $set('LoanAmount', null);
                             $set('LoanType', null);
                             $set('NumberOfPayments', null);
-                            $set('WeeklyDeduction', null); // Reset the deduction amount
+                            $set('WeeklyDeduction', null); 
+                            $set('KinsenaDeduction', null); 
+                            $set('MonthlyDeduction', null); // Clear monthly deduction
                         }),
 
-                        Select::make('PeriodID')
+                    Select::make('PeriodID')
                         ->label('Select Period')
                         ->options(function (callable $get) {
                             $employeeId = $get('EmployeeID');
@@ -69,130 +70,108 @@ class LoanResource extends Resource
                             }
                             return [];
                         })
-                        ->required(fn (string $context) => $context === 'create')
-                        ->reactive() // Add reactivity here
-                        ->afterStateUpdated(function ($state, $set) {
-                            // Clear any dependent fields if necessary
+                        ->required()
+                        ->reactive(),
+
+                    Select::make('LoanType')
+                        ->label('Loan Type')
+                        ->options([
+                            'Salary Loan' => 'Salary Loan',
+                            'SSS Loan' => 'SSS Loan',
+                            'Pagibig Loan' => 'Pagibig Loan',
+                        ])
+                        ->required(),
+
+                    TextInput::make('LoanAmount')
+                        ->label('Loan Amount')
+                        ->required()
+                        ->numeric()
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $get, callable $set) {
+                            $employeeId = $get('EmployeeID');
+                            $employee = Employee::find($employeeId);
+                            $employmentType = $employee ? $employee->employment_type : null;
+                            $loanAmount = $get('LoanAmount');
+                            $numberOfPayments = $get('NumberOfPayments');
+
+                            if (!is_null($loanAmount) && !is_null($numberOfPayments) && $numberOfPayments > 0) {
+                                // Calculate the various deductions
+                                $weeklyDeduction = self::calculateWeeklyDeduction($loanAmount, $numberOfPayments, $employmentType);
+                                $kinsenaDeduction = self::calculateKinsenaDeduction($loanAmount, $numberOfPayments, $employmentType);
+                                $monthlyDeduction = self::calculateMonthlyDeduction($loanAmount, $numberOfPayments);
+
+                                // Set the deduction values
+                                $set('WeeklyDeduction', $weeklyDeduction);
+                                $set('KinsenaDeduction', $kinsenaDeduction);
+                                $set('MonthlyDeduction', $monthlyDeduction);
+                            }
                         }),
 
-                        Select::make('LoanType')
-                            ->label('Loan Type')
-                            ->options([
-                                'Salary Loan' => 'Salary Loan',
-                                'SSS Loan' => 'SSS Loan',
-                                'Pagibig Loan' => 'Pagibig Loan',
-                            ])
-                            ->required(),
-    
-                            TextInput::make('LoanAmount')
-                            ->label('Loan Amount')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->numeric()
-                            ->reactive() // Make reactive
-                            ->afterStateUpdated(function (callable $get, callable $set) {
-                                // Get the selected EmployeeID
-                                $employeeId = $get('EmployeeID'); // Assuming this is the field where you select the employee
-                                
-                                // Fetch the employee's employment type
-                                $employee = Employee::find($employeeId);
-                                $employmentType = $employee ? $employee->employment_type : null; // Assuming 'employment_type' is the column name
-                        
-                                // Get the selected DeductionPeriod
-                                $deductionPeriod = $get('DeductionPeriod');
-                        
-                                // Get Loan Amount and Number of Payments
-                                $loanAmount = $get('LoanAmount');
-                                $numberOfPayments = $get('NumberOfPayments');
-                        
-                                // Calculate the deduction only if LoanAmount and NumberOfPayments are set and valid
-                                if (!is_null($loanAmount) && !is_null($numberOfPayments) && $numberOfPayments > 0) {
-                                    $deduction = self::calculateDeduction($loanAmount, $numberOfPayments, $deductionPeriod, $employmentType);
-                                    // Set the calculated WeeklyDeduction
-                                    $set('WeeklyDeduction', $deduction);
-                                } else {
-                                    $set('WeeklyDeduction', 0); // or handle accordingly
-                                }
-                            }),
-                        
-                        TextInput::make('NumberOfPayments')
-                            ->label('Number of Monthly Payments')
-                            ->required()
-                            ->numeric()
-                            ->reactive() // Make reactive
-                            ->afterStateUpdated(function (callable $get, callable $set) {
-                                // Get the selected EmployeeID
-                                $employeeId = $get('EmployeeID');
-                        
-                                // Fetch the employee's employment type
-                                $employee = Employee::find($employeeId);
-                                $employmentType = $employee ? $employee->employment_type : null; // Assuming 'employment_type' is the column name
-                        
-                                // Get the selected DeductionPeriod
-                                $deductionPeriod = $get('DeductionPeriod');
-                        
-                                // Get Loan Amount and Number of Payments
-                                $loanAmount = $get('LoanAmount');
-                                $numberOfPayments = $get('NumberOfPayments');
-                        
-                                // Calculate the deduction only if LoanAmount and NumberOfPayments are set and valid
-                                if (!is_null($loanAmount) && !is_null($numberOfPayments) && $numberOfPayments > 0) {
-                                    $deduction = self::calculateDeduction($loanAmount, $numberOfPayments, $deductionPeriod, $employmentType);
-                                    // Set the calculated WeeklyDeduction
-                                    $set('WeeklyDeduction', $deduction);
-                                } else {
-                                    $set('WeeklyDeduction', 0); // or handle accordingly
-                                }
-                            }),
-    
-                        // Select::make('DeductionPeriod')
-                        //     ->label('Deduction Period')
-                        //     ->options([
-                        //         'Kinsenas' => 'Kinsenas',
-                        //         'Weekly' => 'Weekly',
-                        //     ])
-                        //     ->disabled(), // Set dynamically based on employee status
-    
-                        TextInput::make('WeeklyDeduction')
-                        ->label(function (callable $get) {
-                            // Get the selected EmployeeID
-                            $employeeId = $get('EmployeeID');
-                    
-                            if (!$employeeId) {
-                                // Return default label if no employee is selected
-                                return 'Deduction Amount';
-                            }
-                    
-                            // Fetch the employee's employment type
-                            $employee = Employee::find($employeeId);
-                            $employmentType = $employee ? $employee->employment_type : null; // Assuming 'employment_type' is the column name
-                    
-                            // Determine the label based on employment type
-                            return $employmentType === 'Regular' ? 'Kinsena Deduction Amount' : 'Weekly Deduction Amount';
-                        })
-                        ->disabled()
+                    TextInput::make('NumberOfPayments')
+                        ->label('Number of Monthly Payments')
+                        ->required()
                         ->numeric()
-                        ->dehydrated(true), // Ensure it is submitted
-                    
-                    ])->columns(4)->collapsible(true),
-            ]);
-    }
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $get, callable $set) {
+                            $employeeId = $get('EmployeeID');
+                            $employee = Employee::find($employeeId);
+                            $employmentType = $employee ? $employee->employment_type : null;
+                            $loanAmount = $get('LoanAmount');
+                            $numberOfPayments = $get('NumberOfPayments');
 
-    public static function calculateDeduction($loanAmount, $numberOfPayments, $deductionPeriod, $employmentType)
-    {
-        // Check if Loan Amount and Number of Payments are set and valid
-        if (is_null($loanAmount) || is_null($numberOfPayments) || $numberOfPayments <= 0) {
-            return 0; // or handle it however you prefer, e.g., return null or throw an exception
-        }
-    
-        // Determine the category based on employment type
-        if ($employmentType === 'Regular') {
-            // Kinsenas for regular employees
-            return $loanAmount / $numberOfPayments; // Example calculation logic for Kinsenas
-        } else {
-            // Weekly for non-regular employees
-            return $loanAmount / ($numberOfPayments * 4); // Example calculation logic for Weekly
-        }
-    }
+                            if (!is_null($loanAmount) && !is_null($numberOfPayments) && $numberOfPayments > 0) {
+                                // Calculate the various deductions
+                                $weeklyDeduction = self::calculateWeeklyDeduction($loanAmount, $numberOfPayments, $employmentType);
+                                $kinsenaDeduction = self::calculateKinsenaDeduction($loanAmount, $numberOfPayments, $employmentType);
+                                $monthlyDeduction = self::calculateMonthlyDeduction($loanAmount, $numberOfPayments);
+
+                                // Set the deduction values
+                                $set('WeeklyDeduction', $weeklyDeduction);
+                                $set('KinsenaDeduction', $kinsenaDeduction);
+                                $set('MonthlyDeduction', $monthlyDeduction);
+                            }
+                        }),
+
+                        TextInput::make('MonthlyDeduction')
+                        ->numeric()
+                        ->dehydrated(true), // Ensure it is included in the form data
+
+
+                    // Hidden fields for deductions
+                    TextInput::make('KinsenaDeduction')
+                    ->numeric()
+                    ->dehydrated(true), // Ensure it is included in the form data
+
+                    TextInput::make('WeeklyDeduction')
+                        ->numeric()
+                        ->dehydrated(true), // Ensure it is included in the form data
+
+                  
+                   
+                ])->columns(4)->collapsible(true),
+        ]);
+}
+
+// Helper functions to calculate deductions
+private static function calculateWeeklyDeduction($loanAmount, $numberOfPayments, $employmentType)
+{
+    // Calculate Weekly Deduction for non-regular employees
+    return $loanAmount / ($numberOfPayments * 4);
+}
+
+private static function calculateKinsenaDeduction($loanAmount, $numberOfPayments, $employmentType)
+{
+    // Calculate Kinsena Deduction for regular employees
+    return $loanAmount / ($numberOfPayments * 2);
+}
+
+private static function calculateMonthlyDeduction($loanAmount, $numberOfPayments)
+{
+    // Calculate Monthly Deduction regardless of employment type
+    return $loanAmount / $numberOfPayments;
+}
+
+
     public static function table(Table $table): Table
     {
         // Calculate the total loan amount
@@ -222,8 +201,8 @@ class LoanResource extends Resource
                     ->label('Number Of Monthly Payments'),
     
                 // Weekly Deduction (for non-regular employees)
-                Tables\Columns\TextColumn::make('WeeklyDeduction')
-                    ->label('Weekly/Kinsena Deduction'),
+                Tables\Columns\TextColumn::make('MonthlyDeduction')
+                    ->label('Monthly Deduction'),
                                          
                 Tables\Columns\TextColumn::make('Balance')
                     ->label('Balance'),
