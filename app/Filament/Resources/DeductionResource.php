@@ -56,6 +56,7 @@ class DeductionResource extends Resource
                 Select::make('DeductionType')
                     ->label('Deduction Type')
                     ->options([
+                        'Cash Advances' => 'Cash Advances',
                         'SalaryAdjustment' => 'Salary Adjustment',
                     ])
                     ->default('SalaryAdjustment'),
