@@ -18,10 +18,22 @@ class Payroll extends Model
         'GrossPay',
         'TotalDeductions',
         'NetPay',
+				'PayrollDate2',
+				'PayrollFrequency',
+				'EmployeeStatus',
+				'PayrollMonth',
+				'PayrollYear',
+				'ProjectID',
+				'weekPeriodID',
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'EmployeeID');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'ProjectID');
     }
 }
