@@ -16,11 +16,17 @@ class Earnings extends Model
         'EarningType',
         'Amount',
         'StartDate',
+        'PeriodID',
+        
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'EmployeeID');
+    }
+    public function weekperiod()
+    {
+        return $this->belongsTo(WeekPeriod::class, 'PeriodID');
     }
 
     // public function overtime()
