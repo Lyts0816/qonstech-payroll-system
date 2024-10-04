@@ -19,19 +19,21 @@ use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use PhpParser\Node\Stmt\Label;
+use Illuminate\Support\Facades\Session;
 
 class AttendanceResource extends Resource
 {
     protected static ?string $model = Attendance::class;
     protected static ?string $navigationIcon = 'heroicon-s-view-columns';
-    protected static ?string $title = 'Attendance';
-
+    protected static ?string $title = 'Attendance';  
     public static function form(Form $form): Form
     {
         return $form->schema([
             // Add your form fields here if needed
         ]);
     }
+
+
 
     public static function table(Table $table): Table
     {
@@ -56,20 +58,31 @@ class AttendanceResource extends Resource
             ->filters([
                 // Employee select filter
                 Filter::make('employee_id')
-                    ->form([
-                        Forms\Components\Select::make('employee_id')
-                            ->label('Select Employee')
-                            ->options(Employee::all()->pluck('full_name', 'id'))
-                            ->extraAttributes([
-                                'class' => 'h-12 text-lg',
-                                'style' => 'width: 110%;'
-                            ])
-                            ->required(),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data) =>
-                        !empty ($data['employee_id']) ? $query->where('employee_id', $data['employee_id']) : null
-                    ),
+                ->form([
+                    Forms\Components\Select::make('selectedEmployeeId')
+                        ->label('Select Employee')
+                        ->options(Employee::all()->pluck('full_name', 'id'))
+                        ->extraAttributes([
+                            'class' => 'h-12 text-lg',
+                            'style' => 'width: 110%;'
+                        ])
+                        ->required(),
+                ])
+                ->query(
+                    function (Builder $query, array $data) {
+                        // Store the selected employee_id in the session
+                        if (!empty($data['selectedEmployeeId'])) { // Use the updated field name
+                            Session::put('selected_employee_id', $data['selectedEmployeeId']); // Update the session
+                            // Filter the query based on the selected employee_id
+                            return $query->where('employee_id', $data['selectedEmployeeId']); // Use the updated field name
+                        }
+                        return $query; // Return the original query if no employee_id
+                    }
+                ),
+                    // ->query(
+                    //     fn(Builder $query, array $data) =>
+                    //     !empty ($data['employee_id']) ? $query->where('employee_id', $data['employee_id']) : null
+                    // ),
                 // Date range filter with two columns
                 Filter::make('date_range')
                     ->form([
@@ -93,23 +106,18 @@ class AttendanceResource extends Resource
                         !empty ($data['start_date']) && !empty ($data['end_date']) ?
                         $query->whereBetween('Date', [$data['start_date'], $data['end_date']]) : null
                     ),
-            ], layout: FiltersLayout::AboveContent)
-            
+            ], 
+
+            layout: FiltersLayout::AboveContent)
             ->headerActions([
                 Action::make('viewDtr')
                     ->label('View DTR')
                     ->color('primary')
                     ->url(fn() => route('dtr.show', [
-                        'employee_id' => 1,
+                        'employee_id' => Session::get('selected_employee_id'), // Get from session
                     ]))
-
                     ->openUrlInNewTab(),
-
             ])
-
-
-
-
             ->bulkActions([]);
 
 
