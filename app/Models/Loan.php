@@ -19,13 +19,18 @@ class Loan extends Model
         //'MonthlyDeduction',
         'WeeklyDeduction',
         'NumberOfPayments',
-        'StartDate',
+        'PeriodID',
         //'EndDate',
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'EmployeeID');
+    }
+
+    public function weekperiod()
+    {
+        return $this->belongsTo(WeekPeriod::class, 'PeriodID');
     }
 
 }

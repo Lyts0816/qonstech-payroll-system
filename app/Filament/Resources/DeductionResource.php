@@ -8,6 +8,7 @@ use App\Models\Deduction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use App\Models\Employee;
+use App\Models\WeekPeriod;
 use App\Models\pagibig;
 use App\Models\philhealth;
 use App\Models\sss;
@@ -40,27 +41,17 @@ class DeductionResource extends Resource
             ->schema([
                 // Employee Select Field
                 Select::make('employeeID')
-                    ->label('Employee')
-                    ->options(Employee::all()->pluck('full_name', 'id'))
-                    ->reactive()
-                    ->required()
-                    ->afterStateUpdated(function (callable $get, callable $set) {
-                        $employeeID = $get('employeeID');
-                        if ($employeeID) {
-                            $employee = Employee::find($employeeID);
-    
-                            if ($employee) {
-                                if ($employee->employment_type === 'Regular') {
-                                    // Regular employee, use Kinsenas
-                                    $set('Period', 'Kinsenas');
-                                } else {
-                                    // Non-regular employee, use Weekly
-                                    $set('Period', 'Weekly');
-                                }
-                            }
-                        }
-                    }),
-    
+                ->label('Employee')
+                ->options(Employee::all()->pluck('full_name', 'id'))
+                ->required()
+                ->preload()
+                ->searchable()
+                ->reactive() // Make this field reactive
+                ->afterStateUpdated(function ($state, $set) {
+                    // Clear PeriodID when EmployeeID changes
+                    $set('PeriodID', null);
+                }),
+            
                 // Deduction Type - Leave only Salary Adjustment
                 Select::make('DeductionType')
                     ->label('Deduction Type')
@@ -75,43 +66,68 @@ class DeductionResource extends Resource
                     ->required()
                     ->numeric(),
 
-                TextInput::make('StartDate')
-                    ->label('Start Paying')
-                    ->required(fn (string $context) => $context === 'create')
-                    ->type('date'),
+                    Select::make('PeriodID')
+                    ->label('Select Period')
+                    ->options(function (callable $get) {
+                        // Ensure PeriodID is reactive to EmployeeID
+                        $employeeId = $get('employeeID');
+                        if ($employeeId) {
+                            $employee = Employee::find($employeeId);
+                            if ($employee) {
+                                // Dynamically filter WeekPeriod based on employee status
+                                $category = $employee->employment_type === 'Regular' ? 'Kinsenas' : 'Weekly';
+                                return WeekPeriod::where('Category', operator: $category)->get()
+                                    ->mapWithKeys(function ($period) {
+                                        return [
+                                            $period->id => $period->StartDate . ' - ' . $period->EndDate
+                                        ];
+                                    });
+                            }
+                        }
+                        return [];
+                    })
+                    ->reactive() // Add reactivity here
+                    ->required(fn (string $context) => $context === 'create'),
             ]);
     }
     
 
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('employee.full_name')
+{
+    return $table
+        ->columns([
+            TextColumn::make('employee.full_name')
                 ->label('Employee'),
 
             TextColumn::make('DeductionType')
                 ->label('Deduction Type'),
 
-            TextColumn::make('StartDate')
-                ->label('Start Paying'),
-            
+            TextColumn::make('PeriodID') // Reference to the period
+                ->label('Period')
+                ->formatStateUsing(function ($state, $record) {
+                    // Assuming $record->weekperiod exists and contains StartDate and EndDate
+                    return $record->weekperiod ? 
+                        $record->weekperiod->StartDate . ' - ' . $record->weekperiod->EndDate : 
+                        'N/A'; // Handle case where no period is found
+                }),
+
             TextColumn::make('Amount')
-                ->label('Amount'),               
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+                ->label('Amount'),
+        ])
+        ->filters([
+            // Add filters here if needed
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]),
+        ]);
+}
+
 
     public static function getRelations(): array
     {
