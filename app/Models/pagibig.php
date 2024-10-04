@@ -12,8 +12,10 @@ class pagibig extends Model
     protected $table = 'pagibig';
 
     protected $fillable = [
-        'MonthlySalary',
-        'Rate',
+        'MinimumSalary',
+        'MaximumSalary',
+        'EmployeeRate',
+        'EmployerRate',
     ];
 
 

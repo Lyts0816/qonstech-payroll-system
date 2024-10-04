@@ -17,9 +17,13 @@ return new class extends Migration
             $table->string('LoanType', 15);
             $table->decimal('LoanAmount', 15, 2);
             $table->decimal('Balance', 15, 2);
-            $table->decimal('MonthlyDeduction', 15, 2);
-            $table->date('StartDate');
-            $table->date('EndDate');
+            
+            $table->integer('NumberOfPayments');
+            $table->decimal('WeeklyDeduction ', 15, 2)->nullable();
+            $table->decimal('MonthlyDeduction', 15, 2)->nullable();
+            $table->decimal('Balance ', 15, 2)->nullable();
+            $table->date('StartDate')->nullable();
+            $table->date('EndDate')->nullable();
 
             $table->foreign('EmployeeID')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();

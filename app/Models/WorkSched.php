@@ -17,6 +17,7 @@ class WorkSched extends Model
         'ScheduleName',
 
         'RegularHours',
+        'ScheduleType',
         
         'monday',
         'tuesday',

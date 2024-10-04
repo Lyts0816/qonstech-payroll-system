@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('worksched', function (Blueprint $table) {
             $table->id();
             $table->string('ScheduleName', 50);
+            $table->string('ScheduleType', 50);
             
             $table->boolean('monday')->default(false);
             $table->boolean('tuesday')->default(false);

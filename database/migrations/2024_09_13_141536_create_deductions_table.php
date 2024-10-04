@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employeeID')->constrained('employees')->onDelete('cascade');
     
-            $table->string('DeductionType');
+            $table->string('DeductionType')->nullable();
+            $table->decimal('Amount', 10, 2)->nullable();
+            $table->date('StartDate')->nullable();
             $table->decimal('Amount', 10, 2);
             
             $table->timestamps();

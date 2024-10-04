@@ -33,31 +33,34 @@ class PhilhealthResource extends Resource
     {
         return $form
             ->schema([
+                // Minimum Salary
                 TextInput::make('MinSalary')
-                ->label('Minimum Salary')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->lte('MaxSalary')
-                ->unique(ignoreRecord: true)
-                ,
-
+                    ->label('Minimum Salary')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter minimum salary for this bracket'),
+    
+                // Maximum Salary
                 TextInput::make('MaxSalary')
-                ->label('Maximum Salary')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->gte('MinSalary')
-                ->unique(ignoreRecord: true)
-                ,
-
+                    ->label('Maximum Salary')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter maximum salary for this bracket'),
+    
+                // Contribution Amount
+                TextInput::make('ContributionAmount')
+                    ->label('PhilHealth Contribution Amount (PHP)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter contribution amount for this bracket'),
+    
+                // Contribution Rate
                 TextInput::make('PremiumRate')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ,
-
-                TextInput::make('MonthlyRate')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ,
+                    ->label('PhilHealth Contribution Rate (%)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter contribution rate (e.g., 5 for 5%)'),
+    
             ]);
     }
 
@@ -76,7 +79,7 @@ class PhilhealthResource extends Resource
                 ->searchable(),
                 
                 TextColumn::make('PremiumRate'),
-                TextColumn::make('MonthlyRate'),
+                TextColumn::make('ContributionAmount'),
             ])
             ->filters([
                 //

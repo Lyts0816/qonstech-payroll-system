@@ -18,6 +18,8 @@ return new class extends Migration
             $table->time('Checkout_One')->nullable();
             $table->time('Checkin_Two')->nullable();
             $table->time('Checkout_Two')->nullable();
+            $table->time('Overtime_In')->nullable();
+            $table->time('Overtime_Out')->nullable();
             $table->date('Date');
             
             $table->time('overtime_in')->nullable();

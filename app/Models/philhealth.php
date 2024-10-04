@@ -15,6 +15,6 @@ class philhealth extends Model
         'MinSalary',
         'MaxSalary',
         'PremiumRate',
-        'MonthlyRate',
+        'ContributionAmount',
     ];
 }

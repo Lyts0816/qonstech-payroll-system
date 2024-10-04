@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Employee;
+use App\Models\Position;
+use App\Models\WorkSched;
 use Faker\Provider\ar_EG\Text;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Forms;
@@ -29,9 +31,9 @@ class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-c-user-group';
 
-    protected static ?string $navigationGroup = "Employee/Deduction/Earnings";
+    protected static ?string $navigationGroup = "Employee Details";
 
     protected static ?int $navigationSort = 1;
 
@@ -43,7 +45,7 @@ class EmployeeResource extends Resource
                 ->schema([
                     TextInput::make('first_name')
                     ->label('First Name')
-                    ->required(fn (string $context) => $context === 'create')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->unique(ignoreRecord: true)
                     ->rules('regex:/^[^\d]*$/'),
 
@@ -54,20 +56,20 @@ class EmployeeResource extends Resource
 
                     TextInput::make('last_name')
                     ->label('last Name')
-                    ->required(fn (string $context) => $context === 'create')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->rules('regex:/^[^\d]*$/'),
 
                     TextInput::make('attendance_code')
                     ->label('Attendance Code')
                     ->unique(ignoreRecord: true)
-                    ->required(fn (string $context) => $context === 'create')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
                     ])->columns(3)->collapsible(true),
 
                 Section::make('Address')
                 ->schema([
                     Select::make('province')
                             ->label('Province')
-                            ->required(fn (string $context) => $context === 'create')
+                            ->required(fn (string $context) => $context === 'create' || 'edit')
                             ->options([
                             'Sarangani' => 'Sarangani',
                             'South Cotabato' => 'South Cotabato',
@@ -75,7 +77,7 @@ class EmployeeResource extends Resource
 
                     Select::make('city')
                         ->label('City')
-                        ->required(fn (string $context) => $context === 'create')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Koronadal City' => 'Koronadal City',
                             'Polomolok' => 'Polomolok',
@@ -89,7 +91,7 @@ class EmployeeResource extends Resource
 
                     Select::make('barangay')
                         ->label('Barangay')
-                        ->required(fn (string $context) => $context === 'create')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Barangay Zone III' => 'Barangay Zone III',
                             'Cannery Site' => 'Cannery Site',
@@ -103,7 +105,7 @@ class EmployeeResource extends Resource
 
                     Select::make('street')
                         ->label('Street')
-                        ->required(fn (string $context) => $context === 'create')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Sanchez St.' => 'Sanchez St.',
                             'Roxas St.' => 'Roxas St.',
@@ -115,9 +117,49 @@ class EmployeeResource extends Resource
                         ])->native(false),
                 ])->columns(4)->collapsible(true),
 
+								Section::make(heading: 'Employment Details')
+                ->schema([
+                    Select::make('schedule_id')
+                    ->label('Work Schedule')
+										->options(
+											WorkSched::query()
+											->pluck('ScheduleName', 'id')
+											->toArray()
+										)
+                    ->required(fn (string $context) => $context === 'create' || 'edit'),
 
+										Select::make('position_id')
+										->label('Position')
+										->options(
+											Position::query()
+											->pluck('PositionName', 'id')
+											->toArray()
+										)
+										->required(fn (string $context) => $context === 'create' || 'edit'),
 
-                Section::make()
+									// Select::make('project_id')
+									//     ->label('Project')
+											
+									//     ->relationship('project', 'ProjectName')
+									//     ->native(false)
+									//     ->reactive()
+									//     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
+									//     ,
+
+									// Select::make('schedule_id')
+									//     ->label('Work Schedule')
+											
+									//     ->relationship('schedule', 'ScheduleName')
+									//     ->native(false),
+
+									// Select::make('overtime_id')
+									//     ->label('Overtime')
+									//     ->relationship('overtime', 'Reason')
+									//     ->native(false),
+
+                ])->columns(4)->collapsible(true),
+
+                Section::make(heading: 'Other Details')
                 ->schema([
                     // Select::make('position_id')
                     //         ->label('Position')
@@ -126,22 +168,22 @@ class EmployeeResource extends Resource
                     //         ->native(false),
                     TextInput::make('TaxIdentificationNumber')
                     ->label('Tax ID Number')
-                    ->required(fn (string $context) => $context === 'create')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->unique(ignoreRecord: true),
 
                             TextInput::make('SSSNumber')
                             ->label('SSS Number')
-                            ->required(fn (string $context) => $context === 'create')
+                            ->required(fn (string $context) => $context === 'create' || 'edit')
                             ->unique(ignoreRecord: true),
 
                             TextInput::make('PhilHealthNumber')
                             ->label('PhilHealth Number')
-                            ->required(fn (string $context) => $context === 'create')
+                            ->required(fn (string $context) => $context === 'create' || 'edit')
                             ->unique(ignoreRecord: true),
 
                             TextInput::make('PagibigNumber')
                             ->label('Pagibig Number')
-                            ->required(fn (string $context) => $context === 'create')
+                            ->required(fn (string $context) => $context === 'create' || 'edit')
                             ->unique(ignoreRecord: true),
                     // Select::make('project_id')
                     //     ->label('Project')
@@ -171,13 +213,13 @@ class EmployeeResource extends Resource
 
                     TextInput::make('contact_number')
                     ->label('Contact Number')
-                    ->required(fn (string $context) => $context === 'create')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->unique(ignoreRecord: true)
                     ->rules('regex:/^[\d]*$/'),
 
                     Select::make('status')
                         ->label('Status')
-                        ->required(fn (string $context) => $context === 'create')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Assigned' => 'Assigned',
                             'Available' => 'Available',
@@ -187,9 +229,10 @@ class EmployeeResource extends Resource
                     
                         Select::make('employment_type')
                         ->label('Employment Type')
-                        ->required(fn (string $context) => $context === 'create')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Regular' => 'Regular',
+                            'Non-Regular' => 'Non-Regular',
                             'Project Based' => 'Project Based',
                         ])->native(false),
 
@@ -224,9 +267,10 @@ class EmployeeResource extends Resource
 
                 TextColumn::make('project.ProjectName'),
                 TextColumn::make('position.PositionName'),
-                TextColumn::make('overtime.Reason'),
+                
 
                 TextColumn::make('contact_number'),
+                TextColumn::make('employment_type'),
                 TextColumn::make('status'),
 
             ])

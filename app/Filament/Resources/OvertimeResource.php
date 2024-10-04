@@ -41,9 +41,9 @@ class OvertimeResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->rules('regex:/^[^\d]*$/'),
 
-                    TextInput::make('OvertimeRate')
-                    ->required(fn (string $context) => $context === 'create')
-                    ->numeric(),
+                    // TextInput::make('OvertimeRate')
+                    // ->required(fn (string $context) => $context === 'create')
+                    // ->numeric(),
     
                     TextInput::make('Checkin')
                     ->label('Check-in Time')
@@ -84,7 +84,7 @@ class OvertimeResource extends Resource
             ->columns([
                 TextColumn::make('Reason')->searchable(),
                 TextColumn::make('Date')->searchable(),
-                TextColumn::make('OvertimeRate')->searchable(),
+                // TextColumn::make('OvertimeRate')->searchable(),
                 TextColumn::make('Status')->searchable(),
                 TextColumn::make('Checkin')->searchable(),
                 TextColumn::make('Checkout')->searchable(),

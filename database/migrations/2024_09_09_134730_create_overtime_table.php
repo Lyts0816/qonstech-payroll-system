@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('overtime', function (Blueprint $table) {
             $table->id();
             $table->string('Reason', 50);
-            $table->decimal('OvertimeRate', 10, 2);
+            $table->decimal('OvertimeRate', 10, 2)->nullable();
             $table->time('Checkin');
             $table->time('Checkout');
             $table->date('Date');

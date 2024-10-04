@@ -36,30 +36,33 @@ class SssResource extends Resource
     {
         return $form
             ->schema([
+                // Minimum Salary Credit
                 TextInput::make('MinSalary')
-                ->label('Minimum Salary')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->unique(ignoreRecord: true)
-                ,
-
+                    ->label('Minimum Salary Credit')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter minimum salary credit for this bracket'),
+    
+                // Maximum Salary Credit
                 TextInput::make('MaxSalary')
-                ->label('Maximum Salary')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ->unique(ignoreRecord: true)
-                ,
-
-                TextInput::make('EmployeeShare')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ,
-
+                    ->label('Maximum Salary Credit')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter maximum salary credit for this bracket'),
+    
+                // Regular SS Contribution (Employer)
                 TextInput::make('EmployerShare')
-                ->required(fn (string $context) => $context === 'create')
-                ->numeric()
-                ,
-
+                    ->label('Employer Regular SS Contribution (PHP)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter employer regular SS contribution'),
+    
+                // Regular SS Contribution (Employee)
+                TextInput::make('EmployeeShare')
+                    ->label('Employee Regular SS Contribution (PHP)')
+                    ->numeric()
+                    ->required()
+                    ->placeholder('Enter employee regular SS contribution'),                  
             ]);
     }
 

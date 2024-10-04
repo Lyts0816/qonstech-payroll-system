@@ -13,8 +13,15 @@ return new class extends Migration
     {
         Schema::create('pagibig', function (Blueprint $table) {
             $table->id();
-            $table->decimal('MonthlySalary', 15, 2);
-            $table->decimal('Rate', 15, 2);
+            $table->decimal('MonthlySalary', 15, 2)->nullable();
+            $table->decimal('Rate', 15, 2)->nullable();
+
+            $table->decimal('MinimumSalary', 15, 2)->nullable();
+            $table->decimal('MaximumSalary', 15, 2)->nullable();
+
+            $table->decimal('EmployeeRate', 15, 2)->nullable();
+            $table->decimal('EmployerRate', 15, 2)->nullable();
+
             $table->timestamps();
         });
     }

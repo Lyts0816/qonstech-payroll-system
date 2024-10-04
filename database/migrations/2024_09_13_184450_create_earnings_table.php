@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('earnings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('EmployeeID'); 
-            $table->unsignedBigInteger('OvertimeID'); 
-            $table->decimal('Holiday', 10, 2); 
-            $table->decimal('Leave', 10, 2);
-            $table->decimal('Total', 10, 2);
+            $table->unsignedBigInteger('OvertimeID')->nullable(); 
+            $table->decimal('Holiday', 10, 2)->nullable(); 
+            $table->decimal('Leave', 10, 2)->nullable();
+            $table->decimal('Total', 10, 2)->nullable();
+            $table->varchar('EarningType' , 255)->nullable(); 
+            $table->decimal('Amount', 15, 2)->nullable();
+            $table->date('StartDate')->nullable();
             $table->timestamps();
 
 

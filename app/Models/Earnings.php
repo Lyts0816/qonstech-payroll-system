@@ -13,19 +13,24 @@ class Earnings extends Model
 
     protected $fillable = [
         'EmployeeID',
-        'OvertimeID',
-        'Holiday',
-        'Leave',
-        'Total',
+        'EarningType',
+        'Amount',
+        'StartDate',
+        'PeriodID',
+        
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'EmployeeID');
     }
-
-    public function overtime()
+    public function weekperiod()
     {
-        return $this->belongsTo(Overtime::class, 'OvertimeID');
+        return $this->belongsTo(WeekPeriod::class, 'PeriodID');
     }
+
+    // public function overtime()
+    // {
+    //     return $this->belongsTo(Overtime::class, 'OvertimeID');
+    // }
 }

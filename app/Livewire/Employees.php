@@ -106,15 +106,15 @@ class Employees extends BaseWidget
                         ->relationship('project', 'ProjectName')
                         ->required()
                 ])
-                ->action(function (array $data, Collection $records) {
-                    $projectId = $data['project_id'];
-
-                    foreach ($records as $record) {
-                        $record->update(['project_id' => $projectId, 'status' => 'Assigned']);
-                    }
-                })
                 ->deselectRecordsAfterCompletion()
-                ->requiresConfirmation(),
+                ->requiresConfirmation()
+                ->action(function (array $data, Collection $records) {
+									$projectId = $data['project_id'];
+
+									foreach ($records as $record) {
+									    $record->update(['project_id' => $projectId, 'status' => 'Assigned']);
+									}
+							}),
                 
             ]);
     }

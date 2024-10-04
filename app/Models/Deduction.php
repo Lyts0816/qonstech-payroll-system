@@ -16,12 +16,19 @@ class Deduction extends Model
         'employeeID',
         'DeductionType',
         'Amount',
+        'StartDate',
+        'PeriodID',
     ];
 
     // Define the relationships
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employeeID');
+    }
+
+    public function weekperiod()
+    {
+        return $this->belongsTo(WeekPeriod::class, 'PeriodID');
     }
 
 }

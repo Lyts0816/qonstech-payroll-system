@@ -8,6 +8,7 @@ use App\Models\Deduction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use App\Models\Employee;
+use App\Models\WeekPeriod;
 use App\Models\pagibig;
 use App\Models\philhealth;
 use App\Models\sss;
@@ -29,7 +30,7 @@ class DeductionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = "Employee/Deduction/Earnings";
+    protected static ?string $navigationGroup = "Employee Payroll";
 
     protected static ?int $navigationSort = 2;
 
@@ -38,93 +39,95 @@ class DeductionResource extends Resource
     {
         return $form
             ->schema([
+                // Employee Select Field
                 Select::make('employeeID')
-                ->options(
-                    Employee::all()->pluck('full_name', 'id')
-                )
-                ->reactive() 
-                ->required(),
+                ->label('Employee')
+                ->options(Employee::all()->pluck('full_name', 'id'))
+                ->required()
+                ->preload()
+                ->searchable()
+                ->reactive() // Make this field reactive
+                ->afterStateUpdated(function ($state, $set) {
+                    // Clear PeriodID when EmployeeID changes
+                    $set('PeriodID', null);
+                }),
+            
+                // Deduction Type - Leave only Salary Adjustment
+                Select::make('DeductionType')
+                    ->label('Deduction Type')
+                    ->options([
+                        'SalaryAdjustment' => 'Salary Adjustment',
+                    ])
+                    ->default('SalaryAdjustment'),
+                                         
+                // Amount Field
+                TextInput::make('Amount')
+                    ->label('Amount')
+                    ->required()
+                    ->numeric(),
 
-            Select::make('DeductionType')
-                ->options([
-                    'SSS' => 'SSS',
-                    'PhilHealth' => 'PhilHealth',
-                    'Pagibig' => 'Pagibig',
-                    'CashAdvance' => 'CashAdvance',
-                    'Undertime' => 'Undertime',
-                    'SalaryAdjustment' => 'SalaryAdjustment',
-                    'Loan' => 'Loan',
-                ])
-                ->reactive()
-                ->afterStateUpdated(function (callable $get, callable $set) {
-                    $employeeID = $get('employeeID');
-                    $deductionType = $get('DeductionType');
-                    
-                    if ($employeeID && in_array($deductionType, ['SSS', 'PhilHealth', 'Pagibig'])) {
-                        $employee = Employee::find($employeeID);
-                        $position = $employee->position;
-
-                        if ($position) {
-                            
-                            $sss = SSS::where('MinSalary', '<=', $position->MonthlySalary)
-                                      ->where('MaxSalary', '>=', $position->MonthlySalary)
-                                      ->first();
-                            $philhealth = Philhealth::where('MinSalary', '<=', $position->MonthlySalary)
-                                                    ->where('MaxSalary', '>=', $position->MonthlySalary)
-                                                    ->first();
-                            $pagibig = Pagibig::first(); 
-
-                            
-                            if ($deductionType === 'SSS') {
-                                $sssMonthlyPayment = $sss->EmployeeShare ?? 0;
-                                $set('Amount', number_format($sssMonthlyPayment, 2, '.', ''));
-                            }
-
-                            if ($deductionType === 'PhilHealth') {
-                                $philhealthMonthlyPayment = $position->MonthlySalary <= 10000
-                                    ? ($philhealth->MonthlyRate ?? 0)
-                                    : ($position->MonthlySalary * ($philhealth->PremiumRate / 100));
-                                $set('Amount', number_format($philhealthMonthlyPayment, 2, '.', ''));
-                            }
-
-                            if ($deductionType === 'Pagibig') {
-                                $pagibigMonthlyPayment = $position->MonthlySalary < 1500
-                                    ? ($position->MonthlySalary * 0.01)
-                                    : ($position->MonthlySalary * 0.02);
-                                $set('Amount', number_format($pagibigMonthlyPayment, 2, '.', ''));
+                    Select::make('PeriodID')
+                    ->label('Select Period')
+                    ->options(function (callable $get) {
+                        // Ensure PeriodID is reactive to EmployeeID
+                        $employeeId = $get('employeeID');
+                        if ($employeeId) {
+                            $employee = Employee::find($employeeId);
+                            if ($employee) {
+                                // Dynamically filter WeekPeriod based on employee status
+                                $category = $employee->employment_type === 'Regular' ? 'Kinsenas' : 'Weekly';
+                                return WeekPeriod::where('Category', operator: $category)->get()
+                                    ->mapWithKeys(function ($period) {
+                                        return [
+                                            $period->id => $period->StartDate . ' - ' . $period->EndDate
+                                        ];
+                                    });
                             }
                         }
-                    }
-                })
-                ->required(),
-
-            TextInput::make('Amount')
-                ->required(),
+                        return [];
+                    })
+                    ->reactive() // Add reactivity here
+                    ->required(fn (string $context) => $context === 'create'),
             ]);
     }
-
+    
 
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('employee.full_name'),
-                TextColumn::make('DeductionType'),
-                TextColumn::make('Amount'),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            TextColumn::make('employee.full_name')
+                ->label('Employee'),
+
+            TextColumn::make('DeductionType')
+                ->label('Deduction Type'),
+
+            TextColumn::make('PeriodID') // Reference to the period
+                ->label('Period')
+                ->formatStateUsing(function ($state, $record) {
+                    // Assuming $record->weekperiod exists and contains StartDate and EndDate
+                    return $record->weekperiod ? 
+                        $record->weekperiod->StartDate . ' - ' . $record->weekperiod->EndDate : 
+                        'N/A'; // Handle case where no period is found
+                }),
+
+            TextColumn::make('Amount')
+                ->label('Amount'),
+        ])
+        ->filters([
+            // Add filters here if needed
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]),
+        ]);
+}
+
 
     public static function getRelations(): array
     {
