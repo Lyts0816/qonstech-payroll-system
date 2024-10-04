@@ -33,7 +33,10 @@ class UserResource extends Resource
                 ->unique(ignoreRecord: true)
                 ->string()->rules('regex:/^[^\d]*$/'),
 
-                TextInput::make('Username')
+                // TextInput::make('Username')
+                // ->required(fn (string $context) => $context === 'create')
+                // ->unique(ignoreRecord: true),
+                TextInput::make('email')
                 ->required(fn (string $context) => $context === 'create')
                 ->unique(ignoreRecord: true),
 
