@@ -22,6 +22,7 @@
         h1 {
             text-align: center;
         }
+
         h2 {
             text-align: center;
         }
@@ -68,10 +69,11 @@
             text-align: center;
             margin: 0;
         }
+
         .totals div td {
             text-align: center;
             margin: 0;
-            
+
         }
 
         .net-pay {
@@ -112,27 +114,23 @@
                 @foreach ($payrollRecords as $record)
                     <tr>
                         <th>Employee Name</th>
-                        <td>{{ $record['first_name'] }} {{ $record['middle_name'] }} {{ $record['last_name'] }}</td>
+                        <td>{{ $record->first_name }} {{ $record->middle_name }} {{ $record->last_name }}</td>
                         <th>Regular Status</th>
-                        <td>{{ $record['RegularStatus'] }}</td>
+                        <td>{{ $record->RegularStatus }}</td>
                     </tr>
                     <tr>
                         <th>Position</th>
-                        <td>{{ $record['position'] }}</td>
+                        <td>{{ $record->position }}</td>
                         <th>Salary Type</th>
-                        <td>{{ $record['SalaryType'] }}</td>
-
+                        <td>{{ $record->SalaryType }}</td>
                     </tr>
                     <tr>
                         <th>Monthly Salary</th>
-                        <td>{{ number_format($record['monthlySalary'], 2) }}</td>
+                        <td>{{ number_format($record->monthlySalary, 2) }}</td>
                         <th>Hourly Rate</th>
-                        <td>{{ number_format($record['hourlyRate'], 2) }}</td>
-                    </tr>
-                    <tr>
+                        <td>{{ number_format($record->hourlyRate, 2) }}</td>
                     </tr>
                 @endforeach
-
             </table>
         </div>
 
@@ -149,27 +147,31 @@
                 <tbody>
                     <tr>
                         <td>Basic Pay</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱ {{ isset($record->BasicPay) ? number_format($record->TotalHours, 2) : '--' }}</td>
                     </tr>
                     <tr>
                         <td>Sunday Pay</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱ {{ isset($record->SundayPay) ? number_format($record->SundayPay, 2) : '--' }}</td>
                     </tr>
                     <tr>
                         <td>Special Holiday Pay</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱
+                            {{ isset($record->SpecialHolidayPay) ? number_format($record->SpecialHolidayPay, 2) : '--' }}
+                        </td>
                     </tr>
                     <tr>
                         <td>Regular Holiday Pay</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱
+                            {{ isset($record->RegularHolidayPay) ? number_format($record->RegularHolidayPay, 2) : '--' }}
+                        </td>
                     </tr>
                     <tr>
                         <td>Overtime</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱ {{ isset($record->OvertimePay) ? number_format($record->OvertimePay, 2) : '--' }}</td>
                     </tr>
                     <tr>
                         <td>Other Earnings</td>
-                        <td>₱ {{ number_format($earnings, 2) }}</td>
+                        <td>₱ {{ isset($earnings) ? number_format($earnings, 2) : '--' }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -210,7 +212,7 @@
             </div>
             <div>
                 <h3>Total Gross Pay</h3>
-                <h2>₱ {{ number_format($totalDeductions, 2) }}</h2>
+                <h2>₱ {{ number_format($totalGrossPay, 2) }}</h2>
             </div>
         </div>
 
