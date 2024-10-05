@@ -345,52 +345,60 @@ class PayslipController extends Controller
         $GetPhilHealth = \App\Models\PhilHealth::all();
         $weekPeriod = \App\Models\WeekPeriod::where('id', $firstRecord->weekPeriodID)->first(); // Adjusted to get specific weekPeriod
 
+        $newRecord->SSSDeduction = 0;
+        $newRecord->PhilHealthDeduction = 0;
+        $newRecord->PagIbigDeduction = 0;
+        $newRecord->DeductionFee = 0;
+
         // Calculate deductions based on week period category
         if ($weekPeriod) {
+           
             // Determine the deduction factor based on the week period type
             $deductionFactor = ($weekPeriod->Category == 'Kinsenas') ?
                 (($weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena') ? 2 : 1) :
                 4; // Default for Weekly
 
             // Function to calculate SSS, PagIbig, and PhilHealth deductions
-            $this->calculateDeductions($newRecord, $employee, $deductionFactor, $GetSSS, $GetPagibig, $GetPhilHealth);
+            
+            // SSS Deduction calculation
+            foreach ($GetSSS as $sss) {
+                if ($sss->MinSalary <= $employee->position->MonthlySalary && $sss->MaxSalary >= $employee->position->MonthlySalary) {
+                    $newRecord->SSSDeduction = $sss->EmployeeShare / $deductionFactor; // Adjusted SSS Deduction based on factor
+                    break; // Exit loop after finding the correct SSS
+                }
+            }
+
+            // PagIbig Deduction calculation
+            foreach ($GetPagibig as $pagibig) {
+                if ($pagibig->MinimumSalary <= $employee->position->MonthlySalary && $pagibig->MaximumSalary >= $employee->position->MonthlySalary) {
+                    $newRecord->PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->position->MonthlySalary) / $deductionFactor; // Adjusted PagIbig Deduction
+                    break; // Exit loop after finding the correct PagIbig
+                }
+            }
+
+            // PhilHealth Deduction calculation
+            foreach ($GetPhilHealth as $philhealth) {
+                if ($philhealth->MinSalary <= $employee->position->MonthlySalary && $philhealth->MaxSalary >= $employee->position->MonthlySalary) {
+                    if ($philhealth->PremiumRate == '0.00') {
+                        $newRecord->PhilHealthDeduction = $philhealth->ContributionAmount / $deductionFactor; // Fixed contribution amount
+                    } else {
+                        $newRecord->PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->position->MonthlySalary) / $deductionFactor; // Adjusted PhilHealth Deduction
+                    }
+                    break; // Exit loop after finding the correct PhilHealth
+                }
+            }
+
+            // Calculate total deductions and store in DeductionFee
+            $newRecord->DeductionFee = $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction;
         }
     }
 
     // New private function to handle deduction calculations
     private function calculateDeductions($newRecord, $employee, $deductionFactor, $GetSSS, $GetPagibig, $GetPhilHealth)
     {
-        $newRecord->SSSDeduction = 0;
-        $newRecord->PhilHealthDeduction = 0;
-        $newRecord->PagIbigDeduction = 0;
-        $newRecord->DeductionFee = 0;
-        // SSS Deduction calculation
-        foreach ($GetSSS as $sss) {
-            if ($sss->MinSalary <= $employee->MonthlySalary && $sss->MaxSalary >= $employee->MonthlySalary) {
-                $newRecord->SSSDeduction = $sss->EmployeeShare / $deductionFactor;
-                break; // Exit loop after finding the correct SSS
-            }
-        }
+        // Initialize deductions to zero
 
-        // PagIbig Deduction calculation
-        foreach ($GetPagibig as $pagibig) {
-            if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                $newRecord->PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
-                break; // Exit loop after finding the correct PagIbig
-            }
-        }
-
-        // PhilHealth Deduction calculation
-        foreach ($GetPhilHealth as $philhealth) {
-            if ($philhealth->MinSalary <= $employee->MonthlySalary && $philhealth->MaxSalary >= $employee->MonthlySalary) {
-                if ($philhealth->PremiumRate == '0.00') {
-                    $newRecord->PhilHealthDeduction = $philhealth->ContributionAmount / $deductionFactor;
-                } else {
-                    $newRecord->PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary) / $deductionFactor;
-                }
-                break; // Exit loop after finding the correct PhilHealth
-            }
-        }
     }
+
 
 }
