@@ -53,14 +53,15 @@ class PayslipController extends Controller
         return view('payslip.records', [
             'payrollRecords' => collect([$newRecord]), // Return a collection with the single employee record
             'earnings' => $newRecord->EarningPay,
+            'TotalOvertimePay' => $newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25),
             'sss' => $newRecord->SSSDeduction,
             'philHealth' => $newRecord->PhilHealthDeduction,
             'pagIbig' => $newRecord->PagIbigDeduction,
             'deductions' => $newRecord->DeductionFee,
             'totalDeductions' => $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee,
-            'totalGrossPay' => $newRecord->EarningPay,
+            'totalGrossPay' => $newRecord->EarningPay + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)),
             'BasicPay' => $newRecord->TotalHours * $newRecord->hourlyRate,
-            'netPay' => $newRecord->EarningPay - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
+            'netPay' => $newRecord->EarningPay + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)) - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
         ]);
     }
 
@@ -92,7 +93,6 @@ class PayslipController extends Controller
             $workedOTHours = Carbon::parse($otRecord->Checkin)->diffInHours(Carbon::parse($otRecord->Checkout));
             $TotalOvertimeHours += $workedOTHours;
         }
-
         $newRecord->TotalOvertimeHours = $TotalOvertimeHours;
     }
 

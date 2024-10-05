@@ -167,7 +167,7 @@
                     </tr>
                     <tr>
                         <td>Overtime</td>
-                        <td>₱ {{ isset($record->OvertimePay) ? number_format($record->OvertimePay, 2) : '--' }}</td>
+                        <td>₱ {{ $TotalOvertimePay }}</td>
                     </tr>
                     <tr>
                         <td>Other Earnings</td>
