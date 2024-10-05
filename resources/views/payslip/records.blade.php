@@ -147,7 +147,7 @@
                 <tbody>
                     <tr>
                         <td>Basic Pay</td>
-                        <td>₱ {{ isset($record->BasicPay) ? number_format($record->TotalHours, 2) : '--' }}</td>
+                        <td>₱ {{ $BasicPay }}</td>
                     </tr>
                     <tr>
                         <td>Sunday Pay</td>

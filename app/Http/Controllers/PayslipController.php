@@ -48,7 +48,6 @@ class PayslipController extends Controller
 
         // Calculate Earnings and Deductions
         $this->calculateEarningsAndDeductions($newRecord, $request, $selectedEmployee, $records);
-
         // Return the view with the selected employee's payroll record
         return view('payslip.records', [
             'payrollRecords' => collect([$newRecord]), // Return a collection with the single employee record
@@ -59,25 +58,170 @@ class PayslipController extends Controller
             'pagIbig' => $newRecord->PagIbigDeduction,
             'deductions' => $newRecord->DeductionFee,
             'totalDeductions' => $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee,
-            'totalGrossPay' => $newRecord->EarningPay + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)),
-            'BasicPay' => $newRecord->TotalHours * $newRecord->hourlyRate,
-            'netPay' => $newRecord->EarningPay + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)) - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
+            'totalGrossPay' => $newRecord->EarningPay + ( $newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)),
+            'BasicPay' =>  $newRecord->TotalHours * $newRecord->hourlyRate,
+            'netPay' => $newRecord->EarningPay + ( $newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)) - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
         ]);
     }
 
     // Process and calculate attendance hours
     protected function calculateAttendanceDetails($attendance, &$newRecord, $selectedEmployee)
     {
+        // Initialize total hours
         $TotalHours = 0;
         $TotalHoursSunday = 0;
         $TotalHrsRegularHol = 0;
         $TotalHrsSpecialHol = 0;
 
+        // Loop through each attendance record
         foreach ($attendance as $att) {
-            $this->processAttendance($att, $selectedEmployee, $newRecord, $TotalHoursSunday, $TotalHrsRegularHol, $TotalHrsSpecialHol, $TotalHours);
+            // Parse attendance date
+            $attendanceDate = Carbon::parse($att['date']);
+
+            // Get holidays for the given date
+            $holidays = Holiday::where('HolidayDate', $attendanceDate->toDateString())->get();
+
+            // Get the work schedule assigned to the employee
+            $workSched = WorkSched::find($selectedEmployee->schedule_id);
+
+            // Skip if there's no work schedule for the employee
+            if (!$workSched) {
+                continue;
+            }
+
+            // Check if the attendance date matches the work schedule
+            if ($this->isScheduledDay($workSched, $attendanceDate)) {
+                // Split the schedule for morning and afternoon shifts
+                $In1Array = explode(':', $workSched->CheckinOne);
+                $Out1Array = explode(':', $workSched->CheckoutOne);
+                $In2Array = explode(':', $workSched->CheckinTwo);
+                $Out2Array = explode(':', $workSched->CheckoutTwo);
+
+                // If Sunday, calculate Sunday hours
+                if ($attendanceDate->isSunday()) {
+                    $this->calculateSundayHours($att, $In1Array, $Out1Array, $In2Array, $Out2Array, $TotalHoursSunday, $newRecord);
+                } else {
+                    // Initialize hours worked
+                    $regularHolidayHours = 0;
+                    $specialHolidayHours = 0;
+                    $hoursWorked = 0;
+
+                    // Extract check-in and check-out times from the attendance data
+                    $checkInTime = Carbon::parse($att['CheckIn']);
+                    $checkOutTime = Carbon::parse($att['CheckOut']);
+
+                    // Calculate holiday hours
+                    foreach ($holidays as $holiday) {
+                        if ($holiday->HolidayType == 'Regular') {
+                            $regularHolidayHours += $this->calculateHolidayHours($checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array, 2);
+                            $TotalHrsRegularHol += $regularHolidayHours;
+                        } elseif ($holiday->HolidayType == 'Special') {
+                            $specialHolidayHours += $this->calculateHolidayHours($checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array, 1.5);
+                            $TotalHrsSpecialHol += $specialHolidayHours;
+                        }
+                    }
+
+                    // If not a holiday, calculate regular hours
+                    if ($regularHolidayHours == 0 && $specialHolidayHours == 0) {
+                        $hoursWorked += $this->calculateRegularHours($att,$checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array);
+                    }
+
+                    // Update newRecord with calculated hours
+                    $newRecord->RegularHours = $hoursWorked;
+                    $TotalHours += $hoursWorked; // Update total hours
+                }
+            }
         }
+
+        // Set total hours in the newRecord
         $newRecord->TotalHours = $TotalHours;
         $newRecord->TotalHoursSunday = $TotalHoursSunday;
+        $newRecord->TotalHrsRegularHol = $TotalHrsRegularHol;
+        $newRecord->TotalHrsSpecialHol = $TotalHrsSpecialHol;
+    }
+
+    private function isScheduledDay($workSched, Carbon $attendanceDate)
+    {
+        // Check if the day of the week matches the work schedule
+        return ($workSched->monday == $attendanceDate->isMonday() ||
+            $workSched->tuesday == $attendanceDate->isTuesday() ||
+            $workSched->wednesday == $attendanceDate->isWednesday() ||
+            $workSched->thursday == $attendanceDate->isThursday() ||
+            $workSched->friday == $attendanceDate->isFriday() ||
+            $workSched->saturday == $attendanceDate->isSaturday() ||
+            $workSched->sunday == $attendanceDate->isSunday());
+    }
+
+    private function calculateHolidayHours($checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array, $multiplier)
+    {
+        $hours = 0;
+
+        // Logic to calculate hours based on check-in and check-out times
+        $scheduledIn1 = Carbon::createFromTime($In1Array[0], $In1Array[1]);
+        $scheduledOut1 = Carbon::createFromTime($Out1Array[0], $Out1Array[1]);
+
+        if ($checkInTime->between($scheduledIn1, $scheduledOut1)) {
+            if ($checkOutTime->lt($scheduledOut1)) {
+                $hours += $checkOutTime->diffInHours($checkInTime);
+            } else {
+                $hours += $scheduledOut1->diffInHours($checkInTime);
+            }
+        }
+
+        if (!empty($In2Array)) {
+            $scheduledIn2 = Carbon::createFromTime($In2Array[0], $In2Array[1]);
+            $scheduledOut2 = Carbon::createFromTime($Out2Array[0], $Out2Array[1]);
+
+            if ($checkInTime->greaterThan($scheduledOut1) && $checkInTime->between($scheduledIn2, $scheduledOut2)) {
+                if ($checkOutTime->lt($scheduledOut2)) {
+                    $hours += $checkOutTime->diffInHours($checkInTime);
+                } else {
+                    $hours += $scheduledOut2->diffInHours($checkInTime);
+                }
+            }
+        }
+
+        return $hours * $multiplier; // Return adjusted holiday hours
+    }
+
+    private function calculateRegularHours($att,$checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array)
+    {
+        $TotalHours = 0; 
+
+        $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]); // 8:00 AM
+        $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);  // 12:00 PM
+        $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
+        $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);  // 5:00 PM
+
+        $checkinOne = Carbon::createFromFormat('H:i', substr($att["Checkin_One"], 0, 5));
+        $checkoutOne = Carbon::createFromFormat('H:i', substr($att["Checkout_One"], 0, 5));
+
+        // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningStart) / 60 : 0;
+
+        $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
+        $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+        $workedMorningHours = $workedMorningMinutes / 60;
+        // $workedMorningHours = $checkinOne->diffInMinutes($morningEnd) / 60;
+
+        $checkinTwo = Carbon::createFromFormat('H:i', substr($att["Checkin_Two"], 0, 5));
+        $checkoutTwo = Carbon::createFromFormat('H:i', substr($att["Checkout_Two"], 0, 5));
+
+        // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
+
+        $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
+        $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+        $workedAfternoonHours = $workedAfternoonMinutes / 60;
+
+        $totalWorkedHours = $workedMorningHours + $workedAfternoonHours;
+        // $totalLateHours = $lateMorningHours + $lateAfternoonHours;
+        $netWorkedHours = $totalWorkedHours
+        ;
+        // $netWorkedHours = $totalWorkedHours - $totalLateHours;
+        // $SundayWorkedHours = $totalSundayWorkedHours - $totalSundayLateHours;
+
+        $TotalHours += $netWorkedHours;
+        return $TotalHours;
+
     }
 
     // Calculate overtime hours
@@ -134,128 +278,21 @@ class PayslipController extends Controller
             ->get();
     }
 
-    protected function processAttendance($attendances, $employee, &$newRecord, &$TotalHoursSunday, &$TotalHrsRegularHol, &$TotalHrsSpecialHol, &$TotalHours)
-    {
-        $attendanceDate = Carbon::parse($attendances['Date']);
 
-        // Get holidays for the given date
-        $GetHoliday = Holiday::where('HolidayDate', substr($attendanceDate, 0, 10))->get();
-        $Holiday = $GetHoliday;
 
-        // Get the work schedule assigned to the employee
-        $GetWorkSched = WorkSched::where('ScheduleName', $employee['schedule']->ScheduleName)->get();
-        $WorkSched = $GetWorkSched;
-
-        // Process based on the employee's work schedule and attendance date
-        if (
-            ($WorkSched[0]->monday == $attendanceDate->isMonday() && $attendanceDate->isMonday() == 1)
-            || ($WorkSched[0]->tuesday == $attendanceDate->isTuesday() && $attendanceDate->isTuesday() == 1)
-            || ($WorkSched[0]->wednesday == $attendanceDate->isWednesday() && $attendanceDate->isWednesday() == 1)
-            || ($WorkSched[0]->thursday == $attendanceDate->isThursday() && $attendanceDate->isThursday() == 1)
-            || ($WorkSched[0]->friday == $attendanceDate->isFriday() && $attendanceDate->isFriday() == 1)
-            || ($WorkSched[0]->saturday == $attendanceDate->isSaturday() && $attendanceDate->isSaturday() == 1)
-            || ($WorkSched[0]->sunday == $attendanceDate->isSunday() && $attendanceDate->isSunday() == 1)
-        ) {
-            // Split the schedule for morning and afternoon shifts
-            $In1Array = explode(':', $WorkSched[0]->CheckinOne);
-            $Out1Array = explode(':', $WorkSched[0]->CheckoutOne);
-            $In2Array = explode(':', $WorkSched[0]->CheckinTwo);
-            $Out2Array = explode(':', $WorkSched[0]->CheckoutTwo);
-
-            // If Sunday, calculate Sunday hours
-            if ($attendanceDate->isSunday()) {
-                $this->calculateSundayHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, $TotalHoursSunday, $newRecord);
-            } else {
-                // If it's a regular day or a holiday, process accordingly
-                if (count($Holiday) > 0) {
-                    $this->calculateHolidayHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, $Holiday, $TotalHrsRegularHol, $TotalHrsSpecialHol, $newRecord);
-                } else {
-                    $this->calculateRegularHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, $TotalHours, $newRecord);
-                }
-            }
-        }
-    }
-    protected function calculateHolidayHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, $Holiday, &$TotalHrsRegularHol, &$TotalHrsSpecialHol, &$newRecord)
-    {
-        // Initialize regular and special holiday hours
-        $regularHolidayHours = 0;
-        $specialHolidayHours = 0;
-
-        // Extract check-in and check-out times from the attendance data
-        $checkInTime = Carbon::parse($attendances['CheckIn']);
-        $checkOutTime = Carbon::parse($attendances['CheckOut']);
-
-        // Determine if the holiday is a regular or special holiday
-        $isRegularHoliday = false;
-        $isSpecialHoliday = false;
-
-        foreach ($Holiday as $holiday) {
-            if ($holiday->HolidayType == 'Regular') {
-                $isRegularHoliday = true;
-            } elseif ($holiday->HolidayType == 'Special') {
-                $isSpecialHoliday = true;
-            }
-        }
-
-        // Calculate the scheduled morning shift hours
-        $scheduledIn1 = Carbon::createFromTime($In1Array[0], $In1Array[1]);
-        $scheduledOut1 = Carbon::createFromTime($Out1Array[0], $Out1Array[1]);
-
-        // Calculate the scheduled afternoon shift hours (if applicable)
-        $scheduledIn2 = !empty($In2Array) ? Carbon::createFromTime($In2Array[0], $In2Array[1]) : null;
-        $scheduledOut2 = !empty($Out2Array) ? Carbon::createFromTime($Out2Array[0], $Out2Array[1]) : null;
-
-        // Check if the check-in time is within the scheduled morning shift
-        if ($checkInTime->between($scheduledIn1, $scheduledOut1)) {
-            // Check-out time should not exceed the scheduled check-out
-            if ($checkOutTime->lt($scheduledOut1)) {
-                $regularHolidayHours += $checkOutTime->diffInHours($checkInTime);
-            } else {
-                $regularHolidayHours += $scheduledOut1->diffInHours($checkInTime);
-            }
-        }
-
-        // Check if there's an afternoon shift and the employee checked in for that shift
-        if ($scheduledIn2 && $checkInTime->greaterThan($scheduledOut1)) {
-            if ($checkInTime->between($scheduledIn2, $scheduledOut2)) {
-                // Check-out time should not exceed the scheduled check-out for the afternoon shift
-                if ($checkOutTime->lt($scheduledOut2)) {
-                    $regularHolidayHours += $checkOutTime->diffInHours($checkInTime);
-                } else {
-                    $regularHolidayHours += $scheduledOut2->diffInHours($checkInTime);
-                }
-            }
-        }
-
-        // If it's a regular holiday, calculate additional pay
-        if ($isRegularHoliday) {
-            $newRecord->RegularHolidayHours = $regularHolidayHours * 2; // Typically, regular holidays pay double
-            $TotalHrsRegularHol += $newRecord->RegularHolidayHours; // Update total regular holiday hours
-        }
-
-        // If it's a special holiday, calculate additional pay
-        if ($isSpecialHoliday) {
-            $newRecord->SpecialHolidayHours = $specialHolidayHours * 1.5; // Typically, special holidays pay time and a half
-            $TotalHrsSpecialHol += $newRecord->SpecialHolidayHours; // Update total special holiday hours
-        }
-
-        // Update the newRecord with total holiday hours worked
-        $newRecord->HolidayHours = $regularHolidayHours + $specialHolidayHours;
-    }
-
-    protected function calculateSundayHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, &$TotalHoursSunday, &$newRecord)
+    protected function calculateSundayHours($att, $In1Array, $Out1Array, $In2Array, $Out2Array, &$TotalHoursSunday, &$newRecord)
     {
         $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]);
         $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);
         $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]);
         $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);
 
-        $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
+        $checkinOne = Carbon::createFromFormat('H:i', substr($att["Checkin_One"], 0, 5));
         $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
         $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
         $workedMorningHours = $workedMorningMinutes / 60;
 
-        $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+        $checkinTwo = Carbon::createFromFormat('H:i', substr($att["Checkin_Two"], 0, 5));
         $effectiveCheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
         $workedAfternoonMinutes = $effectiveCheckinTwo->diffInMinutes($afternoonEnd);
         $workedAfternoonHours = $workedAfternoonMinutes / 60;
@@ -263,49 +300,7 @@ class PayslipController extends Controller
         $totalWorkedHours = $workedMorningHours + $workedAfternoonHours;
         $TotalHoursSunday += $totalWorkedHours;
         $newRecord->TotalHoursSunday = $TotalHoursSunday;
-    }
-    protected function calculateRegularHours($attendances, $In1Array, $Out1Array, $In2Array, $Out2Array, &$TotalHours, &$newRecord)
-    {
-        // Initialize hours worked
-        $hoursWorked = 0;
 
-        // Extract check-in and check-out times from the attendance data
-        $checkInTime = Carbon::parse($attendances['CheckIn']);
-        $checkOutTime = Carbon::parse($attendances['CheckOut']);
-
-        // Calculate the scheduled morning shift hours
-        $scheduledIn1 = Carbon::createFromTime($In1Array[0], $In1Array[1]);
-        $scheduledOut1 = Carbon::createFromTime($Out1Array[0], $Out1Array[1]);
-
-        // Calculate the scheduled afternoon shift hours (if applicable)
-        $scheduledIn2 = !empty($In2Array) ? Carbon::createFromTime($In2Array[0], $In2Array[1]) : null;
-        $scheduledOut2 = !empty($Out2Array) ? Carbon::createFromTime($Out2Array[0], $Out2Array[1]) : null;
-
-        // Check if the check-in time is within the scheduled morning shift
-        if ($checkInTime->between($scheduledIn1, $scheduledOut1)) {
-            // Check-out time should not exceed the scheduled check-out
-            if ($checkOutTime->lt($scheduledOut1)) {
-                $hoursWorked += $checkOutTime->diffInHours($checkInTime);
-            } else {
-                $hoursWorked += $scheduledOut1->diffInHours($checkInTime);
-            }
-        }
-
-        // Check if there's an afternoon shift and the employee checked in for that shift
-        if ($scheduledIn2 && $checkInTime->greaterThan($scheduledOut1)) {
-            if ($checkInTime->between($scheduledIn2, $scheduledOut2)) {
-                // Check-out time should not exceed the scheduled check-out for the afternoon shift
-                if ($checkOutTime->lt($scheduledOut2)) {
-                    $hoursWorked += $checkOutTime->diffInHours($checkInTime);
-                } else {
-                    $hoursWorked += $scheduledOut2->diffInHours($checkInTime);
-                }
-            }
-        }
-
-        // Update the total hours in the newRecord
-        $newRecord->RegularHours = $hoursWorked; // Store calculated hours in newRecord
-        $TotalHours += $hoursWorked; // Add to the total hours
     }
 
 
@@ -352,14 +347,14 @@ class PayslipController extends Controller
 
         // Calculate deductions based on week period category
         if ($weekPeriod) {
-           
+
             // Determine the deduction factor based on the week period type
             $deductionFactor = ($weekPeriod->Category == 'Kinsenas') ?
                 (($weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena') ? 2 : 1) :
                 4; // Default for Weekly
 
             // Function to calculate SSS, PagIbig, and PhilHealth deductions
-            
+
             // SSS Deduction calculation
             foreach ($GetSSS as $sss) {
                 if ($sss->MinSalary <= $employee->position->MonthlySalary && $sss->MaxSalary >= $employee->position->MonthlySalary) {
