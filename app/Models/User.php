@@ -41,7 +41,11 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
-
+     // Define the relationship to the Role model
+     public function role()
+     {
+         return $this->belongsTo(Role::class); // Assuming role_id exists in the users table
+     }
     /**
      * Get the attributes that should be cast.
      *

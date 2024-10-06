@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Role;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
@@ -24,47 +25,48 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                ->required(fn (string $context) => $context === 'create')
-                ->unique(ignoreRecord: true)
-                ->string()->rules('regex:/^[^\d]*$/'),
+                    ->required(fn(string $context) => $context === 'create')
+                    ->unique(ignoreRecord: true)
+                    ->string()->rules('regex:/^[^\d]*$/'),
 
                 // TextInput::make('Username')
                 // ->required(fn (string $context) => $context === 'create')
                 // ->unique(ignoreRecord: true),
                 TextInput::make('email')
-                ->required(fn (string $context) => $context === 'create')
-                ->unique(ignoreRecord: true),
+                    ->required(fn(string $context) => $context === 'create')
+                    ->unique(ignoreRecord: true),
 
-                Select::make('Role')
-                ->options([
-                'Admin' => 'Admin',
-                'Vice President' => 'Vice President',
-                'Project Clerk' => 'Project Clerk',
-                'Human Resource' => 'Human Resource',
-                        ])  
-                ->required(fn (string $context) => $context === 'create'),
+                Select::make('Role') // Field name
+                    ->label('Role')
+                    ->options(Role::pluck('name', 'id')) // Load roles from the database
+                    ->required(fn(string $context) => $context === 'create'), // Required when creating
 
 
-                TextInput::make('password')->password()->required(fn (string $context) => $context === 'create'),
+
+                TextInput::make('password')->password()->required(fn(string $context) => $context === 'create'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->query(User::with('role')) // Eager load the role relationship
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('Username')->searchable(),
-                TextColumn::make('Role')
-                
-
+                TextColumn::make('name')
+                    ->searchable(),
+                TextColumn::make('Username')
+                    ->searchable(),
+                TextColumn::make('role.name') 
+                    ->searchable(),
             ])
-            ->filters([
+
+            ->filters(filters: [
                 //
             ])
             ->actions([
