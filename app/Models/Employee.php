@@ -21,6 +21,7 @@ class Employee extends Model
         'middle_name',
         'last_name',
         'employment_type',
+        'assignment',
         'street',
         'barangay',
         'city',

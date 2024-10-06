@@ -48,8 +48,7 @@ class PayrollResource extends Resource
 							->required(fn(string $context) => $context === 'create' || $context === 'edit')
 							->options([
 								'Regular' => 'Regular',
-								'Non-Regular' => 'Non-Regular',
-								'Project Based' => 'Project Based',
+								'Contractual' => 'Contractual',
 							])
 							->default(request()->query('employee'))
 							->reactive()
@@ -57,30 +56,22 @@ class PayrollResource extends Resource
 								// Automatically set PayrollFrequency based on EmployeeStatus
 								if ($state === 'Regular') {
 									$set('PayrollFrequency', 'Kinsenas');
-								} elseif ($state === 'Non-Regular' || $state === 'Project Based') {
+								} elseif ($state === 'Contractual') {
 									$set('PayrollFrequency', 'Weekly');
 								}
 
-								// If EmployeeStatus is 'Regular' or 'Non-Regular', set ProjectID to null
-								if ($state === 'Regular' || $state === 'Non-Regular') {
-									$set('ProjectID', null);
-								}
 							}),
-						Select::make('ProjectID')
-							->label('Project')
-							->required(fn(callable $get) => $get('EmployeeStatus') === 'Project Based')
-							->options(function (callable $get) {
-								return $get('EmployeeStatus') === 'Project Based'
-									? Project::query()->pluck('ProjectName', 'id')->toArray()
-									: [];
-							})
-							->disabled(fn(callable $get) => $get('EmployeeStatus') !== 'Project Based')
-							->default(null) // Reset default if not project based
-							->nullable(),
+							Select::make('assignment')
+							->label('Assignment')
+							->required(fn (string $context) => $context === 'create' || 'edit')
+							->options([
+								'Main Office' => 'Main Office',
+								'Project Based' => 'Project Based',
+							])->native(false),
+	
 					]),
 
-				// PayrollFrequency Select Field
-				Select::make('PayrollFrequency')
+					Select::make('PayrollFrequency')
 					->label('Payroll Frequency')
 					->required(fn(string $context) => $context === 'create' || $context === 'edit')
 					->options([
@@ -88,7 +79,6 @@ class PayrollResource extends Resource
 						'Weekly' => 'Weekly',
 					])
 					->native(false)
-					->disabled()
 					->reactive(),
 
 				// PayrollDate Select Field
@@ -203,13 +193,18 @@ class PayrollResource extends Resource
 					->label('Employee Type')
 					->searchable()
 					->sortable(),
-
-				Tables\Columns\TextColumn::make('PayrollMonth')
-					->Label('Payroll Month'),
+					
+				Tables\Columns\TextColumn::make('assignment')
+				->label('Assignment')
+				->searchable()
+				->sortable(),
 
 				Tables\Columns\TextColumn::make('PayrollYear')
 					->Label('Payroll Year'),
 
+				Tables\Columns\TextColumn::make('PayrollMonth')
+					->Label('Payroll Month'),
+				
 				Tables\Columns\TextColumn::make('PayrollFrequency')
 					->Label('Payroll Frequency'),
 
@@ -218,10 +213,6 @@ class PayrollResource extends Resource
 					->searchable()
 					->sortable(),
 
-				Tables\Columns\TextColumn::make('project.ProjectName')
-					->label('Project Name')
-					->searchable()
-					->sortable(),
 			])
 			->filters([
 				SelectFilter::make('project_id')
@@ -238,6 +229,15 @@ class PayrollResource extends Resource
 			], layout: FiltersLayout::AboveContent)
 			->actions([
 				Tables\Actions\EditAction::make(),
+				Tables\Actions\Action::make('viewPayroll')
+					->label('View Payroll')
+					->icon('heroicon-o-calculator')
+					->color('info')
+					->url(fn($record) => route('payslip-records', ['EmployeeID' => $record->id])) // Pass the employee ID
+					->openUrlInNewTab()
+					->action(function ($record) {
+						// Removed action logic as we are only setting the URL
+					}),
 				// Tables\Actions\ViewAction::make(),
 				Tables\Actions\Action::make('calculatePayroll')
 					->label('Calculate & Export Payroll')
@@ -529,39 +529,39 @@ class PayrollResource extends Resource
 			
 								// }
 			
-						
+
 
 							}
 							// dd($newRecord->EmployeeID);
 							$OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord->EmployeeID)
-							->where('Status', 'approved') // Only consider approved overtime
-							->get();
+								->where('Status', 'approved') // Only consider approved overtime
+								->get();
 
-						if (count($OtDate) > 0) {
+							if (count($OtDate) > 0) {
 
-							foreach ($OtDate as $otRecord) {
-								// Extract the check-in and check-out times from the overtime record
-								$In1s = $otRecord->Checkin;
-								$InOT = explode(':', $In1s);
+								foreach ($OtDate as $otRecord) {
+									// Extract the check-in and check-out times from the overtime record
+									$In1s = $otRecord->Checkin;
+									$InOT = explode(':', $In1s);
 
-								$Out1s = $otRecord->Checkout;
-								$OutOT = explode(':', $Out1s);
+									$Out1s = $otRecord->Checkout;
+									$OutOT = explode(':', $Out1s);
 
-								// Create Carbon instances for the check-in and check-out times
-								$OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]);
-								$OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);
+									// Create Carbon instances for the check-in and check-out times
+									$OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]);
+									$OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);
 
-								// Calculate the overtime worked in minutes, then convert to hours
-								$workedOTMinutes = $OTStart->diffInMinutes($OTEnd);
-								$workedOTHours = $workedOTMinutes / 60;
+									// Calculate the overtime worked in minutes, then convert to hours
+									$workedOTMinutes = $OTStart->diffInMinutes($OTEnd);
+									$workedOTHours = $workedOTMinutes / 60;
 
-								// Add to the total overtime hours
-								$TotalOvertimeHours += $workedOTHours;
+									// Add to the total overtime hours
+									$TotalOvertimeHours += $workedOTHours;
+								}
+
+								// Store the total overtime hours in the new record
+								$newRecord->TotalOvertimeHours = $TotalOvertimeHours;
 							}
-
-							// Store the total overtime hours in the new record
-							$newRecord->TotalOvertimeHours = $TotalOvertimeHours;
-						}
 
 							// For Earnings
 							$GetEarnings = \App\Models\Earnings::where('PeriodID', $record->weekPeriodID)
@@ -587,6 +587,77 @@ class PayrollResource extends Resource
 								$newRecord->DeductionFee = $DeductionFee;
 								// $TotalEarningPay = $EarningPay;
 							}
+
+							// Get the loan for the employee and period
+							$loan = \App\Models\Loan::where('EmployeeID', $employee->id)
+								->where('PeriodID', $record->weekPeriodID)
+								->first();
+							if ($loan) {
+								// Check if payroll is already generated for this period and employee
+								$existingPayroll = \App\Models\Payroll::where('weekPeriodID', $record->weekPeriodID)
+									->exists();
+								if ($existingPayroll) {
+									$newDeduction = new \App\Models\Deduction();
+									// Initialize variables for SSS and HDMF loan deductions
+									$SSSDeduction = 0;
+									$HDMFDeduction = 0;
+									// Deduct the number of payments based on LoanType
+									if ($loan->PaymentsRemaining > 0) {
+										switch ($loan->LoanType) {
+											case 'Monthly':
+												// For monthly loans, deduct 1 payment
+												$loan->PaymentsRemaining -= 1;
+												$loan->Balance -= $loan->MonthlyDeduction;
+												break;
+
+											case 'Kinsenas':
+												// For Kinsenas, deduct after 2 payroll periods in the same month
+												// Check how many payrolls have been generated for the month
+												$payrollCountKinsenas = \App\Models\Payroll::whereMonth('weekPeriodID', Carbon::now()->month)
+													->where('LoanType', 'Kinsenas')
+													->count();
+
+												if ($payrollCountKinsenas % 2 == 0) { // Deduct every 2 payrolls
+													$loan->PaymentsRemaining -= 1;
+													$loan->Balance -= $loan->KinsenaDeduction;
+
+													// Store SSS and HDMF deductions
+													$newRecord->$SSSDeduction = $loan->KinsenaDeduction;  // Assuming SSS loan for Kinsena
+													$newRecord->$HDMFDeduction = $loan->KinsenaDeduction; // Assuming HDMF loan for Kinsena
+												}
+												break;
+
+											case 'Weekly':
+												// For weekly loans, deduct after 4 payroll periods in the same month
+												// Check how many payrolls have been generated for the month
+												$payrollCountWeekly = \App\Models\Payroll::whereMonth('weekPeriodID', Carbon::now()->month)
+													->where('LoanType', 'Weekly')
+													->count();
+
+												if ($payrollCountWeekly % 4 == 0) { // Deduct every 4 payrolls
+													$loan->PaymentsRemaining -= 1;
+													$loan->Balance -= $loan->WeeklyDeduction;
+
+													// Store SSS and HDMF deductions
+													$newRecord->$SSSDeduction = $loan->WeeklyDeduction;  // Assuming SSS loan for Weekly
+													$newRecord->$HDMFDeduction = $loan->WeeklyDeduction; // Assuming HDMF loan for Weekly
+												}
+												break;
+										}
+
+										// Ensure the balance doesn't go below zero
+										if ($loan->Balance < 0) {
+											$loan->Balance = 0;
+										}
+
+										// Save the updated loan record
+										$loan->save();
+									}
+								}
+							}
+
+
+
 
 							$GetSSS = \App\Models\sss::get();
 
@@ -736,7 +807,7 @@ class PayrollResource extends Resource
 							// return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $record->id . '.xlsx');
 			
 						}
-						// dd($payrollRecords);
+						dd($payrollRecords);
 						return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $record->EmployeeID . '.xlsx');
 						// } 
 						// else {
