@@ -15,7 +15,7 @@ use App\Http\Controllers\AttendanceController;
 Route::get('/dtr/show', [AttendanceController::class, 'showDtr'])->name('dtr.show');
 use App\Http\Controllers\PayslipController;
 
-Route::get('/payslip-records/{EmployeeID}', [PayslipController::class, 'show'])->name('payslip-records');
+Route::get('/generate-payslips/{projectId}', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');// Route::get('/payslip-records/{ProjectID}', [PayslipController::class, 'show'])->name('payslip-records');
 
 
 Route::redirect('/', '/admin/login');

@@ -21,6 +21,7 @@ class Payroll extends Model
 				'PayrollDate2',
 				'PayrollFrequency',
 				'EmployeeStatus',
+                'assignment',
 				'PayrollMonth',
 				'PayrollYear',
 				'ProjectID',

@@ -204,7 +204,14 @@ class EmployeeResource extends Resource
                         ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
                             'Regular' => 'Regular',
-                            'Non-Regular' => 'Non-Regular',
+                            'Contractual' => 'Contractual',
+                        ])->native(false),
+
+                        Select::make('assignment')
+                        ->label('Assignment')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+                        ->options([
+                            'Main Office' => 'Main Office',
                             'Project Based' => 'Project Based',
                         ])->native(false),
 
