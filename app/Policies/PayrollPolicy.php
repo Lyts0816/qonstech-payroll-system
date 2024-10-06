@@ -13,7 +13,7 @@ class PayrollPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -21,7 +21,7 @@ class PayrollPolicy
      */
     public function view(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -29,7 +29,7 @@ class PayrollPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -37,7 +37,7 @@ class PayrollPolicy
      */
     public function update(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp(); 
     }
 
     /**
@@ -45,7 +45,7 @@ class PayrollPolicy
      */
     public function delete(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -53,7 +53,7 @@ class PayrollPolicy
      */
     public function restore(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -61,6 +61,6 @@ class PayrollPolicy
      */
     public function forceDelete(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
     }
 }

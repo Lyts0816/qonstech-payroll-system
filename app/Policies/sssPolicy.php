@@ -13,7 +13,7 @@ class sssPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -21,7 +21,7 @@ class sssPolicy
      */
     public function view(User $user, sss $sss): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -29,7 +29,7 @@ class sssPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -37,7 +37,7 @@ class sssPolicy
      */
     public function update(User $user, sss $sss): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -45,7 +45,7 @@ class sssPolicy
      */
     public function delete(User $user, sss $sss): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class sssPolicy
      */
     public function restore(User $user, sss $sss): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -61,6 +61,6 @@ class sssPolicy
      */
     public function forceDelete(User $user, sss $sss): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

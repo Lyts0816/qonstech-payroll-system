@@ -13,7 +13,7 @@ class EarningsPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -22,7 +22,7 @@ class EarningsPolicy
     public function view(User $user, Earnings $earnings): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -31,7 +31,7 @@ class EarningsPolicy
     public function create(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -40,7 +40,7 @@ class EarningsPolicy
     public function update(User $user, Earnings $earnings): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -49,7 +49,7 @@ class EarningsPolicy
     public function delete(User $user, Earnings $earnings): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -58,7 +58,7 @@ class EarningsPolicy
     public function restore(User $user, Earnings $earnings): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -67,6 +67,6 @@ class EarningsPolicy
     public function forceDelete(User $user, Earnings $earnings): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

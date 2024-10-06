@@ -13,7 +13,7 @@ class ProjectPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk() || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -21,7 +21,7 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk() || $user->isAdVP() || $user->isFiVp();
     }
 
     /**
@@ -29,7 +29,7 @@ class ProjectPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -37,7 +37,7 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN ;
     }
 
     /**
@@ -45,7 +45,7 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class ProjectPolicy
      */
     public function restore(User $user, Project $project): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -61,6 +61,6 @@ class ProjectPolicy
      */
     public function forceDelete(User $user, Project $project): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 }

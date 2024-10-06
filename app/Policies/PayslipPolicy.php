@@ -13,7 +13,7 @@ class PayslipPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -21,7 +21,7 @@ class PayslipPolicy
      */
     public function view(User $user, Payslip $payslip): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -29,7 +29,7 @@ class PayslipPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -37,7 +37,7 @@ class PayslipPolicy
      */
     public function update(User $user, Payslip $payslip): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -45,7 +45,7 @@ class PayslipPolicy
      */
     public function delete(User $user, Payslip $payslip): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -53,7 +53,7 @@ class PayslipPolicy
      */
     public function restore(User $user, Payslip $payslip): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 
     /**
@@ -61,6 +61,6 @@ class PayslipPolicy
      */
     public function forceDelete(User $user, Payslip $payslip): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isFiVp();
     }
 }

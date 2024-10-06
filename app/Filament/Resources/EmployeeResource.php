@@ -129,25 +129,52 @@ class EmployeeResource extends Resource
                 Section::make(heading: 'Other Details')
                 ->schema([
                     TextInput::make('TaxIdentificationNumber')
-                    ->label('Tax ID Number')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->unique(ignoreRecord: true),
+                        ->label('Tax ID Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{9}$/') // Validates a 9-digit Tax ID number
+                        ->numeric()
+                        ->placeholder('Enter 9-digit Tax ID')
+                        ->maxLength(9)
+                        ->minLength(9)
+                        ->validationAttribute('Tax ID Number'),
 
-                            TextInput::make('SSSNumber')
-                            ->label('SSS Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
+                    TextInput::make('SSSNumber')
+                        ->label('SSS Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{10}$/') // Validates a 10-digit SSS number
+                        ->numeric()
+                        ->placeholder('Enter 10-digit SSS Number')                        
+                        ->maxLength(10)
+                        ->minLength(10)
+                        ->validationAttribute('SSS Number'),
 
-                            TextInput::make('PhilHealthNumber')
-                            ->label('PhilHealth Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
+                    TextInput::make('PhilHealthNumber')
+                        ->label('PhilHealth Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{12}$/') // Validates a 12-digit PhilHealth number
+                        ->numeric()
+                        ->placeholder('Enter 12-digit PhilHealth Number')
+                        ->maxLength(12)
+                        ->minLength(12)
+                        ->validationAttribute('PhilHealth Number'),
 
-                            TextInput::make('PagibigNumber')
-                            ->label('Pagibig Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
-                ])->columns(4)->collapsible(true),
+                    TextInput::make('PagibigNumber')
+                        ->label('Pagibig Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{12}$/') // Validates a 12-digit Pag-IBIG number
+                        ->placeholder('Enter 12-digit Pag-IBIG Number')
+                        ->numeric()
+                        ->maxLength(12)
+                        ->minLength(12)
+                        ->validationAttribute('Pagibig Number'),
+                ])
+                ->columns(4)
+                ->collapsible(true),
+
 
 
                 Section::make('Contact Number/Status')
@@ -157,7 +184,10 @@ class EmployeeResource extends Resource
                     ->label('Contact Number')
                     ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->unique(ignoreRecord: true)
-                    ->rules('regex:/^[\d]*$/'),
+                    ->rules('regex:/^[\d]*$/')
+                    ->maxLength(11)
+                    ->minLength(11)
+                    ,
 
                     Select::make('status')
                         ->label('Status')

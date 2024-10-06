@@ -14,7 +14,7 @@ class pagibigPolicy
     public function viewAny(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -23,7 +23,7 @@ class pagibigPolicy
     public function view(User $user, pagibig $pagibig): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -31,7 +31,7 @@ class pagibigPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -39,7 +39,7 @@ class pagibigPolicy
      */
     public function update(User $user, pagibig $pagibig): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -47,7 +47,7 @@ class pagibigPolicy
      */
     public function delete(User $user, pagibig $pagibig): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -55,7 +55,7 @@ class pagibigPolicy
      */
     public function restore(User $user, pagibig $pagibig): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -63,6 +63,6 @@ class pagibigPolicy
      */
     public function forceDelete(User $user, pagibig $pagibig): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

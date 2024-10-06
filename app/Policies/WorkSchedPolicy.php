@@ -13,7 +13,7 @@ class WorkSchedPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -21,7 +21,7 @@ class WorkSchedPolicy
      */
     public function view(User $user, WorkSched $workSched): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -29,7 +29,7 @@ class WorkSchedPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -37,7 +37,7 @@ class WorkSchedPolicy
      */
     public function update(User $user, WorkSched $workSched): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -45,7 +45,7 @@ class WorkSchedPolicy
      */
     public function delete(User $user, WorkSched $workSched): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class WorkSchedPolicy
      */
     public function restore(User $user, WorkSched $workSched): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -61,6 +61,6 @@ class WorkSchedPolicy
      */
     public function forceDelete(User $user, WorkSched $workSched): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

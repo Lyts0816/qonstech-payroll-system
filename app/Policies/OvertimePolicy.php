@@ -14,7 +14,7 @@ class OvertimePolicy
     public function viewAny(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -23,7 +23,7 @@ class OvertimePolicy
     public function view(User $user, Overtime $overtime): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -32,7 +32,7 @@ class OvertimePolicy
     public function create(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -41,7 +41,7 @@ class OvertimePolicy
     public function update(User $user, Overtime $overtime): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -50,7 +50,7 @@ class OvertimePolicy
     public function delete(User $user, Overtime $overtime): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -59,7 +59,7 @@ class OvertimePolicy
     public function restore(User $user, Overtime $overtime): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 
     /**
@@ -68,6 +68,6 @@ class OvertimePolicy
     public function forceDelete(User $user, Overtime $overtime): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return false;
     }
 }

@@ -14,7 +14,7 @@ class LoanPolicy
     public function viewAny(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -23,7 +23,7 @@ class LoanPolicy
     public function view(User $user, Loan $loan): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -32,7 +32,7 @@ class LoanPolicy
     public function create(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -41,7 +41,7 @@ class LoanPolicy
     public function update(User $user, Loan $loan): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -50,7 +50,7 @@ class LoanPolicy
     public function delete(User $user, Loan $loan): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -59,7 +59,7 @@ class LoanPolicy
     public function restore(User $user, Loan $loan): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -68,6 +68,6 @@ class LoanPolicy
     public function forceDelete(User $user, Loan $loan): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

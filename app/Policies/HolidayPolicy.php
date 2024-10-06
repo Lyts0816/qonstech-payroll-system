@@ -14,7 +14,7 @@ class HolidayPolicy
     public function viewAny(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -23,7 +23,7 @@ class HolidayPolicy
     public function view(User $user, Holiday $holiday): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -32,7 +32,7 @@ class HolidayPolicy
     public function create(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -41,7 +41,7 @@ class HolidayPolicy
     public function update(User $user, Holiday $holiday): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -50,7 +50,7 @@ class HolidayPolicy
     public function delete(User $user, Holiday $holiday): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -59,7 +59,7 @@ class HolidayPolicy
     public function restore(User $user, Holiday $holiday): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -68,6 +68,6 @@ class HolidayPolicy
     public function forceDelete(User $user, Holiday $holiday): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

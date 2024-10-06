@@ -13,7 +13,7 @@ class WeekPeriodPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -21,7 +21,7 @@ class WeekPeriodPolicy
      */
     public function view(User $user, WeekPeriod $weekPeriod): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -29,7 +29,7 @@ class WeekPeriodPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -37,7 +37,7 @@ class WeekPeriodPolicy
      */
     public function update(User $user, WeekPeriod $weekPeriod): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -45,7 +45,7 @@ class WeekPeriodPolicy
      */
     public function delete(User $user, WeekPeriod $weekPeriod): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class WeekPeriodPolicy
      */
     public function restore(User $user, WeekPeriod $weekPeriod): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -61,6 +61,6 @@ class WeekPeriodPolicy
      */
     public function forceDelete(User $user, WeekPeriod $weekPeriod): bool
     {
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN;
     }
 }

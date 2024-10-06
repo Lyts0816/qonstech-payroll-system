@@ -14,7 +14,7 @@ class OvertimeSchedulePolicy
     public function viewAny(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -23,7 +23,7 @@ class OvertimeSchedulePolicy
     public function view(User $user, OvertimeSchedule $overtimeSchedule): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -32,7 +32,7 @@ class OvertimeSchedulePolicy
     public function create(User $user): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -41,7 +41,7 @@ class OvertimeSchedulePolicy
     public function update(User $user, OvertimeSchedule $overtimeSchedule): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -50,7 +50,7 @@ class OvertimeSchedulePolicy
     public function delete(User $user, OvertimeSchedule $overtimeSchedule): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -59,7 +59,7 @@ class OvertimeSchedulePolicy
     public function restore(User $user, OvertimeSchedule $overtimeSchedule): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 
     /**
@@ -68,6 +68,6 @@ class OvertimeSchedulePolicy
     public function forceDelete(User $user, OvertimeSchedule $overtimeSchedule): bool
     {
         //
-        return $user->role === User::ROLE_ADMINUSER;
+        return $user->role === User::ROLE_ADMIN || $user->isClerk();
     }
 }
