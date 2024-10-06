@@ -23,8 +23,15 @@ class DatabaseSeeder extends Seeder
             'Username' => 'admin',
             'created_at' => now(),
             'updated_at' => now(),
-            
-            'Role' => 1,
+            'role' => 1,
+
+        ]);
+
+        DB::table('roles')->insert([
+            'name' => 'Admin',
+            'Username' => 'admin',
+            'created_at' => now(),
+            'updated_at' => now(),
 
         ]);
     }

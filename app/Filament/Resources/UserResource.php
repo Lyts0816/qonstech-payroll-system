@@ -56,18 +56,16 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(User::with('role')) // Eager load the role relationship
+            ->query(User::with('roles')) // Eager load the role relationship
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('Username')
                     ->searchable(),
-                TextColumn::make('role.name') 
-                    ->searchable(),
+                TextColumn::make('roles.name')
+                    ->searchable(), // Allow searching by role name
             ])
-
-            ->filters(filters: [
-                //
+            ->filters([
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
