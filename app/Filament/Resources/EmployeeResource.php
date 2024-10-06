@@ -243,6 +243,7 @@ class EmployeeResource extends Resource
                 TextColumn::make('SSSNumber')->label('SSS Number'),
                 TextColumn::make('PhilHealthNumber')->label('PhilHealth Number'),
                 TextColumn::make('PagibigNumber')->label('Pagibig Number'),
+                TextColumn::make('assignment'),
 
                 TextColumn::make('project.ProjectName'),
                 TextColumn::make('position.PositionName'),
