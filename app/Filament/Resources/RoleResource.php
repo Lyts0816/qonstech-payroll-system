@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
+use \Illuminate\Support\Collection;
 
 class RoleResource extends Resource
 {
@@ -25,12 +26,12 @@ class RoleResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('name')
-                ->required()
-                ->unique(Role::class, 'name')
+                ->required(fn(string $context) => $context === 'create')
                 ->maxLength(255),
 
             Select::make('modules')
                 ->label('Access Modules')
+                ->required(fn(string $context) => $context === 'create')
                 ->multiple()
                 ->relationship('modules', 'name')
                 ->preload(), // Optional: Load options in advance
@@ -43,14 +44,8 @@ class RoleResource extends Resource
             ->query(Role::with('modules')) // Eager load modules here
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('modules') // Reference the relationship
+                Tables\Columns\TextColumn::make('modules.name') // Reference the relationship
                     ->label('Access Modules')
-                    ->formatStateUsing(function ($state) {
-                        \Log::info($state); // Log the value of $state
-                        return is_array($state) || $state instanceof \Illuminate\Support\Collection
-                            ? implode(', ', $state->pluck('name')->toArray())
-                            : 'No Modules'; // Fallback if $state is not a collection
-                    }),
             ])
             ->filters([
                 //

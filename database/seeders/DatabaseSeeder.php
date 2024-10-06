@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('123'),
             'remember_token' => null,
+            'Username' => 'admin',
             'created_at' => now(),
             'updated_at' => now(),
             
