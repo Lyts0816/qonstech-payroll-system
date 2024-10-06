@@ -2,69 +2,68 @@
 
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Models\{Employee, Attendance, Holiday, WorkSched, Overtime, Earnings, Deduction, Sss, Pagibig, PhilHealth, WeekPeriod, Payslip};
+use Dompdf\Dompdf;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PayslipController extends Controller
 {
-    public function show(Request $request, $EmployeeID)
+
+    public function generatePayslips(Request $request, $projectId)
     {
-        // Find the specific employee based on EmployeeID in the record
+        // Fetch employees based on ProjectID
+        $employees = Employee::where('project_id', $projectId)->get();
+        $records = Payslip::where('ProjectID', $projectId)->get();
 
+        // Initialize Dompdf instance
+        $dompdf = new Dompdf();
 
-        $selectedEmployee = Employee::with('position')->findOrFail($EmployeeID);
+        // Render each employee's payslip
+        $payslipHtml = '';
 
-        $records = Payslip::where('EmployeeID', $EmployeeID)->get();
+        foreach ($employees as $employee) {
+            $newRecord = new \stdClass();
+            $newRecord->EmployeeID = $employee->id;
+            $newRecord->first_name = $employee->first_name;
+            $newRecord->middle_name = $employee->middle_name ?? null;
+            $newRecord->last_name = $employee->last_name;
+            $newRecord->position = $employee->position->PositionName; // Accessing the position relation
+            $newRecord->monthlySalary = $employee->position->MonthlySalary;
+            $newRecord->hourlyRate = $employee->position->HourlyRate;
+            $newRecord->SalaryType = 'OPEN';
+            $newRecord->RegularStatus = $employee->employment_type === 'Regular' ? 'YES' : 'NO';
 
-        if ($records->isEmpty()) {
-            return redirect()->back()->withErrors(['No payslips found for this employee.']);
+            // Calculate earnings and deductions
+            $this->calculateEarningsAndDeductions($newRecord, $records, $employee);
+
+            // Prepare data for the payslip view
+            $data = [
+                'payrollRecords' => collect([$newRecord]), // Return a collection with the single employee record
+                'earnings' => $newRecord->EarningPay,
+                // 'TotalOvertimePay' => $newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25),
+                'sss' => $newRecord->SSSDeduction,
+                'philHealth' => $newRecord->PhilHealthDeduction,
+                'pagIbig' => $newRecord->PagIbigDeduction,
+                'deductions' => $newRecord->DeductionFee,
+                'totalDeductions' => $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee,
+                // 'totalGrossPay' => $newRecord->EarningPay + ($newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)),
+                // 'BasicPay' => $newRecord->TotalHours * $newRecord->hourlyRate,
+                // 'netPay' => $newRecord->EarningPay + ($newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)) - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
+            ];
+
+            // Render the payslip view for each employee with the prepared data
+            $payslipHtml .= view('payslip-template', $data)->render();
         }
 
-        if (!$selectedEmployee) {
-            return redirect()->back()->withErrors(['Employee not found']);
-        }
+        // Load the HTML content
+        $dompdf->loadHtml($payslipHtml);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
 
-        $newRecord = new \stdClass();
-        $newRecord->EmployeeID = $selectedEmployee->id;
-        $newRecord->first_name = $selectedEmployee->first_name;
-        $newRecord->middle_name = $selectedEmployee->middle_name ?? null;
-        $newRecord->last_name = $selectedEmployee->last_name;
-        $newRecord->position = $selectedEmployee->position->PositionName; // Accessing the position relation
-        $newRecord->monthlySalary = $selectedEmployee->position->MonthlySalary;
-        $newRecord->hourlyRate = $selectedEmployee->position->HourlyRate;
-        $newRecord->SalaryType = 'OPEN';
-        $newRecord->RegularStatus = $selectedEmployee->employment_type == 'Regular' ? 'YES' : 'NO';
-
-        // Check payroll frequency
-        $weekPeriod = WeekPeriod::find($request->weekPeriodID);
-        $attendance = $this->getAttendance($weekPeriod, $selectedEmployee, $request, $records);
-
-        $this->calculateAttendanceDetails($attendance, $newRecord, $selectedEmployee);
-
-        // Get Overtime Records
-        $this->calculateOvertime($newRecord);
-
-        // Calculate Earnings and Deductions
-        $this->calculateEarningsAndDeductions($newRecord, $request, $selectedEmployee, $records);
-        // Return the view with the selected employee's payroll record
-        return view('payslip.records', [
-            'payrollRecords' => collect([$newRecord]), // Return a collection with the single employee record
-            'earnings' => $newRecord->EarningPay,
-            'TotalOvertimePay' => $newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25),
-            'sss' => $newRecord->SSSDeduction,
-            'philHealth' => $newRecord->PhilHealthDeduction,
-            'pagIbig' => $newRecord->PagIbigDeduction,
-            'deductions' => $newRecord->DeductionFee,
-            'totalDeductions' => $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee,
-            'totalGrossPay' => $newRecord->EarningPay + ( $newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)),
-            'BasicPay' =>  $newRecord->TotalHours * $newRecord->hourlyRate,
-            'netPay' => $newRecord->EarningPay + ( $newRecord->TotalHours * $newRecord->hourlyRate) + ($newRecord->TotalOvertimeEarnings = $newRecord->TotalOvertimeHours * ($newRecord->hourlyRate * 1.25)) - ($newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction + $newRecord->DeductionFee),
-        ]);
+        // Output the generated PDF to Browser
+        return $dompdf->stream('payslips.pdf', ['Attachment' => false]);
     }
-
-    // Process and calculate attendance hours
     protected function calculateAttendanceDetails($attendance, &$newRecord, $selectedEmployee)
     {
         // Initialize total hours
@@ -123,7 +122,7 @@ class PayslipController extends Controller
 
                     // If not a holiday, calculate regular hours
                     if ($regularHolidayHours == 0 && $specialHolidayHours == 0) {
-                        $hoursWorked += $this->calculateRegularHours($att,$checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array);
+                        $hoursWorked += $this->calculateRegularHours($att, $checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array);
                     }
 
                     // Update newRecord with calculated hours
@@ -139,7 +138,6 @@ class PayslipController extends Controller
         $newRecord->TotalHrsRegularHol = $TotalHrsRegularHol;
         $newRecord->TotalHrsSpecialHol = $TotalHrsSpecialHol;
     }
-
     private function isScheduledDay($workSched, Carbon $attendanceDate)
     {
         // Check if the day of the week matches the work schedule
@@ -184,9 +182,9 @@ class PayslipController extends Controller
         return $hours * $multiplier; // Return adjusted holiday hours
     }
 
-    private function calculateRegularHours($att,$checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array)
+    private function calculateRegularHours($att, $checkInTime, $checkOutTime, $In1Array, $Out1Array, $In2Array, $Out2Array)
     {
-        $TotalHours = 0; 
+        $TotalHours = 0;
 
         $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]); // 8:00 AM
         $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);  // 12:00 PM
@@ -304,19 +302,21 @@ class PayslipController extends Controller
     }
 
 
-
-
-
-    private function calculateEarningsAndDeductions($newRecord, $record, $employee, $records)
+    private function calculateEarningsAndDeductions($newRecord, $records, $employee)
     {
-        // Initialize values
-        // $newRecord->EarningPay = 0;
-        $firstRecord = $records->first();
-        if (!$firstRecord) {
+        // Check if there are any records
+        if ($records->isEmpty()) {
             // Handle case where there are no records
+            $newRecord->EarningPay = 0;
+            $newRecord->DeductionFee = 0;
+            $newRecord->SSSDeduction = 0;
+            $newRecord->PhilHealthDeduction = 0;
+            $newRecord->PagIbigDeduction = 0;
             return;
         }
 
+        // Fetch the first record to get the period ID
+        $firstRecord = $records->first();
 
         // Calculate Earnings
         $earnings = Earnings::where('PeriodID', $firstRecord->weekPeriodID)
@@ -335,25 +335,22 @@ class PayslipController extends Controller
         $newRecord->DeductionFee = $deductions ? $deductions->Amount : 0;
 
         // Fetch SSS, PagIbig, PhilHealth settings
-        $GetSSS = \App\Models\SSS::all();
-        $GetPagibig = \App\Models\PagIbig::all();
-        $GetPhilHealth = \App\Models\PhilHealth::all();
-        $weekPeriod = \App\Models\WeekPeriod::where('id', $firstRecord->weekPeriodID)->first(); // Adjusted to get specific weekPeriod
+        $GetSSS = Sss::all();
+        $GetPagibig = Pagibig::all();
+        $GetPhilHealth = PhilHealth::all();
+        $weekPeriod = WeekPeriod::find($firstRecord->weekPeriodID); // Adjusted to get specific weekPeriod
 
+        // Initialize deductions
         $newRecord->SSSDeduction = 0;
         $newRecord->PhilHealthDeduction = 0;
         $newRecord->PagIbigDeduction = 0;
-        $newRecord->DeductionFee = 0;
 
         // Calculate deductions based on week period category
         if ($weekPeriod) {
-
             // Determine the deduction factor based on the week period type
-            $deductionFactor = ($weekPeriod->Category == 'Kinsenas') ?
-                (($weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena') ? 2 : 1) :
+            $deductionFactor = ($weekPeriod->Category === 'Kinsenas') ?
+                (($weekPeriod->Type === '1st Kinsena' || $weekPeriod->Type === '2nd Kinsena') ? 2 : 1) :
                 4; // Default for Weekly
-
-            // Function to calculate SSS, PagIbig, and PhilHealth deductions
 
             // SSS Deduction calculation
             foreach ($GetSSS as $sss) {
@@ -374,26 +371,15 @@ class PayslipController extends Controller
             // PhilHealth Deduction calculation
             foreach ($GetPhilHealth as $philhealth) {
                 if ($philhealth->MinSalary <= $employee->position->MonthlySalary && $philhealth->MaxSalary >= $employee->position->MonthlySalary) {
-                    if ($philhealth->PremiumRate == '0.00') {
-                        $newRecord->PhilHealthDeduction = $philhealth->ContributionAmount / $deductionFactor; // Fixed contribution amount
-                    } else {
-                        $newRecord->PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->position->MonthlySalary) / $deductionFactor; // Adjusted PhilHealth Deduction
-                    }
+                    $newRecord->PhilHealthDeduction = ($philhealth->PremiumRate === '0.00') ?
+                        $philhealth->ContributionAmount / $deductionFactor :
+                        (($philhealth->PremiumRate / 100) * $employee->position->MonthlySalary) / $deductionFactor; // Adjusted PhilHealth Deduction
                     break; // Exit loop after finding the correct PhilHealth
                 }
             }
 
             // Calculate total deductions and store in DeductionFee
-            $newRecord->DeductionFee = $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction;
+            $newRecord->DeductionFee += $newRecord->SSSDeduction + $newRecord->PagIbigDeduction + $newRecord->PhilHealthDeduction;
         }
     }
-
-    // New private function to handle deduction calculations
-    private function calculateDeductions($newRecord, $employee, $deductionFactor, $GetSSS, $GetPagibig, $GetPhilHealth)
-    {
-        // Initialize deductions to zero
-
-    }
-
-
 }

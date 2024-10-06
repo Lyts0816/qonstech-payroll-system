@@ -49,32 +49,44 @@ class PayslipResource extends Resource
                             ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                             ->options([
                                 'Regular' => 'Regular',
-                                'Non-Regular' => 'Non-Regular',
-                                'Project Based' => 'Project Based',
+                                'Contractual' => 'Contractual'
                             ])
                             ->default(request()->query('employee'))
                             ->reactive()
                             ->afterStateUpdated(function (callable $set, $state) {
-                                // Automatically set PayrollFrequency based on EmployeeStatus
+                                // Set PayrollFrequency based on the selected EmployeeStatus
                                 if ($state === 'Regular') {
                                     $set('PayrollFrequency', 'Kinsenas');
-                                } else if ($state === 'Non-Regular' || $state === 'Project Based') {
+                                } else {
                                     $set('PayrollFrequency', 'Weekly');
                                 }
-
                             }),
-                        Select::make('EmployeeID')
-                            ->label('Select Employee')
-                            ->required()
-                            ->options(
-                                fn($get) =>
-                                Employee::where('employment_type', $get('EmployeeStatus'))
-                                    ->get() // Get all records first
-                                    ->mapWithKeys(function ($employee) {
-                                        return [$employee->id => $employee->first_name . ' ' . $employee->last_name];
-                                    }) // Combine names
-                            )
+
+                        Select::make('assignment')
+                            ->label('Assignment')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options([
+                                'Project-based' => 'Project-based',
+                                'Main Office' => 'Main Office',
+                            ]),
+                        Select::make('ProjectID')
+                            ->label('Project')
+                            ->options(Project::query()->pluck('ProjectName', 'id')->toArray())
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                             ->reactive(),
+
+                        // Select::make('EmployeeID')
+                        //     ->label('Select Employee')
+                        //     ->required()
+                        //     ->options(
+                        //         fn($get) =>
+                        //         Employee::where('employment_type', $get('EmployeeStatus'))
+                        //             ->get() // Get all records first
+                        //             ->mapWithKeys(function ($employee) {
+                        //                 return [$employee->id => $employee->first_name . ' ' . $employee->last_name];
+                        //             }) // Combine names
+                        //     )
+                        //     ->reactive(),
                     ]),
 
                 // PayrollFrequency Select Field
@@ -82,12 +94,20 @@ class PayslipResource extends Resource
                     ->label('Payroll Frequency')
                     ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                     ->options([
-                        'Kinsenas' => 'Kinsenas (Bi-monthly)',
+                        'Kinsenas' => 'Kinsenas',
                         'Weekly' => 'Weekly',
                     ])
                     ->native(false)
-                    ->disabled()
-                    ->reactive(),
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        // Automatically set PayrollFrequency based on EmployeeStatus if it is not set already
+                        if ($state === 'Regular') {
+                            $set('PayrollFrequency', 'Kinsenas');
+                        } else {
+                            $set('PayrollFrequency', 'Weekly');
+                        }
+                    }),
+
 
                 // PayrollDate Select Field
                 Select::make('PayrollDate2')
@@ -197,15 +217,28 @@ class PayslipResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('employee.full_name')
-                    ->label('Employee Name')
-                    ->searchable()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('employee.full_name')
+                //     ->label('Employee Name')
+                //     ->searchable()
+                //     ->sortable(),
+
+
 
                 Tables\Columns\TextColumn::make('EmployeeStatus')
                     ->label('Employee Type')
                     ->searchable()
                     ->sortable(),
+
+                // Tables\Columns\TextColumn::make('assignment')
+                //     ->label('Assignment')
+                //     ->searchable()
+                //     ->sortable(),
+
+                Tables\Columns\TextColumn::make('project.ProjectName')
+                    ->label('Project')
+                    ->searchable()
+                    ->sortable(),
+
 
 
                 Tables\Columns\TextColumn::make('PayrollMonth')
@@ -224,17 +257,12 @@ class PayslipResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                // Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('viewPayslip')
                     ->label('View Payslip')
                     ->icon('heroicon-o-calculator')
                     ->color('info')
-                    ->url(fn($record) => route('payslip-records', ['EmployeeID' => $record->id])) // Pass the employee ID
-                    ->openUrlInNewTab()
-                    ->action(function ($record) {
-                        // Removed action logic as we are only setting the URL
-                    })
-
+                    ->url(fn($record) => route('generate.payslips', ['projectId' => $record->ProjectID])) // Pass the ProjectID
+                    ->openUrlInNewTab(),
 
             ])
             ->bulkActions([
