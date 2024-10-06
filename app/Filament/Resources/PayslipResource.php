@@ -45,35 +45,49 @@ class PayslipResource extends Resource
                         // EmployeeStatus Select Field
                         // EmployeeStatus Select Field
                         Select::make('EmployeeStatus')
-                            ->label('Employee Status')
-                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                            ->options([
-                                'Regular' => 'Regular',
-                                'Contractual' => 'Contractual'
-                            ])
-                            ->default(request()->query('employee'))
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $set, $state) {
-                                // Set PayrollFrequency based on the selected EmployeeStatus
-                                if ($state === 'Regular') {
-                                    $set('PayrollFrequency', 'Kinsenas');
-                                } else {
-                                    $set('PayrollFrequency', 'Weekly');
-                                }
-                            }),
+                        ->label('Employee Status')
+                        ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                        ->options([
+                            'Regular' => 'Regular',
+                            'Contractual' => 'Contractual',
+                        ])
+                        ->default(request()->query('employee'))
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $set, $state) {
+                            // Automatically set PayrollFrequency based on EmployeeStatus
+                            if ($state === 'Regular') {
+                                $set('PayrollFrequency', 'Kinsenas');
+                            } elseif ($state === 'Contractual') {
+                                $set('PayrollFrequency', 'Weekly');
+                            }
+                        }),
 
-                        Select::make('assignment')
-                            ->label('Assignment')
-                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                            ->options([
-                                'Project-based' => 'Project-based',
-                                'Main Office' => 'Main Office',
-                            ]),
-                        Select::make('ProjectID')
-                            ->label('Project')
-                            ->options(Project::query()->pluck('ProjectName', 'id')->toArray())
-                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                            ->reactive(),
+                    // Assignment Select Field
+                    Select::make('assignment')
+                        ->label('Assignment')
+                        ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                        ->options([
+                            'Main Office' => 'Main Office',
+                            'Project Based' => 'Project Based',
+                        ])
+                        ->native(false)
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $set, $state) {
+                            // Clear project selection if assignment is not Project Based
+                            if ($state !== 'Project Based') {
+                                $set('ProjectID', null); // Reset the project selection
+                            }
+                        }),
+
+                    // Project Select Field - only shown if assignment is Project Based
+                    Select::make('ProjectID')
+                        ->label('Project')
+                        ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                        ->options(function () {
+                            // Fetch projects from the database (assuming you have a Project model)
+                            return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
+                        })
+                        ->hidden(fn($get) => $get('assignment') !== 'Project Based'), // Hide if not project based
 
                         // Select::make('EmployeeID')
                         //     ->label('Select Employee')
@@ -229,10 +243,10 @@ class PayslipResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                // Tables\Columns\TextColumn::make('assignment')
-                //     ->label('Assignment')
-                //     ->searchable()
-                //     ->sortable(),
+                Tables\Columns\TextColumn::make('assignment')
+                    ->label('Assignment')
+                    ->searchable()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('project.ProjectName')
                     ->label('Project')
