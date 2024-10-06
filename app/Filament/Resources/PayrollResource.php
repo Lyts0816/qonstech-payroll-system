@@ -807,7 +807,7 @@ class PayrollResource extends Resource
 							// return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $record->id . '.xlsx');
 			
 						}
-						dd($payrollRecords);
+						// dd($payrollRecords);
 						return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $record->EmployeeID . '.xlsx');
 						// } 
 						// else {
