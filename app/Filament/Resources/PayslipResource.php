@@ -6,6 +6,7 @@ use App\Filament\Resources\PayslipResource\Pages;
 use App\Filament\Resources\PayslipResource\RelationManagers;
 use App\Models\Payslip;
 use App\Models\WeekPeriod;
+use App\Models\Payroll;
 use Filament\Forms;
 use Filament\Forms\Form;
 use App\Models\Project;
