@@ -12,6 +12,20 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
+    const ROLE_ADMIN = 'Human Resource';
+
+    const ROLE_VICEPRES = 'Vice President';
+
+    const ROLE_PROJECTCLERK = 'Project Clerk';
+
+    const ROLE_ADMINUSER = 'Admin';
+
+    const ROLES = [
+        self::ROLE_ADMIN => 'Human Resource',
+        self::ROLE_VICEPRES => 'Vice President',
+        self::ROLE_PROJECTCLERK => 'Project Clerk',
+    ];
+
 
     public function canAccessPanel(Panel $panel): bool{
         return true;
@@ -29,7 +43,7 @@ class User extends Authenticatable implements FilamentUser
         'Username',
         'email',
         'password',
-        'Role',
+        'role',
     ];
 
     /**

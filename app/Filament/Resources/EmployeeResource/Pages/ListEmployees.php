@@ -221,6 +221,10 @@ class ListEmployees extends ListRecords
             'Assigned' => Tab::make()->modifyQueryUsing(function ($query){
                 $query->where('status', 'Assigned');
             }),
+
+            'Regular' => Tab::make()->modifyQueryUsing(function ($query){
+                $query->where('employment_type', 'Regular');
+            }),
         ];
     }
 }

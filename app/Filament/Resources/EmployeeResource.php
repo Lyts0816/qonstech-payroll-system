@@ -58,10 +58,7 @@ class EmployeeResource extends Resource
                     ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->rules('regex:/^[^\d]*$/'),
 
-                    TextInput::make('attendance_code')
-                    ->label('Attendance Code')
-                    ->unique(ignoreRecord: true)
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
+
                     ])->columns(3)->collapsible(true),
 
                 Section::make('Address')
@@ -118,53 +115,19 @@ class EmployeeResource extends Resource
 
 								Section::make(heading: 'Employment Details')
                 ->schema([
-                    Select::make('schedule_id')
-                    ->label('Work Schedule')
-										->options(
-											WorkSched::query()
-											->pluck('ScheduleName', 'id')
-											->toArray()
-										)
-                    ->required(fn (string $context) => $context === 'create' || 'edit'),
-
-										Select::make('position_id')
-										->label('Position')
-										->options(
-											Position::query()
-											->pluck('PositionName', 'id')
-											->toArray()
-										)
-										->required(fn (string $context) => $context === 'create' || 'edit'),
-
-									// Select::make('project_id')
-									//     ->label('Project')
-											
-									//     ->relationship('project', 'ProjectName')
-									//     ->native(false)
-									//     ->reactive()
-									//     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
-									//     ,
-
-									// Select::make('schedule_id')
-									//     ->label('Work Schedule')
-											
-									//     ->relationship('schedule', 'ScheduleName')
-									//     ->native(false),
-
-									// Select::make('overtime_id')
-									//     ->label('Overtime')
-									//     ->relationship('overtime', 'Reason')
-									//     ->native(false),
+                        Select::make('position_id')
+                        ->label('Position')
+                        ->options(
+                            Position::query()
+                            ->pluck('PositionName', 'id')
+                            ->toArray()
+                        )
+                        ->required(fn (string $context) => $context === 'create' || 'edit'),
 
                 ])->columns(4)->collapsible(true),
 
                 Section::make(heading: 'Other Details')
                 ->schema([
-                    // Select::make('position_id')
-                    //         ->label('Position')
-                            
-                    //         ->relationship('position', 'PositionName')
-                    //         ->native(false),
                     TextInput::make('TaxIdentificationNumber')
                     ->label('Tax ID Number')
                     ->required(fn (string $context) => $context === 'create' || 'edit')
@@ -184,26 +147,6 @@ class EmployeeResource extends Resource
                             ->label('Pagibig Number')
                             ->required(fn (string $context) => $context === 'create' || 'edit')
                             ->unique(ignoreRecord: true),
-                    // Select::make('project_id')
-                    //     ->label('Project')
-                        
-                    //     ->relationship('project', 'ProjectName')
-                    //     ->native(false)
-                    //     ->reactive()
-                    //     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
-                    //     ,
-
-                    // Select::make('schedule_id')
-                    //     ->label('Work Schedule')
-                        
-                    //     ->relationship('schedule', 'ScheduleName')
-                    //     ->native(false),
-
-                    // Select::make('overtime_id')
-                    //     ->label('Overtime')
-                    //     ->relationship('overtime', 'Reason')
-                    //     ->native(false),
-
                 ])->columns(4)->collapsible(true),
 
 
@@ -317,27 +260,23 @@ class EmployeeResource extends Resource
             ])
 
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // BulkAction::make('assign_to_project')
+                // ->label('Assign to Project')
+                // ->form([
+                //     Select::make('project_id')
+                //         ->label('Project')
+                //         ->relationship('project', 'ProjectName')
+                //         ->required()
+                // ])
+                // ->action(function (array $data, Collection $records) {
+                //     $projectId = $data['project_id'];
 
-                BulkAction::make('assign_to_project')
-                ->label('Assign to Project')
-                ->form([
-                    Select::make('project_id')
-                        ->label('Project')
-                        ->relationship('project', 'ProjectName')
-                        ->required()
-                ])
-                ->action(function (array $data, Collection $records) {
-                    $projectId = $data['project_id'];
-
-                    foreach ($records as $record) {
-                        $record->update(['project_id' => $projectId]);
-                    }
-                })
-                ->deselectRecordsAfterCompletion()
-                ->requiresConfirmation(),
+                //     foreach ($records as $record) {
+                //         $record->update(['project_id' => $projectId]);
+                //     }
+                // })
+                // ->deselectRecordsAfterCompletion()
+                // ->requiresConfirmation(),
 
 
                 BulkAction::make('assign_to_position')
