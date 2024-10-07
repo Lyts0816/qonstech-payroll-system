@@ -16,7 +16,8 @@ use App\Http\Controllers\PayrollController;
 Route::get('/dtr/show', [AttendanceController::class, 'showDtr'])->name('dtr.show');
 use App\Http\Controllers\PayslipController;
 
-Route::get('/generate-payslips/{projectId}', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');// Route::get('/payslip-records/{ProjectID}', [PayslipController::class, 'show'])->name('payslip-records');
+// Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');
+Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');
 
 Route::get('/payroll-report', [PayrollController::class, 'showReport'])->name('payroll-report');
 
