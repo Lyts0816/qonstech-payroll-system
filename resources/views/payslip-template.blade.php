@@ -138,13 +138,13 @@ $src = 'data:image/png;base64,' . $imageData;
                         <tr>
                             <th>Employee Name</th>
                             <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
-                            <th>Regular Status</th>
-                            <td>{{ $employee['RegularStatus'] ?? '' }}</td>
+                            <th>Employment Status</th>
+                            <td>{{ 'Regular' }}</td>
                         </tr>
                         <tr>
                             <th>Position</th>
                             <td>{{ $employee['position'] ?? '' }}</td>
-                            <th>Salary Type</th>
+                            <th>Payroll</th>
                             <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         </tr>
                         <tr>

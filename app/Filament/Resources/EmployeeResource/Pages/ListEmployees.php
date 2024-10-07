@@ -225,6 +225,10 @@ class ListEmployees extends ListRecords
             'Regular' => Tab::make()->modifyQueryUsing(function ($query){
                 $query->where('employment_type', 'Regular');
             }),
+
+            'Main Office' => Tab::make()->modifyQueryUsing(function ($query){
+                $query->where('assignment', 'Main Office');
+            }),
         ];
     }
 }

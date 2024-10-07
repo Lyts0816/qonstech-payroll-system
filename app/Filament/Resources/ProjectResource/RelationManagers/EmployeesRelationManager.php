@@ -52,6 +52,8 @@ class EmployeesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('first_name')
             ->columns([
+                Tables\Columns\TextColumn::make('id'),
+
                 Tables\Columns\TextColumn::make('full_name') 
                 ->label('Name')
                 ->formatStateUsing(fn ($record) => $record->first_name . ' ' . ($record->middle_name ? $record->middle_name . ' ' : '') . $record->last_name)

@@ -14,7 +14,7 @@
 
         .container {
             width: 100%;
-            max-width: 13in;
+            max-width: 14in;
             margin: 10px auto;
             border: 1px solid #000;
             padding: 10px;
@@ -135,6 +135,9 @@
                     {{-- <th rowspan="2">Salary Type</th>
                     <th rowspan="2">Regular Status</th> --}}
                     <th rowspan="2">Regular Hours</th>
+                    <th rowspan="2">Tardiness</th>
+                    <th rowspan="2">Absences</th>
+                    <th rowspan="2">Total Hours</th>
                     <th rowspan="2">O.T Hours</th>
                     {{-- <th rowspan="2">Sunday Hours</th> --}}
                     {{-- <th colspan="2">Holidays</th> --}}
@@ -145,7 +148,7 @@
                     <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
                     {{-- <th rowspan="2">Other Allowance</th> --}}
                     <th rowspan="2">Gross Amount</th>
-                    <th colspan="6">Deductions</th>
+                    <th colspan="7">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
                     <th rowspan="2">NET PAY</th>
                     <th rowspan="2">SIGNATURE</th>
@@ -159,6 +162,7 @@
                     <th>HDMF</th>
                     <th>Total Government Deduction</th>
                     <th>CASH ADVANCES</th>
+                    <th>Loans</th>
                     {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
@@ -172,6 +176,11 @@
                         {{-- <td>{{ $employee['ProjectName'] ?? '' }}</td> --}}
                         <td>P{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
+
+
+                        <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
+                        <td>{{ number_format('0') }}</td>
+                        <td>{{ number_format('0') }}</td>
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
@@ -194,6 +203,9 @@
                         <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
+
+                        <td>P{{ number_format('0') }}</td>
+
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
                         <td>{{ $employee['SIGNATURE'] ?? '' }}</td>
