@@ -19,6 +19,7 @@ class Payslip extends Model
         'TotalEarnings',
         'GrossPay',
         'TotalDeductions',
+        'assignment',
         'NetPay',
         'PayrollDate2',
         'PayrollFrequency',
