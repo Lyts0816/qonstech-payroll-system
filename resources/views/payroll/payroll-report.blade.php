@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payroll Report</title>
+    <title>Payroll Summary Report</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,14 +57,14 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            font-size: 9px;
+            font-size: 10px;
             /* Smaller font size for better fit */
         }
 
         th,
         td {
-            border: 1px solid #000;
-            padding: 2px;
+            border: 2px solid #000;
+            padding: 3px;
             /* Reduced padding to fit more content */
             text-align: center;
         }
@@ -85,7 +85,7 @@
         }
 
         .signatures div {
-            text-align: center;
+            text-align: left;
             width: 30%;
         }
 
@@ -114,9 +114,10 @@
 
                 @endphp
                 @if ($employeeda)
-                    <h1>HRD Raw Payroll Report</h1>
+                    <h1>Payroll Summary Report</h1>
                     <p>Period covered: {{ $employeeda['Period'] ?? '' }}</p>
                     <p class="project-name">{{ $employeeda['ProjectName'] ?? '' }}</p>
+                    
                 @endif
             </div>
             <img src="{{ asset('images/qonstech.png') }}" alt="Company Logo" class="logo">
@@ -128,36 +129,37 @@
                     <th rowspan="2">ID</th>
                     <th rowspan="2">Name</th>
                     <th rowspan="2">Position</th>
-                    <th rowspan="2">Project Site</th>
+                    {{-- <th rowspan="2">Project Site</th> --}}
                     <th rowspan="2">Monthly Salary</th>
                     <th rowspan="2">Hourly Rate</th>
-                    <th rowspan="2">Salary Type</th>
-                    <th rowspan="2">Regular Status</th>
-                    <th rowspan="2">Regular Total Hours</th>
-                    <th rowspan="2">Regular O.T Hours</th>
-                    <th rowspan="2">Sunday Hours</th>
-                    <th colspan="2">Holidays</th>
-                    <th rowspan="2">Paid Amount For Regular Hours (Basic Pay)</th>
-                    <th rowspan="2">Paid Amount For O.T Hours 25%</th>
-                    <th rowspan="2">Paid Amount For Sunday Hours 30%</th>
-                    <th rowspan="2">Paid Amount For Legal Holiday</th>
-                    <th rowspan="2">Paid Amount For Special Holiday 30%</th>
-                    <th rowspan="2">Other Allowance</th>
+                    {{-- <th rowspan="2">Salary Type</th>
+                    <th rowspan="2">Regular Status</th> --}}
+                    <th rowspan="2">Regular Hours</th>
+                    <th rowspan="2">O.T Hours</th>
+                    {{-- <th rowspan="2">Sunday Hours</th> --}}
+                    {{-- <th colspan="2">Holidays</th> --}}
+                    {{-- <th rowspan="2">Paid Amount For Regular Hours (Basic Pay)</th> --}}
+                    {{-- <th rowspan="2">Paid Amount For O.T Hours 25%</th> --}}
+                    {{-- <th rowspan="2">Paid Amount For Sunday Hours 30%</th> --}}
+                    {{-- <th rowspan="2">Paid Amount For Legal Holiday</th>
+                    <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
+                    {{-- <th rowspan="2">Other Allowance</th> --}}
                     <th rowspan="2">Gross Amount</th>
-                    <th colspan="7">Deductions</th>
+                    <th colspan="6">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
                     <th rowspan="2">NET PAY</th>
+                    <th rowspan="2">SIGNATURE</th>
                 </tr>
                 <tr>
-                    <th>Legal Holiday Hours</th>
-                    <th>Special Holiday Hours</th>
+                    {{-- <th>Legal Holiday Hours</th>
+                    <th>Special Holiday Hours</th> --}}
                     <th>TAXES</th>
                     <th>SSS</th>
                     <th>PHIC</th>
                     <th>HDMF</th>
                     <th>Total Government Deduction</th>
                     <th>CASH ADVANCES</th>
-                    <th>Total Office Deduction & Adjustment</th>
+                    {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -167,32 +169,34 @@
                         <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
                         </td>
                         <td>{{ $employee['position'] ?? '' }}</td>
-                        <td>{{ $employee['ProjectName'] ?? '' }}</td>
-                        <td>₱{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
-                        <td>{{ $employee['SalaryType'] ?? '' }}</td>
-                        <td>{{ $employee['RegularStatus'] ?? '' }}</td>
-                        <td>{{ $employee['TotalHours'] ?? 0 }}</td>
+                        {{-- <td>{{ $employee['ProjectName'] ?? '' }}</td> --}}
+                        <td>P{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
+                        {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
+                        <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
+                        <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
                         <td>{{ $employee['TotalOvertimeHours'] ?? 0 }}</td>
-                        <td>{{ $employee['TotalHoursSunday'] ?? 0 }}</td>
-                        <td>{{ $employee['TotalHrsRegularHol'] ?? 0 }}</td>
-                        <td>{{ $employee['TotalHrsSpecialHol'] ?? 0 }}</td>
-                        <td>₱{{ number_format($employee['BasicPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['TotalOvertimePay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['SundayPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format(0, 2) }}</td>
-                        <td>₱{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td>
-                        <td>₱{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
-                        <td>₱{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
+
+                        {{-- <td>{{ $employee['TotalHoursSunday'] ?? 0 }}</td> --}}
+                        {{-- <td>{{ $employee['TotalHrsRegularHol'] ?? 0 }}</td>
+                        <td>{{ $employee['TotalHrsSpecialHol'] ?? 0 }}</td> --}}
+                        {{-- <td>p{{ number_format($employee['BasicPay'] ?? 0, 2) }}</td> --}}
+                        {{-- <td>p{{ number_format($employee['TotalOvertimePay'] ?? 0, 2) }}</td> --}}
+                        {{-- <td>p{{ number_format($employee['SundayPay'] ?? 0, 2) }}</td> --}}
+                        {{-- <td>p{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
+                        <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
+                        {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
+                        <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format(0, 2) }}</td>
+                        <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
+                        {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
+                        <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
+                        <td>{{ $employee['SIGNATURE'] ?? '' }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -201,20 +205,25 @@
         <div class="signatures">
             <div>
                 <p>Prepared by:</p>
+                <p>_______________________</p>
                 <p>ALMA MAE S. GEPELLANO</p>
                 <p>HR OFFICER</p>
             </div>
             <div>
                 <p>Certified Correct by:</p>
+                <p>_______________________</p>
                 <p>Rosimo Jonas</p>
                 <p>VP ADMIN</p>
             </div>
             <div>
                 <p>Approved by:</p>
+                <p>_______________________</p>
                 <p>Mary Jane Villanueva</p>
                 <p>VP FINANCE</p>
             </div>
+            
         </div>
+        <p>Date Generated: {{ now()->format('Y-m-d H:i:s') }}</p>
     </div>
 
     <!-- Export to PDF button -->

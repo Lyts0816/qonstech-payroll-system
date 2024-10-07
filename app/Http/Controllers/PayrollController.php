@@ -15,8 +15,10 @@ class PayrollController extends Controller
         $validator = Validator::make($request->all(), [
             'EmployeeStatus' => 'required|string',
             'assignment' => 'required|string',
-            'ProjectID' => 'nullable|string|integer', // Adjust according to your requirement
+            'ProjectID' => 'nullable|string|integer',
+             // Adjust according to your requirement
         ]);
+        
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -45,6 +47,7 @@ class PayrollController extends Controller
         foreach ($employeesWPosition as $employee) {
             $newRecord = $request->all();
             // dd($employee->first_name, $employee->middle_name, $employee->last_name);
+            
             $newRecord['EmployeeID'] = $employee->id;
             $newRecord['first_name'] = $employee->first_name;
             $newRecord['middle_name'] = $employee->middle_name ?? Null;

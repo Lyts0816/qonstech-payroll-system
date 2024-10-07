@@ -14,6 +14,7 @@ class Payslip extends Model
 
     protected $fillable = [
         'EmployeeID',
+        'assignment',       
         'PayrollDate',
         'TotalEarnings',
         'GrossPay',
@@ -44,6 +45,6 @@ class Payslip extends Model
     }
     public function dates()
     {
-        return $this->hasMany(PayrollDate::class); // Adjust class name if necessary
+        return $this->hasMany(Payroll::class); // Adjust class name if necessary
     }
 }

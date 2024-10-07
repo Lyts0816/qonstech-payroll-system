@@ -37,4 +37,9 @@ class Payroll extends Model
     {
         return $this->belongsTo(Project::class, 'ProjectID');
     }
+
+    public function dates()
+    {
+        return $this->hasMany(Payroll::class);
+    }
 }

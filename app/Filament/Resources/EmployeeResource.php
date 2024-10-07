@@ -247,6 +247,7 @@ class EmployeeResource extends Resource
 
                 TextColumn::make('project.ProjectName'),
                 TextColumn::make('position.PositionName'),
+                TextColumn::make('schedule.ScheduleName'),
                 
 
                 TextColumn::make('contact_number'),
@@ -298,6 +299,7 @@ class EmployeeResource extends Resource
             ])
 
             ->bulkActions([
+
                 // BulkAction::make('assign_to_project')
                 // ->label('Assign to Project')
                 // ->form([
@@ -315,6 +317,10 @@ class EmployeeResource extends Resource
                 // })
                 // ->deselectRecordsAfterCompletion()
                 // ->requiresConfirmation(),
+
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
 
 
                 BulkAction::make('assign_to_position')
@@ -349,6 +355,24 @@ class EmployeeResource extends Resource
 
                     foreach ($records as $record) {
                         $record->update(['overtime_id' => $projectId]);
+                    }
+                })
+                ->deselectRecordsAfterCompletion()
+                ->requiresConfirmation(),
+
+                BulkAction::make('assign_to_worksched')
+                ->label('Assign to WorkSched')
+                ->form([
+                    Select::make('schedule_id')
+                        ->label('Schedules')
+                        ->relationship('schedule', 'ScheduleName')
+                        ->required()
+                ])
+                ->action(function (array $data, Collection $records) {
+                    $schedid = $data['schedule_id'];
+
+                    foreach ($records as $record) {
+                        $record->update(['schedule_id' => $schedid]);
                     }
                 })
                 ->deselectRecordsAfterCompletion()
