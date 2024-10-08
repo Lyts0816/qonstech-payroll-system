@@ -244,8 +244,8 @@ class ReportsController extends Controller
                                 $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
                                 $SSSDeductionMonthly = $sss->EmployeeShare;
 
-                                $newRecord['Deduction'] = $sss->EmployerShare;
-                                $newRecord['DeductionEmployer'] = $SSSDeduction;
+                                $newRecord['Deduction'] = $SSSDeduction;
+                                $newRecord['DeductionEmployer'] = $sss->EmployerShare;
                                 $newRecord['DeductionMonthly'] = $SSSDeductionMonthly;
                                 $newRecord['DeductionTotal'] = $SSSDeduction + $SSSDeductionMonthly;
                                 break;
@@ -314,7 +314,7 @@ class ReportsController extends Controller
         }
         $payslipHtml .= view('report-template', ['payrollData' => $payrollRecords])->render();
         $dompdf->loadHtml($payslipHtml);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('Legal', 'portrait');
         $dompdf->render();
 
 

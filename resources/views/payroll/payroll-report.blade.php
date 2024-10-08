@@ -111,11 +111,20 @@
             <div>
                 @php
                     $employeeda = $payrollData->first();
-
+                    $formattedPeriod = '';
+                    if (isset($employeeda['Period'])) {
+                    $dates = explode(' - ', $employeeda['Period']);
+                    if (count($dates) == 2) {
+                        $startDate = \Carbon\Carbon::parse($dates[0])->format('m-d-Y');
+                        $endDate = \Carbon\Carbon::parse($dates[1])->format('m-d-Y');
+                        $formattedPeriod = "{$startDate} - {$endDate}";
+                    }
+                }
                 @endphp
                 @if ($employeeda)
                     <h1>Payroll Summary Report</h1>
-                    <p>Period covered: {{ $employeeda['Period'] ?? '' }}</p>
+                    {{-- <p>Period covered: {{ $employeeda['Period'] ?? '' }}</p> --}}
+                    <p>Period covered: {{ $formattedPeriod }}</p>
                     <p class="project-name">{{ $employeeda['ProjectName'] ?? '' }}</p>
                     
                 @endif
@@ -235,7 +244,7 @@
             </div>
             
         </div>
-        <p>Date Generated: {{ now()->format('Y-m-d H:i:s') }}</p>
+        <b>Date Generated: {{ now()->format('m-d-Y H:i:s') }}</b>
     </div>
 
     <!-- Export to PDF button -->

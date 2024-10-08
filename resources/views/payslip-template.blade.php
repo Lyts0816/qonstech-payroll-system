@@ -7,9 +7,8 @@
     <title>Payslip</title>
     <style>
         @page {
-            size: A4;
+            size: Legal;
             margin: 10px;
-            /* Minimal margin to fit 4 cards */
         }
 
         body {
@@ -20,14 +19,11 @@
             flex-wrap: wrap;
             justify-content: center;
             font-size: 8px;
-            /* Reduced font size for compact layout */
         }
 
         .container {
             width: 48%;
-            /* Half-width to fit 2 cards per row */
             height: 48%;
-            /* Half-height to fit 2 cards per column */
             border: 1px solid #000;
             padding: 10px;
             box-sizing: border-box;
@@ -41,8 +37,7 @@
             margin-bottom: 5px;
         }
 
-        h2 {
-            text-align: center;
+        h3 {
             font-size: 10px;
             margin-bottom: 5px;
         }
@@ -54,22 +49,15 @@
             margin-bottom: 5px;
         }
 
-        .employee-details table,
-        .earnings table,
-        .deductions table {
+        table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .employee-details th,
-        .employee-details td,
-        .earnings th,
-        .earnings td,
-        .deductions th,
-        .deductions td {
+        th,
+        td {
             border: 1px solid #000;
             padding: 4px;
-            /* Reduced padding for compactness */
             text-align: left;
         }
 
@@ -84,13 +72,6 @@
             width: 48%;
             padding: 5px;
             border: 1px solid #000;
-            font-size: 8px;
-            /* Smaller font */
-        }
-
-        .totals div h3 {
-            text-align: center;
-            margin: 0;
             font-size: 8px;
         }
 
@@ -110,17 +91,15 @@
 
         .logo {
             width: 100px;
-            /* Set width of the logo */
             height: auto;
-            /* Maintain aspect ratio */
         }
     </style>
 </head>
 
 <body>
     <?php
-$imageData = base64_encode(file_get_contents(public_path('images/qonstech.png')));
-$src = 'data:image/png;base64,' . $imageData;
+        $imageData = base64_encode(file_get_contents(public_path('images/qonstech.png')));
+        $src = 'data:image/png;base64,' . $imageData;
     ?>
 
     <div>
@@ -131,27 +110,26 @@ $src = 'data:image/png;base64,' . $imageData;
             <h1>PAYSLIP</h1>
 
             <!-- Employee Details -->
-
             <div class="employee-details">
                 <table>
                     @foreach ($payrollRecords as $employee)
                         <tr>
                             <th>Employee Name</th>
-                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
+                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}</td>
                             <th>Employment Status</th>
-                            <td>{{ 'Regular' }}</td>
+                            <td>Regular</td>
                         </tr>
                         <tr>
                             <th>Position</th>
                             <td>{{ $employee['position'] ?? '' }}</td>
-                            <th>Payroll</th>
+                            <th>Payroll Type</th>
                             <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         </tr>
                         <tr>
                             <th>Monthly Salary</th>
                             <td>PHP&nbsp;{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
                             <th>Hourly Rate</th>
-                            <td>{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
+                            <td>PHP&nbsp;{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -185,12 +163,8 @@ $src = 'data:image/png;base64,' . $imageData;
                             <td>PHP&nbsp;{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
                         </tr>
                         <tr>
-                            <td>Overtime</td>
+                            <td>Overtime Pay</td>
                             <td>PHP&nbsp;{{ number_format($employee['TotalOvertimePay'] ?? 0, 2) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Other Earnings</td>
-                            <td>PHP&nbsp;{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td>
                         </tr>
                         <tr>
                             <td>Other Earnings</td>
@@ -210,11 +184,15 @@ $src = 'data:image/png;base64,' . $imageData;
                 <table>
                     <thead>
                         <tr>
-                            <th>SSS</th>
-                            <td>PHP&nbsp;{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
+                            <th>Description</th>
+                            <th>Amount</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>SSS</td>
+                            <td>PHP&nbsp;{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
+                        </tr>
                         <tr>
                             <td>Philhealth</td>
                             <td>PHP&nbsp;{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
@@ -241,8 +219,6 @@ $src = 'data:image/png;base64,' . $imageData;
             </div>
         </div>
     </div>
-
-
 </body>
 
 </html>

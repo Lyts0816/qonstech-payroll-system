@@ -553,7 +553,7 @@ class PayslipController extends Controller
             $payslipHtml .= view('payslip-template', ['payrollRecords' => $payrollRecords->toArray()])->render();
         }
         $dompdf->loadHtml($payslipHtml);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('Legal', 'portrait');
         $dompdf->render();
 
 
