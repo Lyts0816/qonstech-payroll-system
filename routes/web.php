@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayslipController;
+use App\Http\Controllers\ReportsController;
 
 
 // Other routes...
@@ -17,8 +18,8 @@ use App\Http\Controllers\PayslipController;
 Route::get('/dtr/show', [AttendanceController::class, 'showDtr'])->name('dtr.show');
 
 
-// Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');
 Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');
+Route::get('/generate-reports', [ReportsController::class, 'generateReports'])->name('generate.reports');
 
 Route::get('/payroll-report', [PayrollController::class, 'showReport'])->name('payroll-report');
 
