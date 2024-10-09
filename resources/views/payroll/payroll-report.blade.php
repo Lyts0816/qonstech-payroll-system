@@ -145,7 +145,8 @@
                     <th rowspan="2">Regular Status</th> --}}
                     <th rowspan="2">Regular Hours</th>
                     <th rowspan="2">Tardiness</th>
-                    <th rowspan="2">Absences</th>
+                    <th rowspan="2">Undertime</th>
+                    <!-- <th rowspan="2">Absences</th> -->
                     <th rowspan="2">Total Hours</th>
                     <th rowspan="2">O.T Hours</th>
                     {{-- <th rowspan="2">Sunday Hours</th> --}}
@@ -188,8 +189,8 @@
 
 
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        <td>{{ number_format('0') }}</td>
-                        <td>{{ number_format('0') }}</td>
+                        <td>{{ number_format($employee['TotalTardiness'] ?? 0, 2) }}</td>
+                        <td>{{ number_format($employee['TotalUndertime'] ?? 0, 2) }}</td>
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
