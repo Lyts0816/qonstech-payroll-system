@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use Dompdf\Dompdf;
 use App\Models\Project;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,10 @@ class AttendanceController extends Controller
 
 		$employeeId = $request->query('employee_id');
 		$projectId = $request->query('project_id');
+
+		$dompdf = new Dompdf();
+        // Render each employee's payslip
+        $payslipHtml = '';
 
 
 		// Find the employee by ID
@@ -92,23 +97,23 @@ class AttendanceController extends Controller
 				$attendances['MorningUndertime'] = $underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0;
 				$attendances['AfternoonTardy'] = $tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes : 0;
 				$attendances['AfternoonUndertime'] = $underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0;
+				// $payslipHtml .= view('dtr.show', ['employee' => $employee, 'data' => $data->toArray()])->render();
+				
 			}
+			$payslipHtml .= view('dtr.show', ['employee' => $employee, 'data' => $data->toArray()])->render();
 		}
+		$dompdf->loadHtml($payslipHtml);
+        $dompdf->setPaper('Legal', 'portrait');
+        $dompdf->render();
+
+		return $dompdf->stream('Dtr.pdf', ['Attachment' => false]);
 		// dd($data);
-		// Return the view with the employee and DTR data
-		return view('dtr.show', compact('employee', 'data'));
+		// return view('dtr.show', compact('employee', 'data'));
 	}
 
 	private function getDTRData($employeeId)
 	{
-		// Replace this with your actual logic to fetch DTR records from the database
-		return []; // Placeholder for DTR data
+		return []; 
 	}
-
-	//     // Get the employee ID from the request
-	//     $employeeId = $request->input('employee_id');
-	//     if (!$employeeId) {
-	//         return redirect()->back()->withErrors(['error' => 'Please select an employee to view the DTR.']);
-	//     }
 
 }

@@ -26,7 +26,7 @@ class AttendanceResource extends Resource
 {
     protected static ?string $model = Attendance::class;
     protected static ?string $navigationIcon = 'heroicon-s-view-columns';
-    protected static ?string $title = 'Attendance';  
+    protected static ?string $title = 'Attendance';
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -56,119 +56,82 @@ class AttendanceResource extends Resource
             ->recordUrl(function ($record) {
                 return null;
             })
-            ->filters([
-                // Employee select filter
-                // Filter::make('employee_id')
-                // ->form([
-                //     Forms\Components\Select::make('selectedEmployeeId')
-                //         ->label('Select Employee')
-                //         ->options(Employee::all()->pluck('full_name', 'id'))
-                //         ->extraAttributes([
-                //             'class' => 'h-12 text-lg',
-                //             'style' => 'width: 110%;'
-                //         ])
-                //         ->required(),
-                // ])
-                // ->query(
-                //     function (Builder $query, array $data) {
-                //         // Store the selected employee_id in the session
-                //         if (!empty($data['selectedEmployeeId'])) { // Use the updated field name
-                //             Session::put('selected_employee_id', $data['selectedEmployeeId']); // Update the session
-                //             // Filter the query based on the selected employee_id
-                //             return $query->where('employee_id', $data['selectedEmployeeId']); // Use the updated field name
-                //         }
-                //         return $query; // Return the original query if no employee_id
-                //     }
-                // ),
-                    // ->query(
-                    //     fn(Builder $query, array $data) =>
-                    //     !empty ($data['employee_id']) ? $query->where('employee_id', $data['employee_id']) : null
-                    // ),
-										// Combine Employee and Project select filters in the same grid layout
-									Filter::make('combined_filters')
-									->form([
-											Forms\Components\Grid::make()
-													->schema([
-															Forms\Components\Select::make('selectedEmployeeId')
-																	->label('Select Employee')
-																	->options(Employee::all()->pluck('full_name', 'id'))
-																	->extraAttributes(['class' => 'h-12 text-lg', 'style' => 'width: 100%;'])
-																	->required(),
+            ->filters(
+                [
+                    Filter::make('employee_filter')
+                        ->form([
+                            Forms\Components\Grid::make()
+                                ->schema([
+                                    Forms\Components\Select::make('selectedEmployeeId')
+                                        ->label('Select Employee')
+                                        ->options(Employee::all()->pluck('full_name', 'id'))
+                                        ->extraAttributes(['class' => 'h-12 text-lg', 'style' => 'width: 100%;'])
+                                        ->required(),
 
-															Forms\Components\Select::make('selectedProjectId')
-																	->label('Select Project')
-																	->options(Project::all()->pluck('ProjectName', 'id'))
-																	->extraAttributes(['class' => 'h-12 text-lg', 'style' => 'width: 100%;'])
-																	->required(),
-													])
-													->columns(2), // Set to 2 columns for side-by-side display
-									])
-									->query(
-											function (Builder $query, array $data) {
-													if (!empty($data['selectedEmployeeId'])) {
-															Session::put('selected_employee_id', $data['selectedEmployeeId']);
-															$query->where('employee_id', $data['selectedEmployeeId']);
-													}
-													if (!empty($data['selectedProjectId'])) {
-															Session::put('selected_project_id', $data['selectedProjectId']);
-															$query->where('ProjectID', $data['selectedProjectId']); // Make sure to use project_id for filtering
-													}
-													return $query;
-											}
-									),
 
-                // Date range filter with two columns
-                Filter::make('date_range')
-                    ->form([
-                        Forms\Components\Grid::make()
-                            ->schema([
-                                Forms\Components\TextInput::make('start_date')
-                                    ->label('Start Date')
-                                    ->type('date')
-                                    ->default(now()->startOfMonth()->toDateString())
-                                    ->extraAttributes(['style' => 'width: 125%;']),
-                                Forms\Components\TextInput::make('end_date')
-                                    ->label('End Date')
-                                    ->type('date')
-                                    ->default(now()->endOfMonth()->toDateString())
-                                    ->extraAttributes(['style' => 'width: 125%;']),
-                            ])
-                            ->columns(2), // Set to 2 columns for side-by-side display
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data) =>
-                        !empty ($data['start_date']) && !empty ($data['end_date']) ?
-                        $query->whereBetween('Date', [$data['start_date'], $data['end_date']]) : null
-                    ),
-                // Filter::make('project')
-                //     ->form([
-                //         Forms\Components\Grid::make()
-                //             ->schema([
-								// 							Forms\Components\Select::make('selectedProjectId')
-								// 							->label('Select Project')
-								// 							->options(Project::all()->pluck('ProjectName', 'id'))
-								// 							->extraAttributes([
-								// 									'class' => 'h-12 text-lg',
-								// 									'style' => 'width: 110%;'
-								// 							])
-								// 							->required(),
-                //             ])
-                //             ->columns(2), // Set to 2 columns for side-by-side display
-                //     ])
-                //     ->query(
-								// 			function (Builder $query, array $data) {
-                //         // Store the selected employee_id in the session
-                //         if (!empty($data['selectedProjectId'])) { // Use the updated field name
-                //             Session::put('selected_project_id', $data['selectedProjectId']); // Update the session
-                //             // Filter the query based on the selected employee_id
-                //             return $query->where('employee_id', $data['selectedProjectId']); // Use the updated field name
-                //         }
-                //         return $query; // Return the original query if no employee_id
-                //     }
-                //     ),
-            ], 
+                                ])
+                                ->columns(1),
+                        ])
+                        ->query(
+                            function (Builder $query, array $data) {
+                                if (!empty($data['selectedEmployeeId'])) {
+                                    Session::put('selected_employee_id', $data['selectedEmployeeId']);
+                                    $query->where('employee_id', $data['selectedEmployeeId']);
+                                }
 
-            layout: FiltersLayout::AboveContent)
+                                return $query;
+                            }
+                        ),
+
+                    Filter::make('project_filter')
+                        ->form([
+                            Forms\Components\Grid::make()
+                                ->schema([
+                                    Forms\Components\Select::make('selectedProjectId')
+                                        ->label('Select Project')
+                                        ->options(Project::all()->pluck('ProjectName', 'id'))
+                                        ->extraAttributes(['class' => 'h-12 text-lg', 'style' => 'width: 100%;'])
+                                        ->required(),
+                                ])
+                                ->columns(1),
+                        ])
+                        ->query(
+                            function (Builder $query, array $data) {
+                                if (!empty($data['selectedProjectId'])) {
+                                    Session::put('selected_project_id', $data['selectedProjectId']);
+                                    $query->where('ProjectID', $data['selectedProjectId']); // Make sure to use project_id for filtering
+                                }
+                                return $query;
+                            }
+                        ),
+
+                    // Date range filter with two columns
+                    Filter::make('date_range')
+                        ->form([
+                            Forms\Components\Grid::make()
+                                ->schema([
+                                    Forms\Components\TextInput::make('start_date')
+                                        ->label('Start Date')
+                                        ->type('date')
+                                        ->default(now()->startOfMonth()->toDateString())
+                                        ->extraAttributes(['style' => 'width: 125%;']),
+                                    Forms\Components\TextInput::make('end_date')
+                                        ->label('End Date')
+                                        ->type('date')
+                                        ->default(now()->endOfMonth()->toDateString())
+                                        ->extraAttributes(['style' => 'width: 125%;']),
+                                ])
+                                ->columns(2),
+                        ])
+                        ->query(
+                            fn(Builder $query, array $data) =>
+                            !empty ($data['start_date']) && !empty ($data['end_date']) ?
+                            $query->whereBetween('Date', [$data['start_date'], $data['end_date']]) : null
+                        ),
+                ],
+
+                layout: FiltersLayout::AboveContent
+            )
             ->headerActions([
                 Action::make('viewDtr')
                     ->label('View DTR')
