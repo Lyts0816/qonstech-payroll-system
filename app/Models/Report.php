@@ -5,17 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
-class Payslip extends Model
+class Report extends Model
 {
     use HasFactory;
-
-    protected $table = 'payslips';
-
     protected $fillable = [
         'EmployeeID',
-        'assignment',       
         'PayrollDate',
+        'ReportType',
         'TotalEarnings',
         'GrossPay',
         'TotalDeductions',
@@ -46,6 +42,6 @@ class Payslip extends Model
     }
     public function dates()
     {
-        return $this->hasMany(Payroll::class); // Adjust class name if necessary
+        return $this->hasMany(PayrollDate::class); // Adjust class name if necessary
     }
 }

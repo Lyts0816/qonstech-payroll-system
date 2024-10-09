@@ -251,6 +251,20 @@ class PayrollResource extends Resource
 							$query->where('id', $data['value']);
 						});
 					}),
+
+				// SelectFilter::make('projectName')
+				// 	->label('Select Project')
+				// 	->options(Project::all()->pluck('ProjectName', 'id'))
+				// 	->query(function (Builder $query, array $data) {
+				// 		if (empty($data['value'])) {
+				// 			return $query;
+				// 		}
+				// 		return $query->whereHas('employee.project', function (Builder $query) use ($data) {
+				// 			$query->where('id', $data['value']);
+				// 		});
+				// 	}),
+
+					
 			], layout: FiltersLayout::AboveContent)
 			->actions([
 				Tables\Actions\EditAction::make(),

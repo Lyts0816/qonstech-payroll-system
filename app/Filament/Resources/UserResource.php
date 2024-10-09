@@ -32,37 +32,38 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->required(fn(string $context) => $context === 'create')
-                    ->unique(ignoreRecord: true)
                     ->string()->rules('regex:/^[^\d]*$/'),
 
-                // TextInput::make('Username')
-                // ->required(fn (string $context) => $context === 'create')
-                // ->unique(ignoreRecord: true),
                 TextInput::make('email')
                     ->required(fn(string $context) => $context === 'create')
                     ->unique(ignoreRecord: true),
 
-                Select::make('Role') // Field name
+                Select::make('role') // Field name
                     ->label('Role')
-                    ->options(Role::pluck('name', 'id')) // Load roles from the database
-                    ->required(fn(string $context) => $context === 'create'), // Required when creating
+                    ->options([
+                        'Vice President' => 'Vice President',
+                        'Project Clerk' => 'Project Clerk',
+                        'Human Resource' => 'Human Resource',
+                        'Admin Vice President' => 'Admin Vice President',
+                        'Finance Vice President' => 'Finance Vice President',
+                    ]), 
 
-
-
-                TextInput::make('password')->password()->required(fn(string $context) => $context === 'create'),
+                TextInput::make('password')
+                ->password()
+                ->required(fn(string $context) => $context === 'create'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->query(User::with('roles')) // Eager load the role relationship
+            // ->query(User::with('roles')) // Eager load the role relationship
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('Username')
+                TextColumn::make('email')
                     ->searchable(),
-                TextColumn::make('roles.name')
+                TextColumn::make('roles')
                     ->searchable(), // Allow searching by role name
             ])
             ->filters([

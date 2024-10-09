@@ -12,9 +12,42 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
+    const ROLE_ADMIN = 'Human Resource';
+
+    const ROLE_VICEPRES = 'Vice President';
+
+    const ROLE_PROJECTCLERK = 'Project Clerk';
+
+    const ROLE_ADMINUSER = 'Admin Vice President';
+
+    const ROLE_FIVP = 'Finance Vice President';
+    
+
+    const ROLES = [
+        // self::ROLE_ADMIN => 'Human Resource',
+        self::ROLE_VICEPRES => 'Vice President',
+        self::ROLE_PROJECTCLERK => 'Project Clerk',
+    ];
+
+    public function isCLerk(){
+        return $this->role === self::ROLE_PROJECTCLERK;
+    } 
+    
 
     public function canAccessPanel(Panel $panel): bool{
         return true;
+    }
+
+    public function isAdmin(){
+        return $this->role === self::ROLE_ADMINUSER || $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isAdVP(){
+        return $this->role === self::ROLE_ADMINUSER;
+    }
+
+    public function isFiVp(){
+        return $this->role === self::ROLE_FIVP;
     }
 
     use HasFactory, Notifiable;
@@ -29,7 +62,7 @@ class User extends Authenticatable implements FilamentUser
         'Username',
         'email',
         'password',
-        'Role',
+        'role',
     ];
 
     /**
@@ -41,11 +74,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
-     // Define the relationship to the Role model
-     public function roles()
-     {
-        return $this->belongsTo(Role::class, 'id');// Assuming role_id exists in the users table
-     }
+     
     /**
      * Get the attributes that should be cast.
      *
@@ -57,5 +86,11 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    public function roles()
+    {
+        return $this->belongsTo(Role::class);
     }
 }

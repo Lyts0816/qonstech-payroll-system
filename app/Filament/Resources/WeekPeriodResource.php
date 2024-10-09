@@ -121,8 +121,8 @@ class WeekPeriodResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('StartDate')->label('Start Date')->sortable(),
-                Tables\Columns\TextColumn::make('EndDate')->label('End Date')->sortable(),
+                Tables\Columns\TextColumn::make('StartDate')->label('Start Date')->date('m, d, Y')->sortable(),
+                Tables\Columns\TextColumn::make('EndDate')->label('End Date')->date('m, d, Y')->sortable(),
                 Tables\Columns\TextColumn::make('Month')->sortable(),
                 Tables\Columns\TextColumn::make('Year')->sortable(),
                 Tables\Columns\TextColumn::make('Category'),

@@ -16,20 +16,18 @@ class DatabaseSeeder extends Seeder
     {
         DB::table('users')->insert([
             'name' => 'John Doe',
-            'email' => 'mackmondejar@gmail.com',
+            'email' => 'macenzer@gmail.com',
             'email_verified_at' => now(),
             'password' => bcrypt('123'),
             'remember_token' => null,
-            'Username' => 'admin',
             'created_at' => now(),
             'updated_at' => now(),
-            'role' => 1,
+            'role' => 2,
 
         ]);
 
         DB::table('roles')->insert([
-            'name' => 'Admin',
-            'Username' => 'admin',
+            'name' => 'AdminTest',
             'created_at' => now(),
             'updated_at' => now(),
 

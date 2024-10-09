@@ -1,4 +1,13 @@
 <?php
+
+$mysqlConfig = [
+    'host' => 'localhost',
+    'dbname' => 'payroll-master',
+    'username' => 'root',
+    'password' => ''
+];
+
+
 $Employee_ID = $_POST['Employee_ID'] ?? null;
 $Checkin_One = $_POST['Checkin_One'] ?? null;
 $Date = date('Y-m-d'); // Get the current date

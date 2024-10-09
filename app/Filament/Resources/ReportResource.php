@@ -2,19 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PayslipResource\Pages;
-use App\Filament\Resources\PayslipResource\RelationManagers;
-use App\Models\Payslip;
-use App\Models\WeekPeriod;
-use App\Models\Payroll;
+use App\Filament\Resources\ReportResource\Pages;
+use App\Filament\Resources\ReportResource\RelationManagers;
+use App\Models\Report;
 use Filament\Forms;
 use Filament\Forms\Form;
-use App\Models\Project;
 use Filament\Resources\Resource;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\WeekPeriod;
+use App\Models\Project;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
@@ -25,15 +26,13 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Employee;
 use Carbon\Carbon;
 use DateTime;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\ButtonAction;
 
-class PayslipResource extends Resource
+class ReportResource extends Resource
 {
-    protected static ?string $model = Payslip::class;
+    protected static ?string $model = Report::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -45,6 +44,28 @@ class PayslipResource extends Resource
                     ->schema([
                         // EmployeeStatus Select Field
                         // EmployeeStatus Select Field
+                        Select::make('ReportType')
+                            ->label('ReportType')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options([
+
+                                'SSS Contribution' => 'SSS Contribution',
+                                'Philhealth Contribution' => 'Philhealth Contribution',
+                                'Pagibig Contribution' => 'Pagibig Contribution',
+                                'Loan' => 'Loan',
+                                'Tax' => 'Tax',
+                            ])
+                            ->default(request()->query('employee'))
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                // Automatically set PayrollFrequency based on EmployeeStatus
+                                if ($state === 'Regular') {
+                                    $set('PayrollFrequency', 'Kinsenas');
+                                } elseif ($state === 'Contractual') {
+                                    $set('PayrollFrequency', 'Weekly');
+                                }
+                            }),
+
                         Select::make('EmployeeStatus')
                             ->label('Employee Status')
                             ->required(fn(string $context) => $context === 'create' || $context === 'edit')
@@ -89,19 +110,6 @@ class PayslipResource extends Resource
                                 return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
                             })
                             ->hidden(fn($get) => $get('assignment') !== 'Project Based'), // Hide if not project based
-
-                        // Select::make('EmployeeID')
-                        //     ->label('Select Employee')
-                        //     ->required()
-                        //     ->options(
-                        //         fn($get) =>
-                        //         Employee::where('employment_type', $get('EmployeeStatus'))
-                        //             ->get() // Get all records first
-                        //             ->mapWithKeys(function ($employee) {
-                        //                 return [$employee->id => $employee->first_name . ' ' . $employee->last_name];
-                        //             }) // Combine names
-                        //     )
-                        //     ->reactive(),
                     ]),
 
                 // PayrollFrequency Select Field
@@ -232,29 +240,25 @@ class PayslipResource extends Resource
     {
         return $table
             ->columns([
-                // Tables\Columns\TextColumn::make('employee.full_name')
-                //     ->label('Employee Name')
-                //     ->searchable()
-                //     ->sortable(),
-
-
+                Tables\Columns\TextColumn::make('ReportType')
+                ->label('Report Type')
+                ->searchable()
+                ->sortable(),
 
                 Tables\Columns\TextColumn::make('EmployeeStatus')
                     ->label('Employee Type')
                     ->searchable()
                     ->sortable(),
 
-                // Tables\Columns\TextColumn::make('assignment')
-                //     ->label('Assignment')
-                //     ->searchable()
-                //     ->sortable(),
+                Tables\Columns\TextColumn::make('assignment')
+                    ->label('Assignment')
+                    ->searchable()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('project.ProjectName')
                     ->label('Project')
                     ->searchable()
                     ->sortable(),
-
-
 
                 Tables\Columns\TextColumn::make('PayrollMonth')
                     ->Label('Payroll Month'),
@@ -272,11 +276,11 @@ class PayslipResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('viewPayslip')
-                    ->label('View Payslip')
+                Tables\Actions\Action::make('generateReport')
+                    ->label('Generate Report')
                     ->icon('heroicon-o-calculator')
                     ->color('info')
-                    ->url(fn($record) => route('generate.payslips', $record->toArray())) // Pass the ProjectID
+                    ->url(fn($record) => route('generate.reports', $record->toArray()))
                     ->openUrlInNewTab(),
 
             ])
@@ -286,33 +290,6 @@ class PayslipResource extends Resource
                 ]),
             ]);
     }
-
-    /**
-     * Example payroll calculation method.
-     *
-     * @param Payslip|array $data
-     * @return float
-     */
-    protected static function calculateNetPay($data)
-    {
-        // Implement your payroll calculation logic here.
-        // This is a dummy implementation.
-        // Replace with your actual calculation logic.
-        if ($data instanceof Payroll) {
-            // If $data is a Payroll model instance
-            return $data->GrossPay - $data->TotalDeductions;
-        } elseif (is_array($data)) {
-            // If $data is an array from the form
-            // Example calculation based on form data
-            // Adjust as necessary
-            $grossPay = isset($data['GrossPay']) ? floatval($data['GrossPay']) : 0;
-            $totalDeductions = isset($data['TotalDeductions']) ? floatval($data['TotalDeductions']) : 0;
-            return $grossPay - $totalDeductions;
-        }
-
-        return 0;
-    }
-
 
     public static function getRelations(): array
     {
@@ -324,9 +301,9 @@ class PayslipResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPayslips::route('/'),
-            'create' => Pages\CreatePayslip::route('/create'),
-            'edit' => Pages\EditPayslip::route('/{record}/edit'),
+            'index' => Pages\ListReports::route('/'),
+            'create' => Pages\CreateReport::route('/create'),
+            'edit' => Pages\EditReport::route('/{record}/edit'),
         ];
     }
 }

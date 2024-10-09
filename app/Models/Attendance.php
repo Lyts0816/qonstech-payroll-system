@@ -27,6 +27,8 @@ class Attendance extends Model
 {
     return $this->belongsTo(Employee::class, 'Employee_ID');
 }
-
-
+    // public function getDateAttribute($value)
+    // {
+    //     return \Carbon\Carbon::parse($value)->format('m-d-Y');
+    // }
 }

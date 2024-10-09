@@ -24,6 +24,7 @@ class Employees extends BaseWidget
                 Employee::query()->where('status', 'Available')
             )
             ->columns([
+                Tables\Columns\TextColumn::make('id'),
                 Tables\Columns\TextColumn::make('full_name') 
                 ->label('Name')
                 ->formatStateUsing(fn ($record) => $record->first_name . ' ' . ($record->middle_name ? $record->middle_name . ' ' : '') . $record->last_name)

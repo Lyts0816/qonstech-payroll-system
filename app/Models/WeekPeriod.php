@@ -21,9 +21,19 @@ class WeekPeriod extends Model
         'Type',
     ];
 
-		public function getTypeWithMonthAttribute()
-{
-    $monthName = DateTime::createFromFormat('!m', $this->Month)->format('F');
-    return "{$this->Type} - {$monthName}";
-}
+	public function getTypeWithMonthAttribute()
+    {
+        $monthName = DateTime::createFromFormat('!m', $this->Month)->format('F');
+        return "{$this->Type} - {$monthName}";
+    }
+
+    // public function getStartDateAttribute($value)
+    // {
+    //     return \Carbon\Carbon::parse($value)->format('m-d-Y');
+    // }
+
+    // public function getEndDateAttribute($value)
+    // {
+    //     return \Carbon\Carbon::parse($value)->format('m-d-Y');
+    // }
 }

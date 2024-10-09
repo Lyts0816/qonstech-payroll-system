@@ -58,10 +58,7 @@ class EmployeeResource extends Resource
                     ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->rules('regex:/^[^\d]*$/'),
 
-                    TextInput::make('attendance_code')
-                    ->label('Attendance Code')
-                    ->unique(ignoreRecord: true)
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
+
                     ])->columns(3)->collapsible(true),
 
                 Section::make('Address')
@@ -118,93 +115,66 @@ class EmployeeResource extends Resource
 
 								Section::make(heading: 'Employment Details')
                 ->schema([
-                    Select::make('schedule_id')
-                    ->label('Work Schedule')
-										->options(
-											WorkSched::query()
-											->pluck('ScheduleName', 'id')
-											->toArray()
-										)
-                    ->required(fn (string $context) => $context === 'create' || 'edit'),
-
-										Select::make('position_id')
-										->label('Position')
-										->options(
-											Position::query()
-											->pluck('PositionName', 'id')
-											->toArray()
-										)
-										->required(fn (string $context) => $context === 'create' || 'edit'),
-
-									// Select::make('project_id')
-									//     ->label('Project')
-											
-									//     ->relationship('project', 'ProjectName')
-									//     ->native(false)
-									//     ->reactive()
-									//     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
-									//     ,
-
-									// Select::make('schedule_id')
-									//     ->label('Work Schedule')
-											
-									//     ->relationship('schedule', 'ScheduleName')
-									//     ->native(false),
-
-									// Select::make('overtime_id')
-									//     ->label('Overtime')
-									//     ->relationship('overtime', 'Reason')
-									//     ->native(false),
+                        Select::make('position_id')
+                        ->label('Position')
+                        ->options(
+                            Position::query()
+                            ->pluck('PositionName', 'id')
+                            ->toArray()
+                        )
+                        ->required(fn (string $context) => $context === 'create' || 'edit'),
 
                 ])->columns(4)->collapsible(true),
 
                 Section::make(heading: 'Other Details')
                 ->schema([
-                    // Select::make('position_id')
-                    //         ->label('Position')
-                            
-                    //         ->relationship('position', 'PositionName')
-                    //         ->native(false),
                     TextInput::make('TaxIdentificationNumber')
-                    ->label('Tax ID Number')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->unique(ignoreRecord: true),
+                        ->label('Tax ID Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{9}$/') // Validates a 9-digit Tax ID number
+                        ->numeric()
+                        ->placeholder('Enter 9-digit Tax ID')
+                        ->maxLength(9)
+                        ->minLength(9)
+                        ->validationAttribute('Tax ID Number'),
 
-                            TextInput::make('SSSNumber')
-                            ->label('SSS Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
+                    TextInput::make('SSSNumber')
+                        ->label('SSS Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{10}$/') // Validates a 10-digit SSS number
+                        ->numeric()
+                        ->placeholder('Enter 10-digit SSS Number')                        
+                        ->maxLength(10)
+                        ->minLength(10)
+                        ->validationAttribute('SSS Number'),
 
-                            TextInput::make('PhilHealthNumber')
-                            ->label('PhilHealth Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
+                    TextInput::make('PhilHealthNumber')
+                        ->label('PhilHealth Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{12}$/') // Validates a 12-digit PhilHealth number
+                        ->numeric()
+                        ->placeholder('Enter 12-digit PhilHealth Number')
+                        ->maxLength(12)
+                        ->minLength(12)
+                        ->validationAttribute('PhilHealth Number'),
 
-                            TextInput::make('PagibigNumber')
-                            ->label('Pagibig Number')
-                            ->required(fn (string $context) => $context === 'create' || 'edit')
-                            ->unique(ignoreRecord: true),
-                    // Select::make('project_id')
-                    //     ->label('Project')
-                        
-                    //     ->relationship('project', 'ProjectName')
-                    //     ->native(false)
-                    //     ->reactive()
-                    //     ->afterStateUpdated(fn ($state, callable $set) => $set('status', $state ? 'Assigned' : 'Available'))
-                    //     ,
+                    TextInput::make('PagibigNumber')
+                        ->label('Pagibig Number')
+                        ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                        ->unique(ignoreRecord: true)
+                        ->regex('/^[0-9]{12}$/') // Validates a 12-digit Pag-IBIG number
+                        ->placeholder('Enter 12-digit Pag-IBIG Number')
+                        ->numeric()
+                        ->maxLength(12)
+                        ->minLength(12)
+                        ->validationAttribute('Pagibig Number'),
+                ])
+                ->columns(4)
+                ->collapsible(true),
 
-                    // Select::make('schedule_id')
-                    //     ->label('Work Schedule')
-                        
-                    //     ->relationship('schedule', 'ScheduleName')
-                    //     ->native(false),
-
-                    // Select::make('overtime_id')
-                    //     ->label('Overtime')
-                    //     ->relationship('overtime', 'Reason')
-                    //     ->native(false),
-
-                ])->columns(4)->collapsible(true),
 
 
                 Section::make('Contact Number/Status')
@@ -214,7 +184,10 @@ class EmployeeResource extends Resource
                     ->label('Contact Number')
                     ->required(fn (string $context) => $context === 'create' || 'edit')
                     ->unique(ignoreRecord: true)
-                    ->rules('regex:/^[\d]*$/'),
+                    ->rules('regex:/^[\d]*$/')
+                    ->maxLength(11)
+                    ->minLength(11)
+                    ,
 
                     Select::make('status')
                         ->label('Status')
@@ -274,6 +247,7 @@ class EmployeeResource extends Resource
 
                 TextColumn::make('project.ProjectName'),
                 TextColumn::make('position.PositionName'),
+                TextColumn::make('schedule.ScheduleName'),
                 
 
                 TextColumn::make('contact_number'),
@@ -325,27 +299,28 @@ class EmployeeResource extends Resource
             ])
 
             ->bulkActions([
+
+                // BulkAction::make('assign_to_project')
+                // ->label('Assign to Project')
+                // ->form([
+                //     Select::make('project_id')
+                //         ->label('Project')
+                //         ->relationship('project', 'ProjectName')
+                //         ->required()
+                // ])
+                // ->action(function (array $data, Collection $records) {
+                //     $projectId = $data['project_id'];
+
+                //     foreach ($records as $record) {
+                //         $record->update(['project_id' => $projectId]);
+                //     }
+                // })
+                // ->deselectRecordsAfterCompletion()
+                // ->requiresConfirmation(),
+
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-
-                BulkAction::make('assign_to_project')
-                ->label('Assign to Project')
-                ->form([
-                    Select::make('project_id')
-                        ->label('Project')
-                        ->relationship('project', 'ProjectName')
-                        ->required()
-                ])
-                ->action(function (array $data, Collection $records) {
-                    $projectId = $data['project_id'];
-
-                    foreach ($records as $record) {
-                        $record->update(['project_id' => $projectId]);
-                    }
-                })
-                ->deselectRecordsAfterCompletion()
-                ->requiresConfirmation(),
 
 
                 BulkAction::make('assign_to_position')
@@ -380,6 +355,24 @@ class EmployeeResource extends Resource
 
                     foreach ($records as $record) {
                         $record->update(['overtime_id' => $projectId]);
+                    }
+                })
+                ->deselectRecordsAfterCompletion()
+                ->requiresConfirmation(),
+
+                BulkAction::make('assign_to_worksched')
+                ->label('Assign to WorkSched')
+                ->form([
+                    Select::make('schedule_id')
+                        ->label('Schedules')
+                        ->relationship('schedule', 'ScheduleName')
+                        ->required()
+                ])
+                ->action(function (array $data, Collection $records) {
+                    $schedid = $data['schedule_id'];
+
+                    foreach ($records as $record) {
+                        $record->update(['schedule_id' => $schedid]);
                     }
                 })
                 ->deselectRecordsAfterCompletion()
