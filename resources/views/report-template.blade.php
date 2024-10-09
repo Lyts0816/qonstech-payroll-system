@@ -22,24 +22,33 @@
     }
 
     .header {
-        text-align: center;
-        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
     }
 
     .logo {
-        width: 50px;
+        width: 60px;
         height: auto;
-        margin-bottom: 10px;
+        margin-right: 20px;
     }
 
+    .header-content {
+        text-align: center;
+        flex: 1;
+        margin-top: -50px;
+    }
+
+
     h1 {
-        font-size: 13px;
+        font-size: 16px;
         margin: 0;
         font-weight: normal;
     }
 
     h2 {
-        font-size: 16px;
+        font-size: 20px;
         margin: 0;
 
     }
@@ -69,7 +78,7 @@
 
     .header-table td {
         text-align: left;
-        border: 1px solid #000;
+        border: .1px solid #000;
         padding: 8px;
         font-size: 12px;
     }
@@ -82,9 +91,9 @@
 
     .data-table th,
     .data-table td {
-        
+
         border: 1px solid #000;
-        padding: 8px;
+        padding: 15px;
         text-align: center;
         font-size: 12px;
     }
@@ -102,52 +111,62 @@
     .footer {
         display: flex;
         justify-content: space-between;
-        margin-top: 20px;
+        padding: 10px;
+        margin-top: 30px;
+        margin-bottom: 70px;
         font-size: 12px;
     }
 
     .footer-section {
-        width: 50%;
+        flex: 1;
+        text-align: center;
     }
 
-    .footer-section p,
-    .footer-section b {
-        margin: 0;
+    .footer-section:first-child {
+        text-align: left;
     }
 
-    .footer-section p {
-        margin-top: 5px;
+    .footer-section:last-child {
+        text-align: right;
+        margin-top: -90px;
+        /* Align the last section to the right */
     }
 </style>
 <?php
-    $employeeda = $payrollData->first();
+$employeeda = $payrollData->first();
 
-    $imageDataP = base64_encode(file_get_contents(public_path('images/pagibig.png')));
-    $imageDataPh = base64_encode(file_get_contents(public_path('images/philhealth.png')));
-    $imageDataS = base64_encode(file_get_contents(public_path('images/sss.png')));
+$imageDataP = base64_encode(file_get_contents(public_path('images/pagibig.png')));
+$imageDataPh = base64_encode(file_get_contents(public_path('images/philhealth.png')));
+$imageDataS = base64_encode(file_get_contents(public_path('images/sss.png')));
 
-    $pagibig = 'data:image/png;base64,' . $imageDataP;
-    $philhealth = 'data:image/png;base64,' . $imageDataPh;
-    $sss = 'data:image/png;base64,' . $imageDataS;
+$pagibig = 'data:image/png;base64,' . $imageDataP;
+$philhealth = 'data:image/png;base64,' . $imageDataPh;
+$sss = 'data:image/png;base64,' . $imageDataS;
 
-    $reportType = $employeeda['ReportType'] ?? '';
+$reportType = $employeeda['ReportType'] ?? '';
 
-    // Set the appropriate title and logo based on ReportType
-    switch ($reportType) {
-        case 'Pagibig Contribution':
-            $titleName = 'Pag-IBIG';
-            $src = $pagibig;
-            break;
-        case 'Philhealth Contribution':
-            $titleName = 'Philippine Health Insurance Corporation';
-            $src = $philhealth;
-            break;
-        case 'SSS Contribution':
-        default:
-            $titleName = 'Social Security System';
-            $src = $sss;
-            break;
-    }
+// Set the appropriate title and logo based on ReportType
+switch ($reportType) {
+    case 'Pagibig Contribution':
+        $titleName = 'Pag-IBIG';
+        $src = $pagibig;
+        $employerNumber = '12-3456789-0';
+        $IDName = 'SSS NUMBER';
+        break;
+    case 'Philhealth Contribution':
+        $titleName = 'Philippine Health Insurance Corporation';
+        $src = $philhealth;
+        $employerNumber = '82-3494289-042';
+        $IDName = 'PHILHEALTH NO';
+        break;
+    case 'SSS Contribution':
+    default:
+        $titleName = 'Social Security System';
+        $src = $sss;
+        $employerNumber = '3214-7658-9832';
+        $IDName = 'PAG-IBIG NO.';
+        break;
+}
 ?>
 
 
@@ -174,15 +193,18 @@
         @if ($employeeda)
             <div class="header">
                 <img src="{{ $src }}" alt="Company Logo" class="logo">
-                <h1>{{$titleName}}</h1>
-                <h2>{{ $employeeda['ReportType'] ?? 'Report' }} Report</h2>
+                <div class="header-content">
+                    <h1>{{ $titleName }}</h1>
+                    <h2>{{ $employeeda['ReportType'] ?? 'Report' }} Report</h2>
+                </div>
             </div>
 
 
             <!-- Header Details Section -->
             <table class="header-table">
                 <tr>
-                    <td><b>EMPLOYER ID NUMBER</b> <br>xxxxxxxxxxxx</td>
+                    <td><b>EMPLOYER ID NUMBER</b> <br>{{$employerNumber}}
+                    </td>
                     <td><b>REGISTERED EMPLOYER NAME</b> <br>Qonstech Construction Corporation </td>
                     <td><b>PERIOD COVERED</b> <br>{{ $formattedPeriod }}</td>
                 </tr>
@@ -197,8 +219,9 @@
 
         <table class="data-table">
             <thead>
+
                 <tr>
-                    <th>ID Number</th>
+                    <th>{{  $IDName }}</th>
                     <th>Name</th>
                     <!-- <th>Monthly Contribution</th> -->
                     <th>Employee Share</th>
@@ -207,33 +230,46 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    // Initialize a variable to track the total number of rows
+                    $totalRows = 20;
+                    $employeeCount = count($payrollData);
+                @endphp
+
                 @foreach ($payrollData as $employee)
                                 @php
                                     // Sum up shares and total for each employee
                                     $employeeShare = $employee['Deduction'] ?? 0;
                                     $employerShare = $employee['DeductionEmployer'] ?? 0;
                                     $totalContribution = $employee['DeductionTotal'] ?? 0;
-                                    $monthlyContribution = $employee['DeductionMonthly'] ?? 0;
 
                                     // Add to total sums
                                     $totalEmployeeShare += $employeeShare;
                                     $totalEmployerShare += $employerShare;
                                     $totalDeduction += $totalContribution;
-                                    $totalMonthlyContribution += $monthlyContribution;
-
                                 @endphp
                                 <tr>
                                     <td style="text-align:left">{{ $employee['DeductionID'] ?? '' }}</td>
                                     <td style="text-align:left">
                                         {{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
                                     </td>
-                                    <!-- <td>{{ number_format($employee['DeductionMonthly'] ?? 0, 2) }}</td> -->
                                     <td style="text-align:right">{{ number_format($employeeShare, 2) }}</td>
                                     <td style="text-align:right">{{ number_format($employerShare, 2) }}</td>
                                     <td style="text-align:right">{{ number_format($totalContribution, 2) }}</td>
                                 </tr>
                 @endforeach
+
+                @for ($i = $employeeCount; $i < $totalRows; $i++)
+                    <tr>
+                        <td style="text-align:left"></td>
+                        <td style="text-align:left"></td>
+                        <td style="text-align:right"></td>
+                        <td style="text-align:right"></td>
+                        <td style="text-align:right"></td>
+                    </tr>
+                @endfor
             </tbody>
+
             <tfoot>
                 <tr>
                     <td style="text-align:left" colspan="2"><strong>Subtotal</strong></td>
@@ -248,16 +284,22 @@
             </tfoot>
         </table>
         <!-- Footer Section -->
-        <div class="footer">
-            <div class="footer-section">
-                <b>Date Generated:</b><br> {{ now()->format('m-d-Y H:i:s') }}
-            </div>
+        <<div class="footer">
             <div class="footer-section">
                 <p>Prepared By:</p>
-                <b>HR OFFICER</b><br>
-                <b>ALMA MAE S. GEPELLANO</b>
+                
+                <b>ALMA MAE S. GEPELLANO</b><br>
+                <small><em>HR OFFICER</em></small>
+
             </div>
-        </div>
+            <div class="footer-section">
+                <p>Date Generated:</p><br>
+                <b>{{ now()->format('F d, Y H:i:s') }}</b>
+
+            </div>
+    </div>
+
+
     </div>
 </body>
 
