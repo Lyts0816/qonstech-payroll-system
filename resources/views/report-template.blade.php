@@ -112,8 +112,8 @@
         display: flex;
         justify-content: space-between;
         padding: 10px;
-        margin-top: 30px;
-        margin-bottom: 30px;
+        /* margin-top: 30px; */
+        /* margin-bottom: 30px; */
         font-size: 12px;
     }
 
@@ -199,82 +199,89 @@ switch ($reportType) {
             </div>
 
 
-                <!-- Header Details Section -->
-                <table class="header-table">
-                    <tr>
-                        <td>EMPLOYER ID NUMBER:</td>
-                        <td>xxxxxxxxxxxx</td>
-                        <td>PERIOD COVERED:</td>
-                        <td>{{ $formattedPeriod }}</td>
-                    </tr>
-                    <tr>
-                        <td>PROJECT NAME:</td>
-                        <td>{{ $employeeda['ProjectName'] ?? '[Project Name]' }}</td>
-                        <td>EMPLOYER TYPE:</td>
-                        <td>Private</td>
-                    </tr>
-                    <tr>
-                        <td>TEL NO.:</td>
-                        <td>09 1234 567 8912</td>
-                        <td>ADDRESS:</td>
-                        <td>Brgy. Zone III, Koronadal City, South Cotabato</td>
-                    </tr>
-                </table>
-            @endif
+            <!-- Header Details Section -->
+            <table class="header-table">
+                <tr>
+                    <td><b>EMPLOYER ID NUMBER</b> <br>{{$employerNumber}}
+                    </td>
+                    <td><b>REGISTERED EMPLOYER NAME</b> <br>Qonstech Construction Corporation </td>
+                    <td><b>PERIOD COVERED</b> <br>{{ $formattedPeriod }}</td>
+                </tr>
+                <tr>
+                    <td><b>TEL NO.</b> <br>09 1234 567 8912</td>
+                    <td><b>ADDRESS</b> <br>Brgy. Zone III, Koronadal City, South Cotabato </td>
+                    <td><b>EMPLOYER TYPE </b><br>Private</td>
+                </tr>
 
-            <!-- Employee Contribution Details Section -->
-            <table class="details-table">
-                <thead>
-                    <tr>
-                        <th>ID Number</th>
-                        <th>Name</th>
-                        <th>Monthly Contribution</th>
-                        <th>Employee Share</th>
-                        <th>Employer Share</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($payrollData as $employee)
-                        @php
-                            // Sum up shares and total for each employee
-                            $employeeShare = $employee['Deduction'] ?? 0;
-                            $employerShare = $employee['DeductionEmployer'] ?? 0;
-                            $totalContribution = $employee['DeductionTotal'] ?? 0;
-                            $monthlyContribution = $employee['DeductionMonthly'] ?? 0;
-
-                            // Add to total sums
-                            $totalEmployeeShare += $employeeShare;
-                            $totalEmployerShare += $employerShare;
-                            $totalDeduction += $totalContribution;
-                            $totalMonthlyContribution += $monthlyContribution;
-                            
-                        @endphp
-                        <tr>
-                            <td>{{ $employee['DeductionID'] ?? '' }}</td>
-                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}</td>
-                            <td>{{ number_format($employee['DeductionMonthly'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employeeShare, 2) }}</td>
-                            <td>{{ number_format($employerShare, 2) }}</td>
-                            <td>{{ number_format($totalContribution, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <!-- Totals row -->
-                <tfoot>
-                    <tr>
-                        <th colspan="2" style="text-align: right;">Overall Total:</th>
-                        <th>{{ number_format($totalMonthlyContribution, 2) }}</th>
-                        <th>{{ number_format($totalEmployeeShare, 2) }}</th>
-                        <th>{{ number_format($totalEmployerShare, 2) }}</th>
-                        <th>{{ number_format($totalDeduction, 2) }}</th>
-                    </tr>
-                </tfoot>
             </table>
+        @endif
 
-            <!-- Footer Section -->
-            <div class="footer">
-                <b>Date Generated:</b> {{ now()->format('m-d-Y H:i:s') }}<br>
+        <table class="data-table">
+            <thead>
+
+                <tr>
+                    <th>{{  $IDName }}</th>
+                    <th>Name</th>
+                    <!-- <th>Monthly Contribution</th> -->
+                    <th>Employee Share</th>
+                    <th>Employer Share</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $totalRows = 20;
+                    $employeeCount = count($payrollData);
+                @endphp
+
+                @foreach ($payrollData as $employee)
+                                @php
+                                    $employeeShare = $employee['Deduction'] ?? 0;
+                                    $employerShare = $employee['DeductionEmployer'] ?? 0;
+                                    $totalContribution = $employee['DeductionTotal'] ?? 0;
+
+                                    $totalEmployeeShare += $employeeShare;
+                                    $totalEmployerShare += $employerShare;
+                                    $totalDeduction += $totalContribution;
+                                @endphp
+                                <tr>
+                                    <td style="text-align:left">{{ $employee['DeductionID'] ?? '' }}</td>
+                                    <td style="text-align:left">
+                                        {{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
+                                    </td>
+                                    <td style="text-align:right">{{ number_format($employeeShare, 2) }}</td>
+                                    <td style="text-align:right">{{ number_format($employerShare, 2) }}</td>
+                                    <td style="text-align:right">{{ number_format($totalContribution, 2) }}</td>
+                                </tr>
+                @endforeach
+
+                @for ($i = $employeeCount; $i < $totalRows; $i++)
+                    <tr>
+                        <td style="text-align:left"></td>
+                        <td style="text-align:left"></td>
+                        <td style="text-align:right"></td>
+                        <td style="text-align:right"></td>
+                        <td style="text-align:right"></td>
+                    </tr>
+                @endfor
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td style="text-align:left" colspan="2"><strong>Subtotal</strong></td>
+                    <td style="text-align:right">Php {{ number_format($totalEmployeeShare, 2) }}</td>
+                    <td style="text-align:right">Php {{ number_format($totalEmployerShare, 2) }}</td>
+                    <td style="text-align:right">Php {{ number_format($totalDeduction, 2) }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align:left" colspan="4"><strong>Total</strong></th>
+                    <th style="text-align:right"><strong>Php {{ number_format($totalDeduction, 2) }}</strong></th>
+                </tr>
+            </tfoot>
+        </table>
+        <!-- Footer Section -->
+        <<div class="footer">
+            <div class="footer-section">
                 <p>Prepared By:</p>
                 
                 <b>ALMA MAE S. GEPELLANO</b><br>
