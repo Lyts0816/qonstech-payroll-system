@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use Carbon\Carbon;
+use DatePeriod;
+use DateInterval;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -132,6 +134,9 @@ class PayrollController extends Controller
             $TotalOvertimeHours = 0;
             $TotalOvertimePay = 0;
             $DeductionFee = 0;
+						$TotalTardiness = 0;
+						$TotalUndertime = 0;
+
             foreach ($finalAttendance as $attendances) {
                 // dd($attendances);
                 $attendanceDate = Carbon::parse($attendances['Date']);
@@ -181,7 +186,10 @@ class PayrollController extends Controller
 
                         // Calculate worked hours for morning shift (in hours)
                         $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                        $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+												$effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+												$workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+												$underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+												$tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                         $workedMorningHours = $workedMorningMinutes / 60;
                         // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
@@ -194,7 +202,10 @@ class PayrollController extends Controller
 
                         // Calculate worked hours for afternoon shift (in hours)
                         $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                        $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+												$effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+												$workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+												$underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+												$tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                         $workedAfternoonHours = $workedAfternoonMinutes / 60;
                         // $workedAfternoonHours = $checkinTwo->diffInMinutes($checkoutTwo) / 60;
 
@@ -207,11 +218,21 @@ class PayrollController extends Controller
 
                         // $TotalHours += $netWorkedHours;
                         $TotalHoursSunday += $SundayWorkedHours; // Add to Sunday worked hours
+												$TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes: 0 ) 
+												+ ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes: 0);
+
+												$TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes: 0 ) 
+												+ ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes: 0);
+						
+												$newRecord['TotalTardiness'] = $TotalTardiness;
+												$newRecord['TotalUndertime'] = $TotalUndertime;
                         $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
                         // If date is Holiday
-                        //dd(count(value: $Holiday));
-                        if (count(value: $Holiday) > 0) {
+                        // dd(count(value: $Holiday));
+
+												// check if Holiday exist on $attendanceDate AND if that holiday is used for the project/area
+                        if (count(value: $Holiday) > 0 && $Holiday[0]->ProjectID == $employee->project_id) { 
                             $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]); // 8:00 AM
                             $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);  // 12:00 PM
                             $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
@@ -223,7 +244,10 @@ class PayrollController extends Controller
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningEnd) / 60 : 0;
 
                             $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+														$effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+														$workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+														$underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+														$tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
@@ -233,7 +257,10 @@ class PayrollController extends Controller
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
                             $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+														$effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+														$workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+														$underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+														$tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                             $workedAfternoonHours = $workedAfternoonMinutes / 60;
                             // $workedAfternoonHours = $checkinTwo->diffInMinutes($checkoutTwo) / 60;
 
@@ -254,6 +281,15 @@ class PayrollController extends Controller
                                 $newRecord['TotalHrsSpecialHol'] = $TotalHrsSpecialHol;
 
                             }
+
+														$TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes: 0 ) 
+														+ ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes: 0);
+
+														$TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes: 0 ) 
+														+ ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes: 0);
+								
+														$newRecord['TotalTardiness'] = $TotalTardiness;
+														$newRecord['TotalUndertime'] = $TotalUndertime;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -271,7 +307,10 @@ class PayrollController extends Controller
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningStart) / 60 : 0;
 
                             $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+														$effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+														$workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+														$underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+														$tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($morningEnd) / 60;
 
@@ -281,7 +320,10 @@ class PayrollController extends Controller
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
                             $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+														$effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+														$workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+														$underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+														$tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                             $workedAfternoonHours = $workedAfternoonMinutes / 60;
 
                             $totalWorkedHours = $workedMorningHours + $workedAfternoonHours;
@@ -292,6 +334,14 @@ class PayrollController extends Controller
                             // $SundayWorkedHours = $totalSundayWorkedHours - $totalSundayLateHours;
 
                             $TotalHours += $netWorkedHours;
+														$TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes: 0 ) 
+														+ ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes: 0);
+
+														$TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes: 0 ) 
+														+ ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes: 0);
+								
+														$newRecord['TotalTardiness'] = $TotalTardiness;
+														$newRecord['TotalUndertime'] = $TotalUndertime;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }

@@ -145,11 +145,12 @@
                     <th rowspan="2">Regular Status</th> --}}
                     <th rowspan="2">Regular Hours</th>
                     <th rowspan="2">Tardiness</th>
-                    <th rowspan="2">Absences</th>
+                    <th rowspan="2">Undertime</th>
+                    <!-- <th rowspan="2">Absences</th> -->
                     <th rowspan="2">Total Hours</th>
                     <th rowspan="2">O.T Hours</th>
                     {{-- <th rowspan="2">Sunday Hours</th> --}}
-                    {{-- <th colspan="2">Holidays</th> --}}
+                    <th colspan="2">Holidays</th>
                     {{-- <th rowspan="2">Paid Amount For Regular Hours (Basic Pay)</th> --}}
                     {{-- <th rowspan="2">Paid Amount For O.T Hours 25%</th> --}}
                     {{-- <th rowspan="2">Paid Amount For Sunday Hours 30%</th> --}}
@@ -163,8 +164,8 @@
                     <th rowspan="2">SIGNATURE</th>
                 </tr>
                 <tr>
-                    {{-- <th>Legal Holiday Hours</th>
-                    <th>Special Holiday Hours</th> --}}
+                    <th>Legal Holiday Hours</th>
+                    <th>Special Holiday Hours</th>
                     <th>TAXES</th>
                     <th>SSS</th>
                     <th>PHIC</th>
@@ -188,16 +189,16 @@
 
 
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        <td>{{ number_format('0') }}</td>
-                        <td>{{ number_format('0') }}</td>
+                        <td>{{ number_format($employee['TotalTardiness'] ?? 0, 2) }}</td>
+                        <td>{{ number_format($employee['TotalUndertime'] ?? 0, 2) }}</td>
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
                         <td>{{ $employee['TotalOvertimeHours'] ?? 0 }}</td>
 
                         {{-- <td>{{ $employee['TotalHoursSunday'] ?? 0 }}</td> --}}
-                        {{-- <td>{{ $employee['TotalHrsRegularHol'] ?? 0 }}</td>
-                        <td>{{ $employee['TotalHrsSpecialHol'] ?? 0 }}</td> --}}
+                        <td>{{ $employee['TotalHrsRegularHol'] ?? 0 }}</td>
+                        <td>{{ $employee['TotalHrsSpecialHol'] ?? 0 }}</td>
                         {{-- <td>p{{ number_format($employee['BasicPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['TotalOvertimePay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['SundayPay'] ?? 0, 2) }}</td> --}}
