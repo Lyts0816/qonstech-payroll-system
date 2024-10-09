@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Relationship;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use PhpParser\Node\Stmt\Label;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeResource extends Resource
 {
@@ -122,9 +123,17 @@ class EmployeeResource extends Resource
                             ->pluck('PositionName', 'id')
                             ->toArray()
                         )
-                        ->required(fn (string $context) => $context === 'create' || 'edit'),
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            $position = Position::find($state);
+                            if ($position && in_array($position->PositionName, ['Human Resource', 'Vice President'])) {
+                                $set('status', 'Office');
+                            }else{
+                                $set('status', 'Available');
+                            }
+                        }),
 
-                ])->columns(4)->collapsible(true),
+                ])->columns(4)->collapsible(true)->live(),
 
                 Section::make(heading: 'Other Details')
                 ->schema([
@@ -193,9 +202,9 @@ class EmployeeResource extends Resource
                         ->label('Status')
                         ->required(fn (string $context) => $context === 'create' || 'edit')
                         ->options([
+                            'Office' => 'Office',
                             'Assigned' => 'Assigned',
                             'Available' => 'Available',
-
                         ])->default('Available'),
 
                     
@@ -299,24 +308,6 @@ class EmployeeResource extends Resource
             ])
 
             ->bulkActions([
-
-                // BulkAction::make('assign_to_project')
-                // ->label('Assign to Project')
-                // ->form([
-                //     Select::make('project_id')
-                //         ->label('Project')
-                //         ->relationship('project', 'ProjectName')
-                //         ->required()
-                // ])
-                // ->action(function (array $data, Collection $records) {
-                //     $projectId = $data['project_id'];
-
-                //     foreach ($records as $record) {
-                //         $record->update(['project_id' => $projectId]);
-                //     }
-                // })
-                // ->deselectRecordsAfterCompletion()
-                // ->requiresConfirmation(),
 
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

@@ -115,7 +115,7 @@
             @if ($employeeda)
                 <h2>{{ $employeeda['ReportType'] ?? 'Report' }} Report</h2>
 
-                <!-- Header Details Section -->
+               
                 <table class="header-table">
                     <tr>
                         <td>EMPLOYER ID NUMBER:</td>
@@ -138,7 +138,7 @@
                 </table>
             @endif
 
-            <!-- Employee Contribution Details Section -->
+           
             <table class="details-table">
                 <thead>
                     <tr>
@@ -153,13 +153,13 @@
                 <tbody>
                     @foreach ($payrollData as $employee)
                         @php
-                            // Sum up shares and total for each employee
+                            
                             $employeeShare = $employee['Deduction'] ?? 0;
                             $employerShare = $employee['DeductionEmployer'] ?? 0;
                             $totalContribution = $employee['DeductionTotal'] ?? 0;
                             $monthlyContribution = $employee['DeductionMonthly'] ?? 0;
 
-                            // Add to total sums
+                            
                             $totalEmployeeShare += $employeeShare;
                             $totalEmployerShare += $employerShare;
                             $totalDeduction += $totalContribution;

@@ -307,9 +307,9 @@ class ReportsController extends Controller
 
 
 
-            // dd($newRecord);
+            
             $payrollRecords->push($newRecord);
-            // dd( $payrollRecords->toArray());
+            
 
         }
         $payslipHtml .= view('report-template', ['payrollData' => $payrollRecords])->render();

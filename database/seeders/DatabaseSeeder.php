@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'remember_token' => null,
             'created_at' => now(),
             'updated_at' => now(),
-            'role' => 2,
+            'role' => 'Human Resource',
 
         ]);
 

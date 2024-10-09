@@ -122,8 +122,8 @@
                         <tr>
                             <th>Position</th>
                             <td>{{ $employee['position'] ?? '' }}</td>
-                            <th>Payroll Type</th>
-                            <td>{{ $employee['SalaryType'] ?? '' }}</td>
+                            <th>Payroll Period</th>
+                            <td>10-08-2024 - 10-14-24</td>
                         </tr>
                         <tr>
                             <th>Monthly Salary</th>

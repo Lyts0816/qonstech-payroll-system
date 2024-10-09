@@ -14,7 +14,7 @@
 
         .container {
             width: 100%;
-            max-width: 14in;
+            max-width: 20in;
             margin: 10px auto;
             border: 1px solid #000;
             padding: 10px;
@@ -155,9 +155,9 @@
                     {{-- <th rowspan="2">Paid Amount For Sunday Hours 30%</th> --}}
                     {{-- <th rowspan="2">Paid Amount For Legal Holiday</th>
                     <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
-                    {{-- <th rowspan="2">Other Allowance</th> --}}
+                    <th rowspan="2">Other Allowance</th>
                     <th rowspan="2">Gross Amount</th>
-                    <th colspan="7">Deductions</th>
+                    <th colspan="9">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
                     <th rowspan="2">NET PAY</th>
                     <th rowspan="2">SIGNATURE</th>
@@ -170,8 +170,10 @@
                     <th>PHIC</th>
                     <th>HDMF</th>
                     <th>Total Government Deduction</th>
-                    <th>CASH ADVANCES</th>
-                    <th>Loans</th>
+                    <th>Cash Advances</th>
+                    <th>Salary Loan</th>
+                    <th>SSS Loan</th>
+                    <th>HDMF Loan</th>
                     {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
@@ -203,7 +205,7 @@
                         {{-- <td>p{{ number_format($employee['SundayPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
                         <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
-                        {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
+                        <td>P{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
                         <td>P{{ number_format(0, 2) }}</td>
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
@@ -213,6 +215,8 @@
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
+                        <td>P{{ number_format('0') }}</td>
+                        <td>P{{ number_format('0') }}</td>
                         <td>P{{ number_format('0') }}</td>
 
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
@@ -227,7 +231,7 @@
             <div>
                 <p>Prepared by:</p>
                 <p>_______________________</p>
-                <p>ALMA MAE S. GEPELLANO</p>
+                <p>Alma Mae S. Gepellano</p>
                 <p>HR OFFICER</p>
             </div>
             <div>
