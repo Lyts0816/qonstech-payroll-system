@@ -210,8 +210,10 @@ class PayrollController extends Controller
                         $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
                         // If date is Holiday
-                        //dd(count(value: $Holiday));
-                        if (count(value: $Holiday) > 0) {
+                        // dd(count(value: $Holiday));
+
+												// check if Holiday exist on $attendanceDate AND if that holiday is used for the project/area
+                        if (count(value: $Holiday) > 0 && $Holiday[0]->ProjectID == $employee->project_id) { 
                             $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]); // 8:00 AM
                             $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);  // 12:00 PM
                             $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
