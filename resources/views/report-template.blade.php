@@ -113,7 +113,7 @@
         justify-content: space-between;
         padding: 10px;
         margin-top: 30px;
-        margin-bottom: 70px;
+        margin-bottom: 30px;
         font-size: 12px;
     }
 
@@ -129,7 +129,6 @@
     .footer-section:last-child {
         text-align: right;
         margin-top: -90px;
-        /* Align the last section to the right */
     }
 </style>
 <?php
