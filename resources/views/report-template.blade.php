@@ -231,19 +231,16 @@ switch ($reportType) {
             </thead>
             <tbody>
                 @php
-                    // Initialize a variable to track the total number of rows
                     $totalRows = 20;
                     $employeeCount = count($payrollData);
                 @endphp
 
                 @foreach ($payrollData as $employee)
                                 @php
-                                    // Sum up shares and total for each employee
                                     $employeeShare = $employee['Deduction'] ?? 0;
                                     $employerShare = $employee['DeductionEmployer'] ?? 0;
                                     $totalContribution = $employee['DeductionTotal'] ?? 0;
 
-                                    // Add to total sums
                                     $totalEmployeeShare += $employeeShare;
                                     $totalEmployerShare += $employerShare;
                                     $totalDeduction += $totalContribution;
