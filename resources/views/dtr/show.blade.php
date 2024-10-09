@@ -82,45 +82,69 @@
 </head>
 
 <body>
-    <div>
-        <div style="display: flex; justify-content: center; align-items: center;">
-            <button class="download-button" id="download-btn">Download DTR</button>
-        </div>
-        <div class="container" id="dtr-container">
-            <!-- Company Logo -->
-            <img src="{{ asset('images/qonstech.png') }}" alt="Company Logo" class="logo">
-
-            <!-- Update path accordingly -->
-
-            <h4 class="text-2xl font-bold">DAILY TIME RECORD</h4>
-            <h2>{{ $employee->full_name }}</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Morning Check-in</th>
-                        <th>Morning Checkout</th>
-                        <th>Afternoon Check-in</th>
-                        <th>Afternoon Checkout</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($data as $row)
-                        <tr>
-                            <td>{{ \Carbon\Carbon::parse($row->Date)->format('F j, Y') }}</td>
-                            <td>{{ $row->Checkin_One }}</td>
-                            <td>{{ $row->Checkout_One }}</td>
-                            <td>{{ $row->Checkin_Two }}</td>
-                            <td>{{ $row->Checkout_Two }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-        </div>
-
+<div>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <button class="download-button" id="download-btn">Download DTR</button>
     </div>
+    <div class="container" id="dtr-container">
+        <!-- Company Logo -->
+        <img src="{{ asset('images/qonstech.png') }}" alt="Company Logo" class="logo">
+
+        <!-- Update path accordingly -->
+
+        <h4 class="text-2xl font-bold">DAILY TIME RECORD</h4>
+        <h2>{{ $employee->full_name }}</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Morning Check-in</th>
+                    <th>Morning Checkout</th>
+                    <th>Afternoon Check-in</th>
+                    <th>Afternoon Checkout</th>
+                    <th>Morning Late</th>
+                    <th>Morning Undertime</th>
+                    <th>Afternoon Late</th>
+                    <th>Afternoon Undertime</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data as $row)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($row->Date)->format('F j, Y') }}</td>
+                        <td>{{ $row->Checkin_One > 0 ? $row->Checkin_One : 0 }}</td>
+                        <td>{{ $row->Checkout_One > 0 ? $row->Checkout_One : 0 }}</td>
+                        <td>{{ $row->Checkin_Two > 0 ? $row->Checkin_Two : 0 }}</td>
+                        <td>{{ $row->Checkout_Two > 0 ? $row->Checkout_Two : 0 }}</td>
+                        <td>{{ $row->MorningTardy > 0 ? $row->MorningTardy : 0 }} mins</td>
+                        <td>{{ $row->MorningUndertime > 0 ? $row->MorningUndertime : 0 }} mins</td>
+                        <td>{{ $row->AfternoonTardy > 0 ? $row->AfternoonTardy : 0 }} mins</td>
+                        <td>{{ $row->AfternoonUndertime > 0 ? $row->AfternoonUndertime : 0 }} mins</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right; font-weight: bold;">Total:</td>
+                    <td style="font-weight: bold;">
+                        {{ $data->sum('MorningTardy') }} mins
+                    </td>
+                    <td style="font-weight: bold;">
+                        {{ $data->sum('MorningUndertime') }} mins
+                    </td>
+                    <td style="font-weight: bold;">
+                        {{ $data->sum('AfternoonTardy') }} mins
+                    </td>
+                    <td style="font-weight: bold;">
+                        {{ $data->sum('AfternoonUndertime') }} mins
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
 
 
 
