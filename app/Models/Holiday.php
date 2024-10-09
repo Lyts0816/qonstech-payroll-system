@@ -7,14 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Holiday extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
-		protected $table = 'holidays';
+	protected $table = 'holidays';
 
-		protected $fillable = [
-			'HolidayName',
-			'HolidayDate',
-			'HolidayType'
+	protected $fillable = [
+		'HolidayName',
+		'HolidayDate',
+		'HolidayType',
+		'ProjectID'
 	];
-	
+
+	public function project()
+	{
+		return $this->belongsTo(Project::class, 'ProjectID');
+	}
+
 }

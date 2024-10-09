@@ -21,88 +21,107 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HolidayResource extends Resource
 {
-    protected static ?string $model = Holiday::class;
+	protected static ?string $model = Holiday::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
-    protected static ?string $navigationGroup = "Employee Payroll";
+	protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
+	protected static ?string $navigationGroup = "Employee Payroll";
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-							Section::make('Holiday')
-							->schema([
-									TextInput::make('HolidayName')
-									->label('Holiday Name')
-									->required(fn (string $context) => $context === 'create')
-									->unique(ignoreRecord: true)
-									->rules('regex:/^[^\d]*$/'),
+	public static function form(Form $form): Form
+	{
+		return $form
+			->schema([
+				Section::make('Holiday')
+					->schema([
+						TextInput::make('HolidayName')
+							->label('Holiday Name')
+							->required(fn(string $context) => $context === 'create' || $context === 'edit')
+							->unique(ignoreRecord: true)
+							->rules('regex:/^[^\d]*$/'),
 
-									DatePicker::make('HolidayDate')
-									->label('Holiday Date')
-									->required(fn (string $context) => $context === 'create'),
-									
-									Select::make('HolidayType')
-									->label('Holiday Type')
-									->required(fn (string $context) => $context === 'create')
-									->options([
-										'Regular' => 'Regular',
-										'Special' => 'Special'
-								])->native(false),
-							])->columns(3)->collapsible(true),
-          ]);
-    }
+						DatePicker::make('HolidayDate')
+							->label('Holiday Date')
+							->required(fn(string $context) => $context === 'create' || $context === 'edit'),
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-							TextColumn::make('HolidayName')
-                ->label('Holiday Name')
-								->searchable(['HolidayName']),
+						Select::make('HolidayType')
+							->label('Holiday Type')
+							->required(fn(string $context) => $context === 'create' || $context === 'edit')
+							->options([
+								'Regular' => 'Regular',
+								'Special' => 'Special'
+							])->native(false),
 
-							TextColumn::make('HolidayDate')
-                ->label('Holiday Date'),
+						Select::make('ProjectID')
+							->label('Project')
+							->required(fn(string $context) => $context === 'create' || $context === 'edit')
+							->options(function () {
+								return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
+							}),
+					])->columns(3)->collapsible(true),
+			]);
+	}
 
-							TextColumn::make('HolidayType')
-                ->label('Holiday Type')
-                
-            ])
-            ->filters([
-							SelectFilter::make('HolidayType')
-							->label('Filter by Holiday Type')
-							->options(
-									Holiday::query()
-											->pluck('HolidayType', 'HolidayType')
-											->toArray()
-							)
-							->searchable()
-							->multiple()
-							->preload(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+	public static function table(Table $table): Table
+	{
+		return $table
+			->columns([
+				TextColumn::make('HolidayName')
+					->label('Holiday Name')
+					->searchable(['HolidayName']),
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+				TextColumn::make('HolidayDate')
+					->label('Holiday Date'),
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListHolidays::route('/'),
-            'create' => Pages\CreateHoliday::route('/create'),
-            'edit' => Pages\EditHoliday::route('/{record}/edit'),
-        ];
-    }
+				TextColumn::make('HolidayType')
+					->label('Holiday Type'),
+
+				TextColumn::make('HolidayType')
+					->label('Holiday Type'),
+
+
+				TextColumn::make('project.ProjectName') 
+					->label('Project')
+					->formatStateUsing(function ($record) {
+						return $record->project->ProjectName . ' - ' . $record->project->PR_City;
+					})
+					->searchable()
+					->sortable(),
+
+			])
+			->filters([
+				SelectFilter::make('HolidayType')
+					->label('Filter by Holiday Type')
+					->options(
+						Holiday::query()
+							->pluck('HolidayType', 'HolidayType')
+							->toArray()
+					)
+					->searchable()
+					->multiple()
+					->preload(),
+			])
+			->actions([
+				Tables\Actions\EditAction::make(),
+			])
+			->bulkActions([
+				Tables\Actions\BulkActionGroup::make([
+					Tables\Actions\DeleteBulkAction::make(),
+				]),
+			]);
+	}
+
+	public static function getRelations(): array
+	{
+		return [
+			//
+		];
+	}
+
+	public static function getPages(): array
+	{
+		return [
+			'index' => Pages\ListHolidays::route('/'),
+			'create' => Pages\CreateHoliday::route('/create'),
+			'edit' => Pages\EditHoliday::route('/{record}/edit'),
+		];
+	}
 }

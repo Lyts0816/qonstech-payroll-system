@@ -41,6 +41,50 @@ class PayslipResource extends Resource
     {
         return $form
             ->schema([
+							// Adding the new "Select Payroll" field at the top
+							Select::make('SelectPayroll')
+							->label('Select Payroll') // Label for the field
+							->required(fn(string $context) => $context === 'create' || $context === 'edit')
+							->options(function () {
+									// Fetch payrolls and format the display string
+									return Payroll::orderBy('PayrollYear')
+									->orderBy('PayrollMonth')
+									->orderBy('PayrollDate2')
+									->get()
+									->mapWithKeys(function ($payroll) {
+											$displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
+											return [$payroll->id => $displayText];
+									});
+							})
+							->placeholder('Select Payroll Option')
+							->reactive()
+							->afterStateUpdated(function (callable $set, $state) {
+								// When a payroll is selected, fetch details and update other fields
+								$set('EmployeeStatus', null);
+								$set('PayrollFrequency', null);
+								$set('PayrollMonth', null);
+								$set('PayrollYear', null);
+								$set('PayrollDate2', null);
+								$set('assignment', null); 
+								$set('ProjectID', null); 
+								$set('weekPeriodID', null); 
+								if ($state) {
+										$payroll = Payroll::find($state); // Fetch payroll by ID
+
+										if ($payroll) {
+												// Update other fields with payroll data
+												$set('EmployeeStatus', $payroll->EmployeeStatus);
+												$set('PayrollFrequency', $payroll->PayrollFrequency);
+												$set('PayrollMonth', $payroll->PayrollMonth);
+												$set('PayrollYear', $payroll->PayrollYear);
+												$set('PayrollDate2', $payroll->PayrollDate2);
+												$set('assignment', $payroll->assignment); 
+												$set('ProjectID', $payroll->ProjectID); 
+												$set('weekPeriodID', $payroll->weekPeriodID); 
+										}
+								}
+						}),
+							
                 Grid::make(2) // Create a two-column grid layout for the first two fields
                     ->schema([
                         // EmployeeStatus Select Field
@@ -147,6 +191,7 @@ class PayslipResource extends Resource
 
                         return [];
                     })
+                    ->native(false)
                     ->reactive(),
 
                 // PayrollMonth Select Field
@@ -222,6 +267,7 @@ class PayslipResource extends Resource
                         // If any of the fields are not set, return an empty array
                         return [];
                     })
+										->native(false)
                     ->reactive() // Make this field reactive to other fields
                     ->placeholder('Select the payroll period'),
 
