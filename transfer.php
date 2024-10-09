@@ -11,6 +11,7 @@ $mysqlConfig = [
 $Employee_ID = $_POST['Employee_ID'] ?? null;
 $Checkin_One = $_POST['Checkin_One'] ?? null;
 $Date = date('Y-m-d'); // Get the current date
+$ProjectID = 0;
 
 try {
     // Connect to MySQL
@@ -31,28 +32,38 @@ try {
         $afternoonCheckoutStart = new DateTime('16:00:00');
         $afternoonCheckoutEnd = new DateTime('17:00:00');
 
+				// Fetch employee information based on Employee_ID
+        $employeeSQL = "SELECT * FROM employees WHERE id = :Employee_ID";
+        $stmt = $mysqlPDO->prepare($employeeSQL);
+        $stmt->execute([':Employee_ID' => $Employee_ID]);
+        $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+				
+				if($employee->project_id) {
+					$ProjectID = $employee->project_id;
+				}
+
         if ($checkinTime >= $morningCheckinStart && $checkinTime <= $morningCheckinEnd) {
             // Morning check-in
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date) ON DUPLICATE KEY UPDATE Checkin_One = :Checkin_One, Date = :Date";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $morningCheckoutStart && $checkinTime <= $morningCheckoutEnd) {
             // Morning check-out
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date) ON DUPLICATE KEY UPDATE Checkout_One = :Checkin_One, Date = :Date";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $afternoonCheckinStart && $checkinTime <= $afternoonCheckinEnd) {
             // Afternoon check-in
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date) ON DUPLICATE KEY UPDATE Checkin_Two = :Checkin_One, Date = :Date";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $afternoonCheckoutStart && $checkinTime <= $afternoonCheckoutEnd) {
             // Afternoon check-out
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date) ON DUPLICATE KEY UPDATE Checkout_Two = :Checkin_One, Date = :Date";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } else {
             throw new Exception("Invalid check-in time.");
         }
 
 
         echo "SQL: $insertSQL\n";
-        echo "Parameters: Employee_ID = $Employee_ID, Checkin_One = $Checkin_One, Date = $Date\n";
+        echo "Parameters: Employee_ID = $Employee_ID, Checkin_One = $Checkin_One, Date = $Date, ProjectID= $$ProjectID\n";
 
         $stmt = $mysqlPDO->prepare($insertSQL);
-        $stmt->execute([':Employee_ID' => $Employee_ID, ':Checkin_One' => $Checkin_One, ':Date' => $Date]);
+        $stmt->execute([':Employee_ID' => $Employee_ID, ':Checkin_One' => $Checkin_One, ':Date' => $Date, ':ProjectID' => $ProjectID]);
 
         echo "Data transferred successfully.";
     } else {
