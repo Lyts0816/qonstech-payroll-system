@@ -34,4 +34,10 @@ class Loan extends Model
         return $this->belongsTo(WeekPeriod::class, 'PeriodID');
     }
 
+    // In Loan.php
+    public function loandtl()
+    {
+        return $this->hasMany(LoanDtl::class, 'loanid', 'id'); // Adjust accordingly
+    }
+
 }
