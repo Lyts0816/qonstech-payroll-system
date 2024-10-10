@@ -9,7 +9,7 @@ class LoanDtl extends Model
 {
     use HasFactory;
 
-    protected $table = 'loan_details'; // Specify the table name if it's different from the pluralized model name
+    protected $table = 'loandtl'; // Specify the table name if it's different from the pluralized model name
 
     protected $fillable = [
         'loanid',
