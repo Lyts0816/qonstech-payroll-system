@@ -112,8 +112,8 @@
         display: flex;
         justify-content: space-between;
         padding: 10px;
-        margin-top: 30px;
-        margin-bottom: 30px;
+        /* margin-top: 30px; */
+        /* margin-bottom: 30px; */
         font-size: 12px;
     }
 
