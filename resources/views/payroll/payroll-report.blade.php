@@ -117,20 +117,20 @@
                     $employeeda = $payrollData->first();
                     $formattedPeriod = '';
                     if (isset($employeeda['Period'])) {
-                    $dates = explode(' - ', $employeeda['Period']);
-                    if (count($dates) == 2) {
-                        $startDate = \Carbon\Carbon::parse($dates[0])->format('m-d-Y');
-                        $endDate = \Carbon\Carbon::parse($dates[1])->format('m-d-Y');
-                        $formattedPeriod = "{$startDate} - {$endDate}";
+                        $dates = explode(' - ', $employeeda['Period']);
+                        if (count($dates) == 2) {
+                            $startDate = \Carbon\Carbon::parse($dates[0])->format('m-d-Y');
+                            $endDate = \Carbon\Carbon::parse($dates[1])->format('m-d-Y');
+                            $formattedPeriod = "{$startDate} - {$endDate}";
+                        }
                     }
-                }
                 @endphp
                 @if ($employeeda)
                     <h1>Payroll Summary Report</h1>
                     {{-- <p>Period covered: {{ $employeeda['Period'] ?? '' }}</p> --}}
                     <p>Period covered: {{ $formattedPeriod }}</p>
                     <p class="project-name">{{ $employeeda['ProjectName'] ?? '' }}</p>
-                    
+
                 @endif
             </div>
             <img src="{{ asset('images/qonstech.png') }}" alt="Company Logo" class="logo">
@@ -149,7 +149,8 @@
                     <th rowspan="2">Regular Status</th> --}}
                     <th rowspan="2">Regular Hours</th>
                     <th rowspan="2">Tardiness</th>
-                    <th rowspan="2">Absences</th>
+                    <th rowspan="2">Undertime</th>
+                    <!-- <th rowspan="2">Absences</th> -->
                     <th rowspan="2">Total Hours</th>
                     <th rowspan="2">O.T Hours</th>
                     {{-- <th rowspan="2">Sunday Hours</th> --}}
@@ -173,11 +174,12 @@
                     <th>SSS</th>
                     <th>PHIC</th>
                     <th>HDMF</th>
+                    <th>SSS LOAN</th>
+                    <th>SALARY LOAN</th>
+                    <th>HDMF LOAN</th>
                     <th>Total Government Deduction</th>
-                    <th>Cash Advances</th>
-                    <th>Salary Loan</th>
-                    <th>SSS Loan</th>
-                    <th>HDMF Loan</th>
+                    <th>CASH ADVANCES</th>
+                    <th>Loans</th>
                     {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
@@ -194,8 +196,8 @@
 
 
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        <td>{{ number_format('0') }}</td>
-                        <td>{{ number_format('0') }}</td>
+                        <td>{{ number_format($employee['TotalTardiness'] ?? 0, 2) }}</td>
+                        <td>{{ number_format($employee['TotalUndertime'] ?? 0, 2) }}</td>
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
@@ -215,12 +217,13 @@
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
-                        <td>P{{ number_format('0') }}</td>
-                        <td>P{{ number_format('0') }}</td>
                         <td>P{{ number_format('0') }}</td>
 
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
@@ -250,7 +253,7 @@
                 <p>Mary Jane Villanueva</p>
                 <p>VP FINANCE</p>
             </div>
-            
+
         </div>
         <b>Date Generated: {{ now()->format('m-d-Y H:i:s') }}</b>
     </div>
@@ -259,29 +262,29 @@
     <button id="exportPDF">Export to PDF</button>
 
     <script>
-document.getElementById('exportPDF').addEventListener('click', function () {
-    const { jsPDF } = window.jspdf;
+        document.getElementById('exportPDF').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
 
-    // Initialize jsPDF with landscape orientation and custom size (8x13 inches)
-    const doc = new jsPDF('landscape', 'pt', [576, 936]);
+            // Initialize jsPDF with landscape orientation and custom size (8x13 inches)
+            const doc = new jsPDF('landscape', 'pt', [576, 936]);
 
-    const element = document.querySelector('.container');
+            const element = document.querySelector('.container');
 
-    if (element) {
-        doc.html(element, {
-            callback: function (doc) {
-                doc.save('payroll-report.pdf');
-            },
-            x: 10,
-            y: 10,
-            autoPaging: 'text',
-            width: 800, // Adjust width to fit the 8x13 size
-            windowWidth: 1200
+            if (element) {
+                doc.html(element, {
+                    callback: function (doc) {
+                        doc.save('payroll-report.pdf');
+                    },
+                    x: 10,
+                    y: 10,
+                    autoPaging: 'text',
+                    width: 800, // Adjust width to fit the 8x13 size
+                    windowWidth: 1200
+                });
+            } else {
+                console.error('Element .container not found!');
+            }
         });
-    } else {
-        console.error('Element .container not found!');
-    }
-});
 
     </script>
 </body>

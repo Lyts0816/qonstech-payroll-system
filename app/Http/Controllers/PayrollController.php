@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\LoanDtl;
 use Carbon\Carbon;
+use DatePeriod;
+use DateInterval;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -16,9 +19,9 @@ class PayrollController extends Controller
             'EmployeeStatus' => 'required|string',
             'assignment' => 'required|string',
             'ProjectID' => 'nullable|string|integer',
-             // Adjust according to your requirement
+            // Adjust according to your requirement
         ]);
-        
+
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -47,7 +50,7 @@ class PayrollController extends Controller
         foreach ($employeesWPosition as $employee) {
             $newRecord = $request->all();
             // dd($employee->first_name, $employee->middle_name, $employee->last_name);
-            
+
             $newRecord['EmployeeID'] = $employee->id;
             $newRecord['first_name'] = $employee->first_name;
             $newRecord['middle_name'] = $employee->middle_name ?? Null;
@@ -132,6 +135,9 @@ class PayrollController extends Controller
             $TotalOvertimeHours = 0;
             $TotalOvertimePay = 0;
             $DeductionFee = 0;
+            $TotalTardiness = 0;
+            $TotalUndertime = 0;
+
             foreach ($finalAttendance as $attendances) {
                 // dd($attendances);
                 $attendanceDate = Carbon::parse($attendances['Date']);
@@ -181,7 +187,10 @@ class PayrollController extends Controller
 
                         // Calculate worked hours for morning shift (in hours)
                         $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                        $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+                        $effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+                        $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+                        $underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+                        $tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                         $workedMorningHours = $workedMorningMinutes / 60;
                         // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
@@ -194,7 +203,10 @@ class PayrollController extends Controller
 
                         // Calculate worked hours for afternoon shift (in hours)
                         $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                        $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+                        $effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+                        $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+                        $underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+                        $tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                         $workedAfternoonHours = $workedAfternoonMinutes / 60;
                         // $workedAfternoonHours = $checkinTwo->diffInMinutes($checkoutTwo) / 60;
 
@@ -207,13 +219,21 @@ class PayrollController extends Controller
 
                         // $TotalHours += $netWorkedHours;
                         $TotalHoursSunday += $SundayWorkedHours; // Add to Sunday worked hours
+                        $TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes : 0)
+                            + ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes : 0);
+
+                        $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
+                            + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
+
+                        $newRecord['TotalTardiness'] = $TotalTardiness;
+                        $newRecord['TotalUndertime'] = $TotalUndertime;
                         $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
                         // If date is Holiday
                         // dd(count(value: $Holiday));
 
-												// check if Holiday exist on $attendanceDate AND if that holiday is used for the project/area
-                        if (count(value: $Holiday) > 0 && $Holiday[0]->ProjectID == $employee->project_id) { 
+                        // check if Holiday exist on $attendanceDate AND if that holiday is used for the project/area
+                        if (count(value: $Holiday) > 0 && $Holiday[0]->ProjectID == $employee->project_id) {
                             $morningStart = Carbon::createFromTime($In1Array[0], $In1Array[1], $In1Array[2]); // 8:00 AM
                             $morningEnd = Carbon::createFromTime($Out1Array[0], $Out1Array[1], $Out1Array[2]);  // 12:00 PM
                             $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
@@ -225,7 +245,10 @@ class PayrollController extends Controller
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningEnd) / 60 : 0;
 
                             $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+                            $effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+                            $underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+                            $tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
@@ -235,7 +258,10 @@ class PayrollController extends Controller
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
                             $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+                            $effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+                            $underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+                            $tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                             $workedAfternoonHours = $workedAfternoonMinutes / 60;
                             // $workedAfternoonHours = $checkinTwo->diffInMinutes($checkoutTwo) / 60;
 
@@ -256,6 +282,15 @@ class PayrollController extends Controller
                                 $newRecord['TotalHrsSpecialHol'] = $TotalHrsSpecialHol;
 
                             }
+
+                            $TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes : 0)
+                                + ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes : 0);
+
+                            $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
+                                + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
+
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -273,7 +308,10 @@ class PayrollController extends Controller
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningStart) / 60 : 0;
 
                             $effectiveCheckinOne = $checkinOne->greaterThan($morningStart) ? $checkinOne : $morningStart;
-                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($morningEnd);
+                            $effectiveCheckOutOne = $checkoutOne->lessThan($morningEnd) ? $checkoutOne : $morningEnd;
+                            $workedMorningMinutes = $effectiveCheckinOne->diffInMinutes($checkoutOne);
+                            $underTimeMorningMinutes = $effectiveCheckOutOne->diffInMinutes($morningEnd);
+                            $tardinessMorningMinutes = $morningStart->diffInMinutes($checkinOne);
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($morningEnd) / 60;
 
@@ -283,7 +321,10 @@ class PayrollController extends Controller
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
                             $effectivecheckinTwo = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo : $afternoonStart;
-                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($afternoonEnd);
+                            $effectiveCheckOutTwo = $checkoutTwo->lessThan($afternoonEnd) ? $checkoutTwo : $afternoonEnd;
+                            $workedAfternoonMinutes = $effectivecheckinTwo->diffInMinutes($checkoutTwo);
+                            $underTimeAfternoonMinutes = $effectiveCheckOutTwo->diffInMinutes($afternoonEnd);
+                            $tardinessAfternoonMinutes = $afternoonStart->diffInMinutes($checkinTwo);
                             $workedAfternoonHours = $workedAfternoonMinutes / 60;
 
                             $totalWorkedHours = $workedMorningHours + $workedAfternoonHours;
@@ -294,6 +335,14 @@ class PayrollController extends Controller
                             // $SundayWorkedHours = $totalSundayWorkedHours - $totalSundayLateHours;
 
                             $TotalHours += $netWorkedHours;
+                            $TotalTardiness += ($tardinessMorningMinutes > 0 ? $tardinessMorningMinutes : 0)
+                                + ($tardinessAfternoonMinutes > 0 ? $tardinessAfternoonMinutes : 0);
+
+                            $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
+                                + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
+
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }
@@ -391,74 +440,64 @@ class PayrollController extends Controller
                 // $TotalEarningPay = $EarningPay;
             }
 
-            // Get the loan for the employee and period
-            $loan = \App\Models\Loan::where('EmployeeID', $employee->id)
-                ->where('PeriodID', $request->weekPeriodID)
-                ->first();
-            if ($loan) {
-                // Check if payroll is already generated for this period and employee
-                $existingPayroll = \App\Models\Payroll::where('weekPeriodID', $request->weekPeriodID)
-                    ->exists();
-                if ($existingPayroll) {
-                    $newDeduction = new \App\Models\Deduction();
-                    // Initialize variables for SSS and HDMF loan deductions
-                    $SSSDeduction = 0;
-                    $HDMFDeduction = 0;
-                    // Deduct the number of payments based on LoanType
-                    if ($loan->PaymentsRemaining > 0) {
-                        switch ($loan->LoanType) {
-                            case 'Monthly':
-                                // For monthly loans, deduct 1 payment
-                                $loan->PaymentsRemaining -= 1;
-                                $loan->Balance -= $loan->MonthlyDeduction;
-                                break;
+            // Get loans for the employee filtered by LoanType
+            $loans = \App\Models\Loan::where('EmployeeID', $employee->id)
+                ->whereIn('LoanType', ['SSS Loan', 'Pagibig Loan', 'Salary Loan']) // Filter by loan types
+                ->get();
 
-                            case 'Kinsenas':
-                                // For Kinsenas, deduct after 2 payroll periods in the same month
-                                // Check how many payrolls have been generated for the month
-                                $payrollCountKinsenas = \App\Models\Payroll::whereMonth('weekPeriodID', Carbon::now()->month)
-                                    ->where('LoanType', 'Kinsenas')
-                                    ->count();
+            // Initialize new record array for deduction amounts
+            $newRecord['SSSLoan'] = 0;
+            $newRecord['PagibigLoan'] = 0;
+            $newRecord['SalaryLoan'] = 0;
 
-                                if ($payrollCountKinsenas % 2 == 0) { // Deduct every 2 payrolls
-                                    $loan->PaymentsRemaining -= 1;
-                                    $loan->Balance -= $loan->KinsenaDeduction;
+            // Iterate over each loan to calculate deductions
+            foreach ($loans as $loan) {
+                // Get loan details for the specific week period
+                $loanDetails = LoanDtl::where('LoanID', $loan->id) // Assuming LoanID is the foreign key in LoanDetail
+                    ->where('PeriodID', $request->weekPeriodID)
+                    ->get();
 
-                                    // Store SSS and HDMF deductions
-                                    $newRecord['$SSSDeduction'] = $loan->KinsenaDeduction;  // Assuming SSS loan for Kinsena
-                                    $newRecord['$HDMFDeduction'] = $loan->KinsenaDeduction; // Assuming HDMF loan for Kinsena
-                                }
-                                break;
+                // Initialize deduction amount for this loan type
+                $deductionAmount = 0;
 
-                            case 'Weekly':
-                                // For weekly loans, deduct after 4 payroll periods in the same month
-                                // Check how many payrolls have been generated for the month
-                                $payrollCountWeekly = \App\Models\Payroll::whereMonth('weekPeriodID', Carbon::now()->month)
-                                    ->where('LoanType', 'Weekly')
-                                    ->count();
+                // Iterate over loan details to calculate the total deduction amount
+                foreach ($loanDetails as $detail) {
+                    // Sum up the deduction amounts
+                    $deductionAmount += $detail->Amount; // Assuming Amount is the deduction amount in LoanDtl
 
-                                if ($payrollCountWeekly % 4 == 0) { // Deduct every 4 payrolls
-                                    $loan->PaymentsRemaining -= 1;
-                                    $loan->Balance -= $loan->WeeklyDeduction;
+                    // Check if the detail is already paid; if not, proceed to update
+                    if (!$detail->IsPaid) { // Assuming 'isPaid' is a boolean column indicating payment status
+                        // Mark loan detail as paid
+                        $detail->IsPaid = true;
+                        $detail->save(); // Save the updated loan detail
 
-                                    // Store SSS and HDMF deductions
-                                    $newRecord['$SSSDeduction'] = $loan->WeeklyDeduction;  // Assuming SSS loan for Weekly
-                                    $newRecord['$HDMFDeduction'] = $loan->WeeklyDeduction; // Assuming HDMF loan for Weekly
-                                }
-                                break;
-                        }
-
-                        // Ensure the balance doesn't go below zero
-                        if ($loan->Balance < 0) {
-                            $loan->Balance = 0;
-                        }
-
-                        // Save the updated loan record
-                        $loan->save();
+                        // Deduct the payment from the loan balance
+                        $loan->Balance -= $detail->Amount; // Deduct the amount from loan balance
                     }
                 }
-            }
 
+                // Store the deduction amount in the new record array by loan type
+                switch ($loan->LoanType) {
+                    case 'SSS Loan':
+                        $newRecord['SSSLoan'] += $deductionAmount; // Add to SSSLoan
+                        break;
+                    case 'Pagibig Loan':
+                        $newRecord['PagibigLoan'] += $deductionAmount; // Add to PagibigLoan
+                        break;
+                    case 'Salary Loan':
+                        $newRecord['SalaryLoan'] += $deductionAmount; // Add to SalaryLoan
+                        break;
+                }
+
+                //Save the updated loan after processing all loan details
+                if ($loan->Balance < 0) {
+                    $loan->Balance = 0; // Ensure the balance does not go below zero
+                }
+                $loan->save(); // Save the updated loan record
+            }
+            // dd($newRecord['SSSLoan'], $newRecord['PagibigLoan'], $newRecord['SalaryLoan']);
+
+            // }
 
 
 
@@ -560,10 +599,10 @@ class PayrollController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
-            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee;
+            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
-            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction;
+            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
 
             $TotalOfficeDeductions = $DeductionFee;

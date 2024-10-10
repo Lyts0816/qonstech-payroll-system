@@ -44,16 +44,16 @@ try {
 
         if ($checkinTime >= $morningCheckinStart && $checkinTime <= $morningCheckinEnd) {
             // Morning check-in
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_One, Date, ProjectID) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $morningCheckoutStart && $checkinTime <= $morningCheckoutEnd) {
             // Morning check-out
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_One, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_One, Date, ProjectID) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_One = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $afternoonCheckinStart && $checkinTime <= $afternoonCheckinEnd) {
             // Afternoon check-in
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkin_Two, Date, ProjectID) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkin_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } elseif ($checkinTime >= $afternoonCheckoutStart && $checkinTime <= $afternoonCheckoutEnd) {
             // Afternoon check-out
-            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_Two, Date) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
+            $insertSQL = "INSERT INTO attendance (Employee_ID, Checkout_Two, Date, ProjectID) VALUES (:Employee_ID, :Checkin_One, :Date, :ProjectID) ON DUPLICATE KEY UPDATE Checkout_Two = :Checkin_One, Date = :Date, ProjectID = :ProjectID";
         } else {
             throw new Exception("Invalid check-in time.");
         }
