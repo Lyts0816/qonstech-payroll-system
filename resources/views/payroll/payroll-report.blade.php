@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payroll Summary Report</title>
     <style>
+        @page {
+            size: Legal;
+            margin: 10px;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -65,7 +70,6 @@
         td {
             border: 2px solid #000;
             padding: 3px;
-            /* Reduced padding to fit more content */
             text-align: center;
         }
 
@@ -174,8 +178,10 @@
                     <th>SALARY LOAN</th>
                     <th>HDMF LOAN</th>
                     <th>Total Government Deduction</th>
-                    <th>CASH ADVANCES</th>
-                    <!-- <th>Loans</th> -->
+                    <th>Cash Advances</th>
+                    <!-- <th>Salary Loan</th> -->
+                    <!-- <th>SSS Loan</th> -->
+                    <!-- <th>HDMF Loan</th> -->
                     {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
@@ -214,13 +220,15 @@
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
-                        <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
-                        <!-- <td>P{{ number_format('0') }}</td> -->
+                        <!-- <td>P{{ number_format('0') }}</td>
+                            <td>P{{ number_format('0') }}</td>
+                            <td>P{{ number_format('0') }}</td> -->
 
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
@@ -261,7 +269,7 @@
         document.getElementById('exportPDF').addEventListener('click', function () {
             const { jsPDF } = window.jspdf;
 
-            // Initialize jsPDF with landscape orientation and custom size (8x13 inches)
+            // Initialize jsPDF with landscape orientation and a custom size (8x13 inches)
             const doc = new jsPDF('landscape', 'pt', [576, 936]);
 
             const element = document.querySelector('.container');
@@ -274,8 +282,9 @@
                     x: 10,
                     y: 10,
                     autoPaging: 'text',
-                    width: 800, // Adjust width to fit the 8x13 size
-                    windowWidth: 1200
+                    width: 900,          // Adjusted width to ensure the table fits well
+                    windowWidth: 1300,    // Adjusted window width for better scaling
+                    scale: 0.8            // Scales content to fit within defined dimensions
                 });
             } else {
                 console.error('Element .container not found!');
