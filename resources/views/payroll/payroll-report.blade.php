@@ -179,9 +179,9 @@
                     <th>HDMF LOAN</th>
                     <th>Total Government Deduction</th>
                     <th>Cash Advances</th>
-                    <th>Salary Loan</th>
-                    <th>SSS Loan</th>
-                    <th>HDMF Loan</th>
+                    <!-- <th>Salary Loan</th> -->
+                    <!-- <th>SSS Loan</th> -->
+                    <!-- <th>HDMF Loan</th> -->
                     {{-- <th>Total Office Deduction & Adjustment</th> --}}
                 </tr>
             </thead>
@@ -220,15 +220,15 @@
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
-                        <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
+                        <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
+                        <!-- <td>P{{ number_format('0') }}</td>
                         <td>P{{ number_format('0') }}</td>
-                        <td>P{{ number_format('0') }}</td>
-                        <td>P{{ number_format('0') }}</td>
+                        <td>P{{ number_format('0') }}</td> -->
 
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
