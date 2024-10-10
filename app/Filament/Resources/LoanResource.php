@@ -31,7 +31,6 @@ class LoanResource extends Resource
     {
         return $form
             ->schema([
-                // Your form schema goes here...
                 Section::make('Loan Information')
                     ->schema([
                         Select::make('EmployeeID')
@@ -53,8 +52,9 @@ class LoanResource extends Resource
                                 $set('WeeklyDeduction', null);
                                 $set('KinsenaDeduction', null);
                                 $set('MonthlyDeduction', null);
+                                $set('Balance', null);  // Reset Balance as well
                             }),
-
+    
                         Select::make('PeriodID')
                             ->label('Select Starting Period')
                             ->options(function (callable $get) {
@@ -75,7 +75,7 @@ class LoanResource extends Resource
                             })
                             ->required()
                             ->reactive(),
-
+    
                         Select::make('LoanType')
                             ->label('Loan Type')
                             ->options([
@@ -84,7 +84,7 @@ class LoanResource extends Resource
                                 'Pagibig Loan' => 'Pagibig Loan',
                             ])
                             ->required(),
-
+    
                         TextInput::make('LoanAmount')
                             ->label('Loan Amount')
                             ->required()
@@ -99,8 +99,11 @@ class LoanResource extends Resource
                                     $set('KinsenaDeduction', self::calculateKinsenaDeduction($loanAmount, $numberOfPayments));
                                     $set('MonthlyDeduction', self::calculateMonthlyDeduction($loanAmount, $numberOfPayments));
                                 }
+    
+                                // Set Balance as the same as LoanAmount initially
+                                $set('Balance', $loanAmount);
                             }),
-
+    
                         TextInput::make('NumberOfPayments')
                             ->label('Number of Monthly Payments')
                             ->required()
@@ -115,21 +118,27 @@ class LoanResource extends Resource
                                     $set('MonthlyDeduction', self::calculateMonthlyDeduction($loanAmount, $numberOfPayments));
                                 }
                             }),
-
+    
                         TextInput::make('MonthlyDeduction')
                             ->numeric()
                             ->dehydrated(true),
-
+    
                         TextInput::make('KinsenaDeduction')
                             ->numeric()
                             ->dehydrated(true),
-
-                        // TextInput::make('WeeklyDeduction')
-                        //     ->numeric()
-                        //     ->dehydrated(true),
+    
+                        // New field for Balance
+                        TextInput::make('Balance')
+                        ->label('Balance')
+                        ->numeric()
+                        ->required()
+                        ->disabled()  // Prevents user editing
+                        ->dehydrated(true)  // Ensures the value is saved
+                        ->reactive(),
                     ])->columns(4)->collapsible(true),
             ]);
     }
+    
 
     // Helper functions to calculate deductions
     private static function calculateWeeklyDeduction($loanAmount, $numberOfPayments)
