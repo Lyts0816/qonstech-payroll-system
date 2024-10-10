@@ -74,17 +74,14 @@ class CreateLoan extends CreateRecord
             // Update the periodID for the next iteration
             $periodID = $nextPeriod->id;
 
-            // Debugging output
-            // Log current values for debugging
-            \Log::info("Current Period: ", [$currentPeriod]);
-            \Log::info("Next Period: ", [$nextPeriod]);
-            \Log::info("Iteration: $i, Total Payments: $noOfPayments");
+            // // Debugging output
+            // // Log current values for debugging
+            // \Log::info("Current Period: ", [$currentPeriod]);
+            // \Log::info("Next Period: ", [$nextPeriod]);
+            // \Log::info("Iteration: $i, Total Payments: $noOfPayments");
         }
 
         // Optionally return the request or created record after processing
         return $request;
     }
-
-
-
 }
