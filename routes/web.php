@@ -11,6 +11,9 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\TransferController;
+
+
 
 
 // Other routes...
@@ -22,6 +25,7 @@ Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])
 Route::get('/generate-reports', [ReportsController::class, 'generateReports'])->name('generate.reports');
 
 Route::get('/payroll-report', [PayrollController::class, 'showReport'])->name('payroll-report');
+Route::get('/transfer', [TransferController::class, 'runTransfer']);
 
 Route::redirect('/', '/admin/login');
 
