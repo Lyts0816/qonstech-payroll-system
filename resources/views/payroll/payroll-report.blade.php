@@ -215,7 +215,7 @@
                         <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
                         <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
-                        <td>P{{ number_format(0, 2) }}</td>
+                        <td>P{{ number_format($employee['WTAXDeduction'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
