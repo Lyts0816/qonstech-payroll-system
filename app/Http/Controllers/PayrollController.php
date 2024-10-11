@@ -129,6 +129,7 @@ class PayrollController extends Controller
             $SSSDeduction = 0;
             $PagIbigDeduction = 0;
             $PhilHealthDeduction = 0;
+            $WTAXDeduction = 0;
             $EarningPay = 0;
             $RegHolidayWorkedHours = 0; // initialize as zero
             $SpecialHolidayWorkedHours = 0;
@@ -350,12 +351,23 @@ class PayrollController extends Controller
 
             }
             // dd($newRecord['EmployeeID);
+// Fetch the selected WeekPeriod
+            $otweekPeriod = \App\Models\WeekPeriod::where('id', $request->weekPeriodID)->first();
+
+            // Assuming $weekPeriod has StartDate and EndDate fields
+            $startDate = Carbon::parse($otweekPeriod->StartDate);
+            $endDate = Carbon::parse($otweekPeriod->EndDate);
+
+            // Fetch approved overtime records for the employee within the selected week period
             $OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord['EmployeeID'])
                 ->where('Status', 'approved') // Only consider approved overtime
+                ->whereBetween('Date', [$startDate, $endDate]) // Filter by date range
                 ->get();
 
-            if (count($OtDate) > 0) {
+            // Initialize total overtime hours
+            $TotalOvertimeHours = 0;
 
+            if ($OtDate->count() > 0) {
                 foreach ($OtDate as $otRecord) {
                     // Extract the check-in and check-out times from the overtime record
                     $In1s = $otRecord->Checkin;
@@ -379,6 +391,36 @@ class PayrollController extends Controller
                 // Store the total overtime hours in the new record
                 $newRecord['TotalOvertimeHours'] = $TotalOvertimeHours;
             }
+
+            // $OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord['EmployeeID'])
+            //     ->where('Status', 'approved') // Only consider approved overtime
+            //     ->get();
+
+            // if (count($OtDate) > 0) {
+
+            //     foreach ($OtDate as $otRecord) {
+            //         // Extract the check-in and check-out times from the overtime record
+            //         $In1s = $otRecord->Checkin;
+            //         $InOT = explode(':', $In1s);
+
+            //         $Out1s = $otRecord->Checkout;
+            //         $OutOT = explode(':', $Out1s);
+
+            //         // Create Carbon instances for the check-in and check-out times
+            //         $OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]);
+            //         $OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);
+
+            //         // Calculate the overtime worked in minutes, then convert to hours
+            //         $workedOTMinutes = $OTStart->diffInMinutes($OTEnd);
+            //         $workedOTHours = $workedOTMinutes / 60;
+
+            //         // Add to the total overtime hours
+            //         $TotalOvertimeHours += $workedOTHours;
+            //     }
+
+            //     // Store the total overtime hours in the new record
+            //     $newRecord['TotalOvertimeHours'] = $TotalOvertimeHours;
+            // }
 
 
             // For Earnings
@@ -473,14 +515,15 @@ class PayrollController extends Controller
 
             $GetPhilHealth = \App\Models\philhealth::get();
 
+            $GetWTAX = \App\Models\Tax::get();
             // $weekPeriod = \App\Models\WeekPeriod::where('id', $request->weekPeriodID)->first();
 
             if ($weekPeriod) {
                 // For Kinsenas (1st Kinsena or 2nd Kinsena)
                 if ($weekPeriod->Category == 'Kinsenas') {
-                    $deductionFactor = $weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena' ? 2 : 1;
+                    $deductionFactor = ($weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena') ? 2 : 1;
 
-                    // SSS Deduction for Kinsenas (1st or 2nd half of the month)
+                    // SSS Deduction for Kinsenas
                     foreach ($GetSSS as $sss) {
                         if ($sss->MinSalary <= $employee->MonthlySalary && $sss->MaxSalary >= $employee->MonthlySalary) {
                             $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
@@ -492,11 +535,21 @@ class PayrollController extends Controller
                     // PagIbig Deduction for Kinsenas
                     foreach ($GetPagibig as $pagibig) {
                         if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                            $PagIbigDeduction = ($pagibig->EmployeeRate / $deductionFactor);
+                            // Set a static amount for employee and employer share
+                            $PagIbigDeduction = 200 / $deductionFactor; // Divide by deduction factor for Kinsenas or Weekly
                             $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
                             break;
                         }
                     }
+
+                    // // PagIbig Deduction for Kinsenas
+                    // foreach ($GetPagibig as $pagibig) {
+                    //     if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
+                    //         $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                    //         $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
+                    //         break;
+                    //     }
+                    // }
 
                     // PhilHealth Deduction for Kinsenas
                     foreach ($GetPhilHealth as $philhealth) {
@@ -511,27 +564,37 @@ class PayrollController extends Controller
                         }
                     }
 
+                    // WTAX Deduction for Kinsenas
+                    foreach ($GetWTAX as $wTax) {
+                        if ($wTax->MinSalary <= $employee->MonthlySalary && $wTax->MaxSalary >= $employee->MonthlySalary) {
+                            $excess = $employee->MonthlySalary - $wTax->MinSalary;
+                            $WTAXAnnual = $wTax->base_rate + ($excess * ($wTax->exceess_percent / 100));
+                            $WTAXDeduction = $WTAXAnnual / $deductionFactor; // Dividing by 12 for monthly and deductionFactor for Kinsenas
+                            $newRecord['WTAXDeduction'] = $WTAXDeduction;
+                            break;
+                        }
+                    }
                 } elseif ($weekPeriod->Category == 'Weekly') {
                     // For Weekly (Week 1, Week 2, Week 3, or Week 4)
                     $deductionFactor = 4; // Weekly deductions are typically divided into 4 parts
 
-                    // SSS Deduction for Weekly
-                    foreach ($GetSSS as $sss) {
-                        if ($sss->MinSalary <= $employee->MonthlySalary && $sss->MaxSalary >= $employee->MonthlySalary) {
-                            $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
-                            $newRecord['SSSDeduction'] = $SSSDeduction;
-                            break;
-                        }
-                    }
+                    // // SSS Deduction for Weekly
+                    // foreach ($GetSSS as $sss) {
+                    //     if ($sss->MinSalary <= $employee->MonthlySalary && $sss->MaxSalary >= $employee->MonthlySalary) {
+                    //         $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
+                    //         $newRecord['SSSDeduction'] = $SSSDeduction;
+                    //         break;
+                    //     }
+                    // }
 
-                    // PagIbig Deduction for Weekly
-                    foreach ($GetPagibig as $pagibig) {
-                        if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                            $PagIbigDeduction = $pagibig->EmployeeRate  / $deductionFactor;
-                            $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
-                            break;
-                        }
-                    }
+                    // // PagIbig Deduction for Weekly
+                    // foreach ($GetPagibig as $pagibig) {
+                    //     if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
+                    //         $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                    //         $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
+                    //         break;
+                    //     }
+                    // }
 
                     // PhilHealth Deduction for Weekly
                     foreach ($GetPhilHealth as $philhealth) {
@@ -542,6 +605,17 @@ class PayrollController extends Controller
                                 $PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary) / $deductionFactor;
                             }
                             $newRecord['PhilHealthDeduction'] = $PhilHealthDeduction;
+                            break;
+                        }
+                    }
+
+                    // WTAX Deduction for Weekly
+                    foreach ($GetWTAX as $wTax) {
+                        if ($wTax->MinSalary <= $employee->MonthlySalary && $wTax->MaxSalary >= $employee->MonthlySalary) {
+                            $excess = $employee->MonthlySalary - $wTax->MinSalary;
+                            $WTAXAnnual = $wTax->BaseRate + ($excess * ($wTax->ExcessPercent / 100));
+                            $WTAXDeduction = $WTAXAnnual / 12 / $deductionFactor; // Dividing by 12 for monthly and deductionFactor for Weekly
+                            $newRecord['WTAXDeduction'] = $WTAXDeduction;
                             break;
                         }
                     }
@@ -565,10 +639,10 @@ class PayrollController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
-            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
+            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
-            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction;
+            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'];
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
 
             $TotalOfficeDeductions = $DeductionFee;

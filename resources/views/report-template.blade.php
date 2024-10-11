@@ -292,12 +292,12 @@ switch ($reportType) {
             </tfoot>
         </table>
         <!-- Footer Section -->
-        <<div class="footer">
+        <div class="footer">
             <div class="footer-section">
-                <p><b>Prepared By:</b></p>
-                <p></p>
-                <p></p><b>Alma Mae S. Gepellano</b><br>
-                <small><em>HR OFFICER</em></small></p>
+                <p>Prepared By:</p>
+
+                <b>ALMA MAE S. GEPELLANO</b><br>
+                <small><em>Human Resource Officer</em></small>
 
             </div>
             <div class="footer-section">
@@ -306,7 +306,7 @@ switch ($reportType) {
                 <br>
 
             </div>
-    </div>
+        </div>
 
 
     </div>

@@ -86,7 +86,7 @@ class LoanResource extends Resource
                             ->required(),
     
                         TextInput::make('LoanAmount')
-                            ->label('Loan Amount')
+                            ->label('Total Amount Due')
                             ->required()
                             ->numeric()
                             ->reactive()

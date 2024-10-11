@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Payroll;
 use App\Models\Project;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
@@ -15,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,6 +40,7 @@ class AttendanceResource extends Resource
 
     public static function table(Table $table): Table
     {
+
 
         return $table
             ->columns([
@@ -105,42 +108,74 @@ class AttendanceResource extends Resource
                             }
                         ),
 
-                    // Date range filter with two columns
-                    Filter::make('date_range')
+                    Filter::make('start_date')
                         ->form([
-                            Forms\Components\Grid::make()
-                                ->schema([
-                                    Forms\Components\TextInput::make('start_date')
-                                        ->label('Start Date')
-                                        ->type('date')
-                                        ->default(now()->startOfMonth()->toDateString())
-                                        ->extraAttributes(['style' => 'width: 125%;']),
-                                    Forms\Components\TextInput::make('end_date')
-                                        ->label('End Date')
-                                        ->type('date')
-                                        ->default(now()->endOfMonth()->toDateString())
-                                        ->extraAttributes(['style' => 'width: 125%;']),
-                                ])
-                                ->columns(2),
+                            Forms\Components\TextInput::make('start_date')
+                                ->label('Start Date')
+                                ->type('date')
+                                ->default(now()->startOfMonth()->toDateString())
                         ])
                         ->query(
-                            fn(Builder $query, array $data) =>
-                            !empty ($data['start_date']) && !empty ($data['end_date']) ?
-                            $query->whereBetween('Date', [$data['start_date'], $data['end_date']]) : null
+                            fn(Builder $query, $data) =>
+                            !empty ($data['start_date']) ?
+                            $query->where('Date', '>=', $data['start_date']) : null
                         ),
+
+                    Filter::make('end_date')
+                        ->form([
+                            Forms\Components\TextInput::make('end_date')
+                                ->label('End Date')
+                                ->type('date')
+                                ->default(now()->endOfMonth()->toDateString())
+                        ])
+                        ->query(
+                            fn(Builder $query, $data) =>
+                            !empty ($data['end_date']) ?
+                            $query->where('Date', '<=', $data['end_date']) : null
+                        ),
+
                 ],
 
                 layout: FiltersLayout::AboveContent
             )
+
             ->headerActions([
                 Action::make('viewDtr')
                     ->label('View DTR')
                     ->color('primary')
                     ->url(fn() => route('dtr.show', [
-                        'employee_id' => Session::get('selected_employee_id'), // Get from session
-                        'project_id' => Session::get('selected_project_id'), // Get from session
+                        'employee_id' => Session::get('selected_employee_id'),
+                        'project_id' => Session::get('selected_project_id'),
                     ]))
                     ->openUrlInNewTab(),
+                Action::make('viewSummary')
+                    ->label('View Attendance Summary')
+                    ->color('success')
+                    ->form([
+                        Select::make('SelectPayroll')
+                            ->label('Select Payroll') // Label for the field
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options(function () {
+                                return Payroll::orderBy('PayrollYear')
+                                    ->orderBy('PayrollMonth')
+                                    ->orderBy('PayrollDate2')
+                                    ->get()
+                                    ->mapWithKeys(function ($payroll) {
+                                        $displayText = "{$payroll->PayrollMonth},{$payroll->PayrollYear} - {$payroll->PayrollDate2} | {$payroll->EmployeeStatus} - {$payroll->assignment} ";
+                                        return [$payroll->id => $displayText];
+                                    });
+                            })
+                            ->placeholder('Select Payroll Option')
+                            ->reactive()
+                    ])
+
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (array $data) {
+                        return redirect()->to(route('dtr.summary', [
+                            'payroll_id' => $data['SelectPayroll'], // Pass the selected payroll_id
+                        ]));
+                    })
+                    ->openUrlInNewTab()
             ])
             ->bulkActions([]);
 
