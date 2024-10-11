@@ -19,7 +19,7 @@
 
         .container {
             width: 100%;
-            max-width: 20in;
+            max-width: 14in;
             margin: 10px auto;
             border: 1px solid #000;
             padding: 10px;
@@ -160,7 +160,7 @@
                     {{-- <th rowspan="2">Paid Amount For Sunday Hours 30%</th> --}}
                     {{-- <th rowspan="2">Paid Amount For Legal Holiday</th>
                     <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
-                    <th rowspan="2">Other Allowance</th>
+                    {{-- <th rowspan="2">Other Allowance</th> --}}
                     <th rowspan="2">Gross Amount</th>
                     <th colspan="9">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
@@ -213,7 +213,7 @@
                         {{-- <td>p{{ number_format($employee['SundayPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
                         <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
-                        <td>P{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td>
+                        {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
                         <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
                         <td>P{{ number_format(0, 2) }}</td>
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
@@ -242,7 +242,7 @@
             <div>
                 <p>Prepared by:</p>
                 <p>_______________________</p>
-                <p>Alma Mae S. Gepellano</p>
+                <p>ALMA MAE S. GEPELLANO</p>
                 <p>HR OFFICER</p>
             </div>
             <div>
