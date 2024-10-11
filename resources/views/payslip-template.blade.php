@@ -98,8 +98,8 @@
 
 <body>
     <?php
-        $imageData = base64_encode(file_get_contents(public_path('images/qonstech.png')));
-        $src = 'data:image/png;base64,' . $imageData;
+$imageData = base64_encode(file_get_contents(public_path('images/qonstech.png')));
+$src = 'data:image/png;base64,' . $imageData;
     ?>
 
     <div>
@@ -115,7 +115,8 @@
                     @foreach ($payrollRecords as $employee)
                         <tr>
                             <th>Employee Name</th>
-                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}</td>
+                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
+                            </td>
                             <th>Employment Status</th>
                             <td>Regular</td>
                         </tr>
@@ -190,6 +191,10 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td>Tax</td>
+                            <td>PHP&nbsp;{{ number_format($employee['WTAXDeduction'] ?? 0, 2) }}</td>
+                        </tr>
+                        <tr>
                             <td>SSS</td>
                             <td>PHP&nbsp;{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
                         </tr>
@@ -202,9 +207,22 @@
                             <td>PHP&nbsp;{{ number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
                         </tr>
                         <tr>
+                            <td>SSS Loan</td>
+                            <td>PHP&nbsp;{{ number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Pagibig Loan</td>
+                            <td>PHP&nbsp;{{ number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Salary Loan</td>
+                            <td>PHP&nbsp;{{ number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
+                        </tr>
+                        <tr>
                             <td>Other Deductions</td>
                             <td>PHP&nbsp;{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         </tr>
+
                         <tr>
                             <td>Total Deductions</td>
                             <td><b>PHP&nbsp;{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</b></td>
