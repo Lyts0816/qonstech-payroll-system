@@ -43,7 +43,7 @@ class ReportResource extends Resource
             ->schema([
                 // EmployeeStatus Select Field
                 Select::make('ReportType')
-                    ->label('ReportType')
+                    ->label('Report Type')
                     ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                     ->options([
                         'SSS Contribution' => 'SSS Contribution',
@@ -61,26 +61,27 @@ class ReportResource extends Resource
                         }
                         $set('SelectPayroll', null);
                     }),
-                Select::make('SelectPayroll')
+
+                    Select::make('SelectPayroll')
                     ->label('Select Payroll')
                     ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                     ->options(function (callable $get) {
                         // Get the current ReportType value
                         $reportType = $get('ReportType');
-
+                
                         // Start the query to fetch payrolls
                         $payrollsQuery = Payroll::orderBy('PayrollYear')
                             ->orderBy('PayrollMonth')
                             ->orderBy('PayrollDate2');
-
+                
                         // Apply filter only for "SSS Contribution" to show Regular employees only
                         if ($reportType === 'SSS Contribution' || $reportType === 'Pagibig Contribution') {
                             $payrollsQuery->where('EmployeeStatus', 'Regular');
                         }
-
+                
                         // Fetch and format payroll options
                         return $payrollsQuery->get()->mapWithKeys(function ($payroll) {
-                            $displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
+                            $displayText = "{$payroll->PayrollMonth},{$payroll->PayrollYear} - {$payroll->PayrollDate2} | {$payroll->EmployeeStatus} - {$payroll->assignment} ";
                             return [$payroll->id => $displayText];
                         });
                     })
@@ -95,6 +96,7 @@ class ReportResource extends Resource
                         $set('assignment', null);
                         $set('ProjectID', null);
                         $set('weekPeriodID', null);
+                
                         if ($state) {
                             $payroll = Payroll::find($state);
                             if ($payroll) {
@@ -109,6 +111,7 @@ class ReportResource extends Resource
                             }
                         }
                     }),
+                
                 Fieldset::make('Payroll Details')// Create a two-column grid layout for the first two fields
                     ->schema([
 
@@ -169,7 +172,6 @@ class ReportResource extends Resource
                             ->native(false)
                             ->reactive()
                             ->afterStateUpdated(function (callable $set, $state) {
-                                // Automatically set PayrollFrequency based on EmployeeStatus if it is not set already
                                 if ($state === 'Regular') {
                                     $set('PayrollFrequency', 'Kinsenas');
                                 } else {
@@ -184,7 +186,6 @@ class ReportResource extends Resource
                             ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                             ->options(function (callable $get) {
                                 $frequency = $get('PayrollFrequency');
-
                                 if ($frequency == 'Kinsenas') {
                                     return [
                                         '1st Kinsena' => '1st-15th',

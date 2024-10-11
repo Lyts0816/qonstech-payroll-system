@@ -280,12 +280,12 @@ switch ($reportType) {
             </tfoot>
         </table>
         <!-- Footer Section -->
-        <<div class="footer">
+        <div class="footer">
             <div class="footer-section">
                 <p>Prepared By:</p>
-                
+
                 <b>ALMA MAE S. GEPELLANO</b><br>
-                <small><em>HR OFFICER</em></small>
+                <small><em>Human Resource Officer</em></small>
 
             </div>
             <div class="footer-section">
@@ -293,7 +293,7 @@ switch ($reportType) {
                 <b>{{ now()->format('F d, Y H:i:s') }}</b>
 
             </div>
-    </div>
+        </div>
 
 
     </div>

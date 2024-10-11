@@ -50,6 +50,29 @@
             width: 200px;
             height: auto;
         }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            /* margin-top: 30px; */
+            /* margin-bottom: 30px; */
+            font-size: 12px;
+        }
+
+        .footer-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .footer-section:first-child {
+            text-align: left;
+        }
+
+        .footer-section:last-child {
+            text-align: right;
+            margin-top: -90px;
+        }
     </style>
 </head>
 <?php
@@ -66,7 +89,7 @@ $src = 'data:image/png;base64,' . $imageData;
 
             <table>
                 @php
-                   $employee = $payrollRecords->first(); // Get the first employee record
+                    $employee = $payrollRecords->first(); // Get the first employee record
                     $formattedPeriod = 'N/A'; // Default value
 
                     if ($employee && isset($employee['Period'])) { // Check if the employee exists
@@ -119,6 +142,20 @@ $src = 'data:image/png;base64,' . $imageData;
                     @endforeach
                 </tbody>
             </table>
+            <div class="footer">
+                <div class="footer-section">
+                    <p>Prepared By:</p>
+
+                    <b>ALMA MAE S. GEPELLANO</b><br>
+                    <small><em>Human Resource Officer</em></small>
+
+                </div>
+                <div class="footer-section">
+                    <p>Date Generated:</p><br>
+                    <b>{{ now()->format('F d, Y H:i:s') }}</b>
+
+                </div>
+            </div>
         </div>
     </div>
 
