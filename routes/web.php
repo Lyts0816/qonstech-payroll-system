@@ -19,7 +19,7 @@ use App\Http\Controllers\TransferController;
 // Other routes...
 
 Route::get('/dtr/show', [AttendanceController::class, 'showDtr'])->name('dtr.show');
-
+Route::get('/dtr/summary', [AttendanceController::class, 'showSummary'])->name('dtr.summary');
 
 Route::get('/generate-payslips', [PayslipController::class, 'generatePayslips'])->name('generate.payslips');
 Route::get('/generate-reports', [ReportsController::class, 'generateReports'])->name('generate.reports');

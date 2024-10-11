@@ -30,62 +30,67 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\ButtonAction;
+use Filament\Forms\Components\Fieldset;
 
 class PayslipResource extends Resource
 {
     protected static ?string $model = Payslip::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // public static function getNavigationLabel(): string
+    // {
+    //     return 'Payslips and DTR';
+    // }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-							// Adding the new "Select Payroll" field at the top
-							Select::make('SelectPayroll')
-							->label('Select Payroll') // Label for the field
-							->required(fn(string $context) => $context === 'create' || $context === 'edit')
-							->options(function () {
-									// Fetch payrolls and format the display string
-									return Payroll::orderBy('PayrollYear')
-									->orderBy('PayrollMonth')
-									->orderBy('PayrollDate2')
-									->get()
-									->mapWithKeys(function ($payroll) {
-											$displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
-											return [$payroll->id => $displayText];
-									});
-							})
-							->placeholder('Select Payroll Option')
-							->reactive()
-							->afterStateUpdated(function (callable $set, $state) {
-								// When a payroll is selected, fetch details and update other fields
-								$set('EmployeeStatus', null);
-								$set('PayrollFrequency', null);
-								$set('PayrollMonth', null);
-								$set('PayrollYear', null);
-								$set('PayrollDate2', null);
-								$set('assignment', null); 
-								$set('ProjectID', null); 
-								$set('weekPeriodID', null); 
-								if ($state) {
-										$payroll = Payroll::find($state); // Fetch payroll by ID
+                // Adding the new "Select Payroll" field at the top
+                Select::make('SelectPayroll')
+                    ->label('Select Payroll') // Label for the field
+                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                    ->options(function () {
+                        // Fetch payrolls and format the display string
+                        return Payroll::orderBy('PayrollYear')
+                            ->orderBy('PayrollMonth')
+                            ->orderBy('PayrollDate2')
+                            ->get()
+                            ->mapWithKeys(function ($payroll) {
+                            $displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
+                            return [$payroll->id => $displayText];
+                        });
+                    })
+                    ->placeholder('Select Payroll Option')
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        // When a payroll is selected, fetch details and update other fields
+                        $set('EmployeeStatus', null);
+                        $set('PayrollFrequency', null);
+                        $set('PayrollMonth', null);
+                        $set('PayrollYear', null);
+                        $set('PayrollDate2', null);
+                        $set('assignment', null);
+                        $set('ProjectID', null);
+                        $set('weekPeriodID', null);
+                        if ($state) {
+                            $payroll = Payroll::find($state); // Fetch payroll by ID
+            
+                            if ($payroll) {
+                                // Update other fields with payroll data
+                                $set('EmployeeStatus', $payroll->EmployeeStatus);
+                                $set('PayrollFrequency', $payroll->PayrollFrequency);
+                                $set('PayrollMonth', $payroll->PayrollMonth);
+                                $set('PayrollYear', $payroll->PayrollYear);
+                                $set('PayrollDate2', $payroll->PayrollDate2);
+                                $set('assignment', $payroll->assignment);
+                                $set('ProjectID', $payroll->ProjectID);
+                                $set('weekPeriodID', $payroll->weekPeriodID);
+                            }
+                        }
+                    }),
 
-										if ($payroll) {
-												// Update other fields with payroll data
-												$set('EmployeeStatus', $payroll->EmployeeStatus);
-												$set('PayrollFrequency', $payroll->PayrollFrequency);
-												$set('PayrollMonth', $payroll->PayrollMonth);
-												$set('PayrollYear', $payroll->PayrollYear);
-												$set('PayrollDate2', $payroll->PayrollDate2);
-												$set('assignment', $payroll->assignment); 
-												$set('ProjectID', $payroll->ProjectID); 
-												$set('weekPeriodID', $payroll->weekPeriodID); 
-										}
-								}
-						}),
-							
-                Grid::make(2) // Create a two-column grid layout for the first two fields
+                Fieldset::make('Payroll Details') // Create a two-column grid layout for the first two fields
                     ->schema([
                         // EmployeeStatus Select Field
                         // EmployeeStatus Select Field
@@ -146,131 +151,132 @@ class PayslipResource extends Resource
                         //             }) // Combine names
                         //     )
                         //     ->reactive(),
-                    ]),
-
-                // PayrollFrequency Select Field
-                Select::make('PayrollFrequency')
-                    ->label('Payroll Frequency')
-                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options([
-                        'Kinsenas' => 'Kinsenas',
-                        'Weekly' => 'Weekly',
-                    ])
-                    ->native(false)
-                    ->reactive()
-                    ->afterStateUpdated(function (callable $set, $state) {
-                        // Automatically set PayrollFrequency based on EmployeeStatus if it is not set already
-                        if ($state === 'Regular') {
-                            $set('PayrollFrequency', 'Kinsenas');
-                        } else {
-                            $set('PayrollFrequency', 'Weekly');
-                        }
-                    }),
 
 
-                // PayrollDate Select Field
-                Select::make('PayrollDate2')
-                    ->label('Payroll Date')
-                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options(function (callable $get) {
-                        $frequency = $get('PayrollFrequency');
+                        // PayrollFrequency Select Field
+                        Select::make('PayrollFrequency')
+                            ->label('Payroll Frequency')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options([
+                                'Kinsenas' => 'Kinsenas',
+                                'Weekly' => 'Weekly',
+                            ])
+                            ->native(false)
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                // Automatically set PayrollFrequency based on EmployeeStatus if it is not set already
+                                if ($state === 'Regular') {
+                                    $set('PayrollFrequency', 'Kinsenas');
+                                } else {
+                                    $set('PayrollFrequency', 'Weekly');
+                                }
+                            }),
 
-                        if ($frequency == 'Kinsenas') {
-                            return [
-                                '1st Kinsena' => '1st-15th',
-                                '2nd Kinsena' => '16th-End of the Month',
-                            ];
-                        } elseif ($frequency == 'Weekly') {
-                            return [
-                                'Week 1' => 'Week 1',
-                                'Week 2' => 'Week 2',
-                                'Week 3' => 'Week 3',
-                                'Week 4' => 'Week 4',
-                            ];
-                        }
 
-                        return [];
-                    })
-                    ->native(false)
-                    ->reactive(),
+                        // PayrollDate Select Field
+                        Select::make('PayrollDate2')
+                            ->label('Payroll Date')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options(function (callable $get) {
+                                $frequency = $get('PayrollFrequency');
 
-                // PayrollMonth Select Field
-                Select::make('PayrollMonth')
-                    ->label('Payroll Month')
-                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options([
-                        'January' => 'January',
-                        'February' => 'February',
-                        'March' => 'March',
-                        'April' => 'April',
-                        'May' => 'May',
-                        'June' => 'June',
-                        'July' => 'July',
-                        'August' => 'August',
-                        'September' => 'September',
-                        'October' => 'October',
-                        'November' => 'November',
-                        'December' => 'December',
-                    ])
-                    ->native(false)
-                    ->reactive(),
-
-                // PayrollYear Select Field
-                Select::make('PayrollYear')
-                    ->label('Payroll Year')
-                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options(function () {
-                        $currentYear = date('Y');
-                        $years = [];
-                        for ($i = $currentYear - 5; $i <= $currentYear + 5; $i++) {
-                            $years[$i] = $i;
-                        }
-                        return $years;
-                    })
-                    ->native(false)
-                    ->reactive(),
-
-                // weekPeriodID Select Field
-                Select::make('weekPeriodID')
-                    ->label('Period')
-                    ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options(function (callable $get) {
-                        // Fetch selected values from other fields
-                        $month = $get('PayrollMonth');
-                        $frequency = $get('PayrollFrequency');
-                        $payrollDate = $get('PayrollDate2');
-                        $year = $get('PayrollYear');
-
-                        // Ensure that all necessary fields are filled before proceeding
-                        if ($month && $frequency && $payrollDate && $year) {
-                            try {
-                                // Convert month name to month number (e.g., 'January' to '01')
-                                $monthId = Carbon::createFromFormat('F', $month)->format('m');
-
-                                // Fetch WeekPeriod entries based on the selected criteria
-                                return WeekPeriod::where('Month', $monthId)
-                                    ->where('Category', $frequency)
-                                    ->where('Type', $payrollDate)
-                                    ->where('Year', $year)
-                                    ->get()
-                                    ->mapWithKeys(function ($period) {
+                                if ($frequency == 'Kinsenas') {
                                     return [
-                                        $period->id => $period->StartDate . ' - ' . $period->EndDate,
+                                        '1st Kinsena' => '1st-15th',
+                                        '2nd Kinsena' => '16th-End of the Month',
                                     ];
-                                });
-                            } catch (\Exception $e) {
-                                // In case there is an issue with parsing the date or any other issue
+                                } elseif ($frequency == 'Weekly') {
+                                    return [
+                                        'Week 1' => 'Week 1',
+                                        'Week 2' => 'Week 2',
+                                        'Week 3' => 'Week 3',
+                                        'Week 4' => 'Week 4',
+                                    ];
+                                }
+
                                 return [];
-                            }
-                        }
+                            })
+                            ->native(false)
+                            ->reactive(),
 
-                        // If any of the fields are not set, return an empty array
-                        return [];
-                    })
-										->native(false)
-                    ->reactive() // Make this field reactive to other fields
-                    ->placeholder('Select the payroll period'),
+                        // PayrollMonth Select Field
+                        Select::make('PayrollMonth')
+                            ->label('Payroll Month')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options([
+                                'January' => 'January',
+                                'February' => 'February',
+                                'March' => 'March',
+                                'April' => 'April',
+                                'May' => 'May',
+                                'June' => 'June',
+                                'July' => 'July',
+                                'August' => 'August',
+                                'September' => 'September',
+                                'October' => 'October',
+                                'November' => 'November',
+                                'December' => 'December',
+                            ])
+                            ->native(false)
+                            ->reactive(),
 
+                        // PayrollYear Select Field
+                        Select::make('PayrollYear')
+                            ->label('Payroll Year')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options(function () {
+                                $currentYear = date('Y');
+                                $years = [];
+                                for ($i = $currentYear - 5; $i <= $currentYear + 5; $i++) {
+                                    $years[$i] = $i;
+                                }
+                                return $years;
+                            })
+                            ->native(false)
+                            ->reactive(),
+
+                        // weekPeriodID Select Field
+                        Select::make('weekPeriodID')
+                            ->label('Period')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options(function (callable $get) {
+                                // Fetch selected values from other fields
+                                $month = $get('PayrollMonth');
+                                $frequency = $get('PayrollFrequency');
+                                $payrollDate = $get('PayrollDate2');
+                                $year = $get('PayrollYear');
+
+                                // Ensure that all necessary fields are filled before proceeding
+                                if ($month && $frequency && $payrollDate && $year) {
+                                    try {
+                                        // Convert month name to month number (e.g., 'January' to '01')
+                                        $monthId = Carbon::createFromFormat('F', $month)->format('m');
+
+                                        // Fetch WeekPeriod entries based on the selected criteria
+                                        return WeekPeriod::where('Month', $monthId)
+                                            ->where('Category', $frequency)
+                                            ->where('Type', $payrollDate)
+                                            ->where('Year', $year)
+                                            ->get()
+                                            ->mapWithKeys(function ($period) {
+                                            return [
+                                                $period->id => $period->StartDate . ' - ' . $period->EndDate,
+                                            ];
+                                        });
+                                    } catch (\Exception $e) {
+                                        // In case there is an issue with parsing the date or any other issue
+                                        return [];
+                                    }
+                                }
+
+                                // If any of the fields are not set, return an empty array
+                                return [];
+                            })
+                            ->native(false)
+                            ->reactive() // Make this field reactive to other fields
+                            ->placeholder('Select the payroll period'),
+
+                    ])
             ]);
     }
 
