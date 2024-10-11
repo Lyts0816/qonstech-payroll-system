@@ -244,10 +244,13 @@ class ReportsController extends Controller
                                 $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
                                 $SSSDeductionMonthly = $sss->EmployeeShare;
 
+                                $employershare = $sss->EmployerShare / $deductionFactor;
+
+
                                 $newRecord['Deduction'] = $SSSDeduction;
-                                $newRecord['DeductionEmployer'] = $sss->EmployerShare;
+                                $newRecord['DeductionEmployer'] = $employershare;
                                 $newRecord['DeductionMonthly'] = $SSSDeductionMonthly;
-                                $newRecord['DeductionTotal'] = $SSSDeduction + $SSSDeductionMonthly;
+                                $newRecord['DeductionTotal'] = $SSSDeduction + $sss->EmployerShare;
                                 break;
                             }
                         }
@@ -258,16 +261,21 @@ class ReportsController extends Controller
                         foreach ($GetPhilHealth as $philhealth) {
                             if ($philhealth->MinSalary <= $employee->MonthlySalary && $philhealth->MaxSalary >= $employee->MonthlySalary) {
                                 if ($philhealth->PremiumRate == '0.00') {
-                                    $PhilHealthDeduction = $philhealth->ContributionAmount / $deductionFactor;
+                                    $PhilHealthDeduction = $philhealth->ContributionAmount;
                                     $PhilHealthDeductionMonthly = $philhealth->ContributionAmount;
                                 } else {
-                                    $PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                                    $PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary);
                                     $PhilHealthDeductionMonthly = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary);
                                 }
-                                $newRecord['Deduction'] = $PhilHealthDeduction;
-                                $newRecord['DeductionEmployer'] = $PhilHealthDeduction;
+                                $personal = $PhilHealthDeduction / $deductionFactor;
+                                $employer = $PhilHealthDeduction / $deductionFactor;
+                                $total = $personal + $employer;
+                                // PhilHealthDeductionMonthly
+
+                                $newRecord['Deduction'] = $personal;
+                                $newRecord['DeductionEmployer'] = $employer;
                                 $newRecord['DeductionMonthly'] = $PhilHealthDeductionMonthly;
-                                $newRecord['DeductionTotal'] = $PhilHealthDeduction + $PhilHealthDeductionMonthly;
+                                $newRecord['DeductionTotal'] = $total;
                                 break;
                             }
                         }
@@ -277,13 +285,15 @@ class ReportsController extends Controller
                         $newRecord['DeductionID'] = $employee->PagibigNumber;
                         foreach ($GetPagibig as $pagibig) {
                             if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                                $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
-                                $PagIbigDeductionEmployer = (($pagibig->EmployeeRate / 50) * $employee->MonthlySalary) / $deductionFactor;
-                                $PagIbigDeductionMonthly = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary);
+                                // $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                                // $PagIbigDeductionEmployer = (($pagibig->EmployeeRate / 50) * $employee->MonthlySalary) / $deductionFactor;
+                                // $PagIbigDeductionMonthly = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary);
+                                $PagIbigDeduction = $pagibig->EmployeeRate / $deductionFactor;
+                                $PagIbigDeductionMonthly = $pagibig->EmployeeRate / $deductionFactor;
 
                                 $newRecord['Deduction'] = $PagIbigDeduction;
-                                $newRecord['DeductionEmployer'] = $PagIbigDeductionEmployer;
-                                $newRecord['DeductionMonthly'] = $PagIbigDeductionMonthly;
+                                $newRecord['DeductionEmployer'] = $PagIbigDeductionMonthly;
+                                $newRecord['DeductionMonthly'] = $PagIbigDeduction;
                                 $newRecord['DeductionTotal'] = $PagIbigDeduction + $PagIbigDeductionMonthly;
                                 break;
                             }

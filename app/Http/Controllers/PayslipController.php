@@ -462,7 +462,7 @@ class PayslipController extends Controller
                     // PagIbig Deduction for Kinsenas
                     foreach ($GetPagibig as $pagibig) {
                         if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                            $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                            $PagIbigDeduction = ($pagibig->EmployeeRate);
                             $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
                             break;
                         }
@@ -517,6 +517,7 @@ class PayslipController extends Controller
                     }
                 }
             }
+            
 
             $BasicPay = $TotalHours * $employee->HourlyRate;
             $newRecord['BasicPay'] = $BasicPay;

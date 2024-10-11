@@ -50,12 +50,12 @@ class HolidayResource extends Resource
 								'Special' => 'Special'
 							])->native(false),
 
-						Select::make('ProjectID')
-							->label('Project')
-							->required(fn(string $context) => $context === 'create' || $context === 'edit')
-							->options(function () {
-								return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
-							}),
+						// Select::make('ProjectID')
+						// 	->label('Project')
+						// 	->required(fn(string $context) => $context === 'create' || $context === 'edit')
+						// 	->options(function () {
+						// 		return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
+						// 	}),
 					])->columns(3)->collapsible(true),
 			]);
 	}
@@ -78,13 +78,13 @@ class HolidayResource extends Resource
 					->label('Holiday Type'),
 
 
-				TextColumn::make('project.ProjectName') 
-					->label('Project')
-					->formatStateUsing(function ($record) {
-						return $record->project->ProjectName . ' - ' . $record->project->PR_City;
-					})
-					->searchable()
-					->sortable(),
+				// TextColumn::make('project.ProjectName') 
+				// 	->label('Project')
+				// 	->formatStateUsing(function ($record) {
+				// 		return $record->project->ProjectName . ' - ' . $record->project->PR_City;
+				// 	})
+				// 	->searchable()
+				// 	->sortable(),
 
 			])
 			->filters([

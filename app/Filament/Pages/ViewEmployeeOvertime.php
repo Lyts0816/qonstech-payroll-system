@@ -20,7 +20,7 @@ class ViewEmployeeOvertime extends Page
 
     public static function canAccess(): bool
     {
-    return Auth::user()->role === User::ROLE_ADMINUSER || Auth::user()->role === User::ROLE_VICEPRES || Auth::user()->role === User::ROLE_ADMIN;
+    return false;
     }
 
     protected function getWidgets(): array

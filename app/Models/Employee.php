@@ -36,6 +36,11 @@ class Employee extends Model
         'TaxIdentificationNumber'
     ];
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'EmployeeID');
+    }
+
     // Defining the relationships
 
     /**

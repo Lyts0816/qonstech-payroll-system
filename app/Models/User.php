@@ -14,18 +14,17 @@ class User extends Authenticatable implements FilamentUser
 {
     const ROLE_ADMIN = 'Human Resource';
 
-    const ROLE_VICEPRES = 'Vice President';
-
     const ROLE_PROJECTCLERK = 'Project Clerk';
 
     const ROLE_ADMINUSER = 'Admin Vice President';
 
     const ROLE_FIVP = 'Finance Vice President';
     
+    
 
     const ROLES = [
-        // self::ROLE_ADMIN => 'Human Resource',
-        self::ROLE_VICEPRES => 'Vice President',
+        self::ROLE_ADMIN => 'Human Resource',
+        
         self::ROLE_PROJECTCLERK => 'Project Clerk',
     ];
 
@@ -59,6 +58,7 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $fillable = [
         'name',
+        'EmployeeID',
         'Username',
         'email',
         'password',
@@ -74,6 +74,11 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'EmployeeID');
+    }
      
     /**
      * Get the attributes that should be cast.

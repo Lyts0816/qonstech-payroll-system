@@ -101,6 +101,7 @@
     .data-table thead th {
         background-color: #f2f2f2;
         font-weight: bold;
+        font-size: 10.5px;
     }
 
     .data-table tfoot th {
@@ -114,7 +115,7 @@
         padding: 10px;
         /* margin-top: 30px; */
         /* margin-bottom: 30px; */
-        font-size: 12px;
+        font-size: 10px;
     }
 
     .footer-section {
@@ -150,20 +151,23 @@ switch ($reportType) {
         $titleName = 'Pag-IBIG';
         $src = $pagibig;
         $employerNumber = '12-3456789-0';
-        $IDName = 'SSS NUMBER';
+        $IDName = 'PAG-IBIG NO.'; 
+        $personal = 'EMPLOYEE SHARE';
         break;
     case 'Philhealth Contribution':
         $titleName = 'Philippine Health Insurance Corporation';
         $src = $philhealth;
         $employerNumber = '82-3494289-042';
         $IDName = 'PHILHEALTH NO';
+        $personal = 'PERSONAL SHARE';
         break;
     case 'SSS Contribution':
     default:
         $titleName = 'Social Security System';
         $src = $sss;
         $employerNumber = '3214-7658-9832';
-        $IDName = 'PAG-IBIG NO.';
+        $IDName = 'SSS NUMBER'; 
+        $personal =  'EMPLOYEE SHARE';
         break;
 }
 ?>
@@ -221,11 +225,13 @@ switch ($reportType) {
 
                 <tr>
                     <th>{{  $IDName }}</th>
-                    <th>Name</th>
+                    <th>NAME OF EMPLOYEE</th>
                     <!-- <th>Monthly Contribution</th> -->
-                    <th>Employee Share</th>
-                    <th>Employer Share</th>
-                    <th>Total</th>
+                    <th>EMPLOYER SHARE</th>
+                    {{-- <th>EC</th> --}}
+                    <th>{{  $personal }}</th>
+                    <th>TOTAL</th>
+                    {{-- <th>REMARKS</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -243,25 +249,29 @@ switch ($reportType) {
                                     $totalEmployeeShare += $employeeShare;
                                     $totalEmployerShare += $employerShare;
                                     $totalDeduction += $totalContribution;
+
+                                    
                                 @endphp
                                 <tr>
                                     <td style="text-align:left">{{ $employee['DeductionID'] ?? '' }}</td>
                                     <td style="text-align:left">
                                         {{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
                                     </td>
-                                    <td style="text-align:right">{{ number_format($employeeShare, 2) }}</td>
                                     <td style="text-align:right">{{ number_format($employerShare, 2) }}</td>
+                                    {{-- <td style="text-align:right">{{'10'}}</td> --}}
+                                    <td style="text-align:right">{{ number_format($employeeShare, 2) }}</td>
                                     <td style="text-align:right">{{ number_format($totalContribution, 2) }}</td>
+                                    {{-- <td style="text-align:right"> </td> --}}
                                 </tr>
                 @endforeach
 
                 @for ($i = $employeeCount; $i < $totalRows; $i++)
                     <tr>
+                        {{-- <td style="text-align:left"></td>
                         <td style="text-align:left"></td>
-                        <td style="text-align:left"></td>
                         <td style="text-align:right"></td>
                         <td style="text-align:right"></td>
-                        <td style="text-align:right"></td>
+                        <td style="text-align:right"></td> --}}
                     </tr>
                 @endfor
             </tbody>
@@ -269,28 +279,31 @@ switch ($reportType) {
             <tfoot>
                 <tr>
                     <td style="text-align:left" colspan="2"><strong>Subtotal</strong></td>
-                    <td style="text-align:right">Php {{ number_format($totalEmployeeShare, 2) }}</td>
                     <td style="text-align:right">Php {{ number_format($totalEmployerShare, 2) }}</td>
+                    <td style="text-align:right">Php {{ number_format($totalEmployeeShare, 2) }}</td>
                     <td style="text-align:right">Php {{ number_format($totalDeduction, 2) }}</td>
+                    {{-- <td style="text-align:left"><strong></strong></td> --}}
                 </tr>
                 <tr>
                     <th style="text-align:left" colspan="4"><strong>Total</strong></th>
                     <th style="text-align:right"><strong>Php {{ number_format($totalDeduction, 2) }}</strong></th>
+                    {{-- <th style="text-align:right"><strong> </strong></th> --}}
                 </tr>
             </tfoot>
         </table>
         <!-- Footer Section -->
         <<div class="footer">
             <div class="footer-section">
-                <p>Prepared By:</p>
-                
-                <b>ALMA MAE S. GEPELLANO</b><br>
-                <small><em>HR OFFICER</em></small>
+                <p><b>Prepared By:</b></p>
+                <p></p>
+                <p></p><b>Alma Mae S. Gepellano</b><br>
+                <small><em>HR OFFICER</em></small></p>
 
             </div>
             <div class="footer-section">
-                <p>Date Generated:</p><br>
-                <b>{{ now()->format('F d, Y H:i:s') }}</b>
+                <p><b>Date Generated:</b><br>
+                {{ now()->format('F d, Y H:i:s') }}</p>
+                <br>
 
             </div>
     </div>

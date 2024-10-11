@@ -168,17 +168,17 @@
                     <th rowspan="2">SIGNATURE</th>
                 </tr>
                 <tr>
-                    <th>Legal Holiday Hours</th>
+                    <th>Regular Holiday Hours</th>
                     <th>Special Holiday Hours</th>
                     <th>TAXES</th>
                     <th>SSS</th>
                     <th>PHIC</th>
                     <th>HDMF</th>
+                    <th>Total Government Deduction</th>
+                    <th>Cash Advances</th>
                     <th>SSS LOAN</th>
                     <th>SALARY LOAN</th>
                     <th>HDMF LOAN</th>
-                    <th>Total Government Deduction</th>
-                    <th>Cash Advances</th>
                     <!-- <th>Salary Loan</th> -->
                     <!-- <th>SSS Loan</th> -->
                     <!-- <th>HDMF Loan</th> -->
@@ -219,11 +219,12 @@
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
+
+                        <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagibigLoan'] ?? 0, 2) }}</td>
-                        <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
-                        <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
                         <!-- <td>P{{ number_format('0') }}</td>
@@ -242,7 +243,7 @@
             <div>
                 <p>Prepared by:</p>
                 <p>_______________________</p>
-                <p>ALMA MAE S. GEPELLANO</p>
+                <p>Alma Mae S. Gepellano</p>
                 <p>HR OFFICER</p>
             </div>
             <div>

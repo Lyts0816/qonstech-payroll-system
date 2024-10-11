@@ -348,40 +348,6 @@ class PayrollController extends Controller
                     }
                 }
 
-                // FOR OVERTIME WORKED HOUR
-                // $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
-                // $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
-                // $OtDate = \App\Models\Overtime::where('Date', substr($attendanceDate, 0, 10))
-                // 	->where('EmployeeID', $employee->id)
-                // 	->get();
-
-                // if (count($OtDate) > 0 && $attendanceDate == $OtDate[0]->Date) {
-
-                // 	$In1s = $OtDate[0]->Checkin;
-                // 	$InOT = explode(':', $In1s);
-
-                // 	$Out1s = $OtDate[0]->Checkout;
-                // 	$OutOT = explode(':', $Out1s);
-
-                // 	$OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]); // 8:00 AM
-                // 	$OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);  // 12:00 PM
-
-                // 	$checkinOT = Carbon::createFromFormat('H:i', substr($attendances["Overtime_In"], 0, 5));
-                // 	$checkoutOT = Carbon::createFromFormat('H:i', substr($attendances["Overtime_Out"], 0, 5));
-
-                // 	// $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningEnd) / 60 : 0;
-
-                // 	$effectiveCheckinOT = $checkinOT->greaterThan($OTStart) ? $checkinOT : $OTStart;
-                // 	$workedOTMinutes = $effectiveCheckinOT->diffInMinutes($OTEnd);
-                // 	$workedOTHours = $workedOTMinutes / 60;
-
-                // 	$TotalOvertimeHours += $workedOTHours;
-                // 	$newRecord['TotalOvertimeHours = $TotalOvertimeHours;
-
-                // }
-
-
-
             }
             // dd($newRecord['EmployeeID);
             $OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord['EmployeeID'])
@@ -526,7 +492,7 @@ class PayrollController extends Controller
                     // PagIbig Deduction for Kinsenas
                     foreach ($GetPagibig as $pagibig) {
                         if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                            $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                            $PagIbigDeduction = ($pagibig->EmployeeRate / $deductionFactor);
                             $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
                             break;
                         }
@@ -561,7 +527,7 @@ class PayrollController extends Controller
                     // PagIbig Deduction for Weekly
                     foreach ($GetPagibig as $pagibig) {
                         if ($pagibig->MinimumSalary <= $employee->MonthlySalary && $pagibig->MaximumSalary >= $employee->MonthlySalary) {
-                            $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
+                            $PagIbigDeduction = $pagibig->EmployeeRate  / $deductionFactor;
                             $newRecord['PagIbigDeduction'] = $PagIbigDeduction;
                             break;
                         }
@@ -602,7 +568,7 @@ class PayrollController extends Controller
             $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
-            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
+            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction;
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
 
             $TotalOfficeDeductions = $DeductionFee;

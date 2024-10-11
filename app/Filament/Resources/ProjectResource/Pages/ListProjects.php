@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource;
 use Filament\Actions;
 use App\Filament\Pages\ShowAvailableEmployees;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
@@ -20,6 +21,7 @@ class ListProjects extends ListRecords
             Action::make('customPage')
             ->label('Assign Employees')
             ->url(ShowAvailableEmployees::getUrl())
+
         ];
     }
 }

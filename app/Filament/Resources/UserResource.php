@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use App\Models\Employee;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
@@ -30,6 +32,20 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
+                Select::make('EmployeeID')
+                    ->label('Employee')
+                    ->options(Employee::all()->pluck('full_name', 'id'))
+                    ->searchable()
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $employee = Employee::find($state);
+                        if ($employee) {
+                            // Update the text input with the selected employee's full name
+                            $set('name', $employee->full_name);
+                        }
+                    }),
+
+
                 TextInput::make('name')
                     ->required(fn(string $context) => $context === 'create')
                     ->string()->rules('regex:/^[^\d]*$/'),
@@ -50,6 +66,7 @@ class UserResource extends Resource
 
                 TextInput::make('password')
                 ->password()
+                ->rule(Password::default())
                 ->required(fn(string $context) => $context === 'create'),
             ]);
     }
@@ -63,7 +80,7 @@ class UserResource extends Resource
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable(),
-                TextColumn::make('roles')
+                TextColumn::make('role')
                     ->searchable(), // Allow searching by role name
             ])
             ->filters([

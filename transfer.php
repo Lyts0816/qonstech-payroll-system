@@ -2,7 +2,7 @@
 
 $mysqlConfig = [
     'host' => 'localhost',
-    'dbname' => 'payroll-master',
+    'dbname' => 'payroll-system',
     'username' => 'root',
     'password' => ''
 ];
