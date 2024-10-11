@@ -41,71 +41,77 @@ class ReportResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('SelectPayroll')
-                    ->label('Select Payroll') // Label for the field
+                // EmployeeStatus Select Field
+                Select::make('ReportType')
+                    ->label('ReportType')
                     ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                    ->options(function () {
-                        // Fetch payrolls and format the display string
-                        return Payroll::orderBy('PayrollYear')
-                            ->orderBy('PayrollMonth')
-                            ->orderBy('PayrollDate2')
-                            ->get()
-                            ->mapWithKeys(function ($payroll) {
-                            $displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
-                            return [$payroll->id => $displayText];
-                        });
-                    })
-                    ->placeholder('Select Payroll Option')
+                    ->options([
+                        'SSS Contribution' => 'SSS Contribution',
+                        'Philhealth Contribution' => 'Philhealth Contribution',
+                        'Pagibig Contribution' => 'Pagibig Contribution',
+                        'Loan' => 'Loan',
+                        'Tax' => 'Tax',
+                    ])
+                    ->default(request()->query('employee'))
                     ->reactive()
                     ->afterStateUpdated(function (callable $set, $state) {
-                        // When a payroll is selected, fetch details and update other fields
-                        $set('EmployeeStatus', null);
-                        $set('PayrollFrequency', null);
-                        $set('PayrollMonth', null);
-                        $set('PayrollYear', null);
-                        $set('PayrollDate2', null);
-                        $set('assignment', null);
-                        $set('ProjectID', null);
-                        $set('weekPeriodID', null);
-                        if ($state) {
-                            $payroll = Payroll::find($state); // Fetch payroll by ID
-            
-                            if ($payroll) {
-                                // Update other fields with payroll data
-                                $set('EmployeeStatus', $payroll->EmployeeStatus);
-                                $set('PayrollFrequency', $payroll->PayrollFrequency);
-                                $set('PayrollMonth', $payroll->PayrollMonth);
-                                $set('PayrollYear', $payroll->PayrollYear);
-                                $set('PayrollDate2', $payroll->PayrollDate2);
-                                $set('assignment', $payroll->assignment);
-                                $set('ProjectID', $payroll->ProjectID);
-                                $set('weekPeriodID', $payroll->weekPeriodID);
-                            }
+                        // Restrict EmployeeStatus options based on ReportType
+                        if ($state === 'SSS Contribution' || $state === 'Pagibig Contribution') {
+                            $set('EmployeeStatus', 'Regular');
+                        } else {
+                            $set('EmployeeStatus', null); // Clear EmployeeStatus if ReportType changes to non-restricted type
                         }
+                        $set('SelectPayroll', null);
                     }),
+
                 Grid::make(2) // Create a two-column grid layout for the first two fields
                     ->schema([
-                        // EmployeeStatus Select Field
-                        // EmployeeStatus Select Field
-                        Select::make('ReportType')
-                            ->label('ReportType')
+                        Select::make('SelectPayroll')
+                            ->label('Select Payroll')
                             ->required(fn(string $context) => $context === 'create' || $context === 'edit')
-                            ->options([
+                            ->options(function (callable $get) {
+                                // Get the current ReportType value
+                                $reportType = $get('ReportType');
 
-                                'SSS Contribution' => 'SSS Contribution',
-                                'Philhealth Contribution' => 'Philhealth Contribution',
-                                'Pagibig Contribution' => 'Pagibig Contribution',
-                                'Loan' => 'Loan',
-                                'Tax' => 'Tax',
-                            ])
-                            ->default(request()->query('employee'))
+                                // Start the query to fetch payrolls
+                                $payrollsQuery = Payroll::orderBy('PayrollYear')
+                                    ->orderBy('PayrollMonth')
+                                    ->orderBy('PayrollDate2');
+
+                                // Apply filter only for "SSS Contribution" to show Regular employees only
+                                if ($reportType === 'SSS Contribution' || $reportType === 'Pagibig Contribution') {
+                                    $payrollsQuery->where('EmployeeStatus', 'Regular');
+                                }
+
+                                // Fetch and format payroll options
+                                return $payrollsQuery->get()->mapWithKeys(function ($payroll) {
+                                    $displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
+                                    return [$payroll->id => $displayText];
+                                });
+                            })
+                            ->placeholder('Select Payroll Option')
                             ->reactive()
                             ->afterStateUpdated(function (callable $set, $state) {
-                                // Automatically set PayrollFrequency based on EmployeeStatus
-                                if ($state === 'Regular') {
-                                    $set('PayrollFrequency', 'Kinsenas');
-                                } elseif ($state === 'Contractual') {
-                                    $set('PayrollFrequency', 'Weekly');
+                                $set('EmployeeStatus', null);
+                                $set('PayrollFrequency', null);
+                                $set('PayrollMonth', null);
+                                $set('PayrollYear', null);
+                                $set('PayrollDate2', null);
+                                $set('assignment', null);
+                                $set('ProjectID', null);
+                                $set('weekPeriodID', null);
+                                if ($state) {
+                                    $payroll = Payroll::find($state);
+                                    if ($payroll) {
+                                        $set('EmployeeStatus', $payroll->EmployeeStatus);
+                                        $set('PayrollFrequency', $payroll->PayrollFrequency);
+                                        $set('PayrollMonth', $payroll->PayrollMonth);
+                                        $set('PayrollYear', $payroll->PayrollYear);
+                                        $set('PayrollDate2', $payroll->PayrollDate2);
+                                        $set('assignment', $payroll->assignment);
+                                        $set('ProjectID', $payroll->ProjectID);
+                                        $set('weekPeriodID', $payroll->weekPeriodID);
+                                    }
                                 }
                             }),
 
