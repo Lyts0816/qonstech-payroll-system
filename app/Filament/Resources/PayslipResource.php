@@ -57,7 +57,7 @@ class PayslipResource extends Resource
                             ->orderBy('PayrollDate2')
                             ->get()
                             ->mapWithKeys(function ($payroll) {
-                            $displayText = "{$payroll->EmployeeStatus} - {$payroll->PayrollFrequency} - {$payroll->PayrollMonth} - {$payroll->PayrollYear} - {$payroll->PayrollDate2}";
+                            $displayText = "{$payroll->PayrollMonth},{$payroll->PayrollYear} - {$payroll->PayrollDate2} | {$payroll->EmployeeStatus} - {$payroll->assignment} ";
                             return [$payroll->id => $displayText];
                         });
                     })
