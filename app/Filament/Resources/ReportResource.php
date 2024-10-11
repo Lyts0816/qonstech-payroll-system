@@ -48,9 +48,7 @@ class ReportResource extends Resource
                     ->options([
                         'SSS Contribution' => 'SSS Contribution',
                         'Philhealth Contribution' => 'Philhealth Contribution',
-                        'Pagibig Contribution' => 'Pagibig Contribution',
-                        'Loan' => 'Loan',
-                        'Tax' => 'Tax',
+                        'Pagibig Contribution' => 'Pagibig Contribution'
                     ])
                     ->default(request()->query('employee'))
                     ->reactive()
