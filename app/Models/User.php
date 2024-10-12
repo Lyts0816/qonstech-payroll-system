@@ -28,8 +28,17 @@ class User extends Authenticatable implements FilamentUser
         self::ROLE_PROJECTCLERK => 'Project Clerk',
     ];
 
+
+    public function isVPFI(){
+        return $this->role === self::ROLE_ADMINUSER || $this->role === self::ROLE_FIVP;
+    } 
+
     public function isCLerk(){
         return $this->role === self::ROLE_PROJECTCLERK;
+    } 
+
+    public function isHR(){
+        return $this->role === self::ROLE_ADMIN;
     } 
     
 

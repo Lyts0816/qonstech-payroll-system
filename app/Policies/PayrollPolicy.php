@@ -29,7 +29,7 @@ class PayrollPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
+        return   $user->isFiVp();
     }
 
     /**
@@ -37,7 +37,7 @@ class PayrollPolicy
      */
     public function update(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp(); 
+        return   $user->isFiVp(); 
     }
 
     /**
@@ -45,7 +45,7 @@ class PayrollPolicy
      */
     public function delete(User $user, Payroll $payroll): bool
     {
-        return $user->role === User::ROLE_ADMIN || $user->isAdVP() || $user->isFiVp();
+        return   $user->isFiVp();
     }
 
     /**

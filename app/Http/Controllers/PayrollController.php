@@ -621,6 +621,7 @@ class PayrollController extends Controller
                     }
                 }
             }
+            $newRecord['WTAXDeduction'] = $newRecord['WTAXDeduction'] ?? 0;
 
             $BasicPay = $TotalHours * $employee->HourlyRate;
             $newRecord['BasicPay'] = $BasicPay;

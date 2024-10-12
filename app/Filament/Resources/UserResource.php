@@ -42,32 +42,41 @@ class UserResource extends Resource
                         if ($employee) {
                             // Update the text input with the selected employee's full name
                             $set('name', $employee->full_name);
+
+                            $set('role', $employee->position->PositionName);
                         }
                     }),
 
 
                 TextInput::make('name')
                     ->required(fn(string $context) => $context === 'create')
-                    ->string()->rules('regex:/^[^\d]*$/'),
+                    ->string()->rules('regex:/^[^\d]*$/')
+                    ->maxLength(30),
 
                 TextInput::make('email')
                     ->required(fn(string $context) => $context === 'create')
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->email()
+                    ->placeholder('Example@gmail.com')
+                    ->maxLength(50),
 
                 Select::make('role') // Field name
                     ->label('Role')
+                    ->required(fn(string $context) => $context === 'create')
                     ->options([
-                        'Vice President' => 'Vice President',
+                    
                         'Project Clerk' => 'Project Clerk',
                         'Human Resource' => 'Human Resource',
                         'Admin Vice President' => 'Admin Vice President',
                         'Finance Vice President' => 'Finance Vice President',
                     ]), 
 
-                TextInput::make('password')
-                ->password()
-                ->rule(Password::default())
-                ->required(fn(string $context) => $context === 'create'),
+                    TextInput::make('password')
+                    ->required(fn(string $context) => $context === 'create')
+                    ->visible(fn(string $context) => $context === 'create') // Only show on create
+                    ->password()
+                    ->rule(Password::default()->letters()->mixedCase()->numbers()->symbols())
+                    ->maxLength(20),
             ]);
     }
 
@@ -82,6 +91,7 @@ class UserResource extends Resource
                     ->searchable(),
                 TextColumn::make('role')
                     ->searchable(), // Allow searching by role name
+                    
             ])
             ->filters([
             ])

@@ -46,19 +46,20 @@ class EmployeeResource extends Resource
                 ->schema([
                     TextInput::make('first_name')
                     ->label('First Name')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->rules('regex:/^[^\d]*$/'),
-
-                    TextInput::make('middle_name')
+                    ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                    ->rules('regex:/^[^\d]*$/')
+                    ->maxLength(30),
+                
+                TextInput::make('middle_name')
                     ->label('Middle Name')
-                    ->rules('regex:/^[^\d]*$/'),
-                    
-
-                    TextInput::make('last_name')
-                    ->label('last Name')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->rules('regex:/^[^\d]*$/'),
-
+                    ->rules('regex:/^[^\d]*$/')
+                    ->maxLength(30),
+                
+                TextInput::make('last_name')
+                    ->label('Last Name')
+                    ->required(fn (string $context) => $context === 'create' || $context === 'edit')
+                    ->rules('regex:/^[^\d]*$/')
+                    ->maxLength(30),
 
                     ])->columns(3)->collapsible(true),
 
@@ -198,6 +199,22 @@ class EmployeeResource extends Resource
                     ->minLength(11)
                     ,
 
+                    Select::make('employment_type')
+                    ->label('Employment Type')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
+                    ->options([
+                        'Regular' => 'Regular',
+                        'Contractual' => 'Contractual',
+                    ])->native(false),
+
+                    Select::make('assignment')
+                        ->label('Assignment')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+                        ->options([
+                            'Main Office' => 'Main Office',
+                            'Project Based' => 'Project Based',
+                        ])->native(false),
+
                     Select::make('status')
                         ->label('Status')
                         ->required(fn (string $context) => $context === 'create' || 'edit')
@@ -206,24 +223,6 @@ class EmployeeResource extends Resource
                             'Assigned' => 'Assigned',
                             'Available' => 'Available',
                         ])->default('Available'),
-
-                    
-                        Select::make('employment_type')
-                        ->label('Employment Type')
-                        ->required(fn (string $context) => $context === 'create' || 'edit')
-                        ->options([
-                            'Regular' => 'Regular',
-                            'Contractual' => 'Contractual',
-                        ])->native(false),
-
-                        Select::make('assignment')
-                        ->label('Assignment')
-                        ->required(fn (string $context) => $context === 'create' || 'edit')
-                        ->options([
-                            'Main Office' => 'Main Office',
-                            'Project Based' => 'Project Based',
-                        ])->native(false),
-
 
                 ])->columns(3)->collapsible(true)
 

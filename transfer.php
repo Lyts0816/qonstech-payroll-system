@@ -30,7 +30,7 @@ try {
         $afternoonCheckinStart = new DateTime('12:00:00');
         $afternoonCheckinEnd = new DateTime('13:00:00');
         $afternoonCheckoutStart = new DateTime('16:00:00');
-        $afternoonCheckoutEnd = new DateTime('17:00:00');
+        $afternoonCheckoutEnd = new DateTime('23:00:00');
 
         // Check if an entry for the Employee_ID and Date already exists
         $existingSQL = "SELECT * FROM attendance WHERE Employee_ID = :Employee_ID AND Date = :Date";

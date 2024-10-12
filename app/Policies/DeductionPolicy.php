@@ -13,7 +13,7 @@ class DeductionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -21,7 +21,7 @@ class DeductionPolicy
      */
     public function view(User $user, Deduction $deduction): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -29,7 +29,7 @@ class DeductionPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -37,7 +37,7 @@ class DeductionPolicy
      */
     public function update(User $user, Deduction $deduction): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  ||  $user->role === User::ROLE_ADMIN;
+        return    $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -45,7 +45,7 @@ class DeductionPolicy
      */
     public function delete(User $user, Deduction $deduction): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class DeductionPolicy
      */
     public function restore(User $user, Deduction $deduction): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 
     /**
@@ -61,6 +61,6 @@ class DeductionPolicy
      */
     public function forceDelete(User $user, Deduction $deduction): bool
     {
-        return $user->role === User::ROLE_ADMINUSER  || $user->role === User::ROLE_ADMIN;
+        return   $user->role === User::ROLE_ADMIN;
     }
 }

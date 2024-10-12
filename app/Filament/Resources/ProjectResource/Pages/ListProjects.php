@@ -21,6 +21,7 @@ class ListProjects extends ListRecords
             Action::make('customPage')
             ->label('Assign Employees')
             ->url(ShowAvailableEmployees::getUrl())
+            ->visible(Auth::user()->role === 'Human Resource')
 
         ];
     }

@@ -492,7 +492,9 @@ class PayslipController extends Controller
             // Initialize new record array for deduction amounts
             $newRecord['SSSLoan'] = 0;
             $newRecord['PagibigLoan'] = 0;
-            $newRecord['SalaryLoan'] = 0;
+            $newRecord['SalaryLoan'] = 0; 
+            
+            
 
             // Iterate over each loan to calculate deductions
             foreach ($loans as $loan) {
@@ -660,7 +662,8 @@ class PayslipController extends Controller
             }
             
 
-
+            $newRecord['WTAXDeduction'] = $newRecord['WTAXDeduction'] ?? 0;
+            
             $BasicPay = $TotalHours * $employee->HourlyRate;
             $newRecord['BasicPay'] = $BasicPay;
 
@@ -678,6 +681,7 @@ class PayslipController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
+
             $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
