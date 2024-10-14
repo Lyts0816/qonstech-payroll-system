@@ -111,28 +111,28 @@ $src = 'data:image/png;base64,' . $imageData;
 
             <!-- Employee Details -->
             <div class="employee-details">
+                @foreach ($payrollRecords as $employee)
+                @endforeach
                 <table>
-                    @foreach ($payrollRecords as $employee)
-                        <tr>
-                            <th>Employee Name</th>
-                            <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
-                            </td>
-                            <th>Employment Status</th>
-                            <td>Regular</td>
-                        </tr>
-                        <tr>
-                            <th>Position</th>
-                            <td>{{ $employee['position'] ?? '' }}</td>
-                            <th>Payroll Period</th>
-                            <td>10-08-2024 - 10-14-24</td>
-                        </tr>
-                        <tr>
-                            <th>Monthly Salary</th>
-                            <td>PHP&nbsp;{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
-                            <th>Hourly Rate</th>
-                            <td>PHP&nbsp;{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
-                        </tr>
-                    @endforeach
+                    <tr>
+                        <th>Employee Name</th>
+                        <td>{{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
+                        </td>
+                        <th>Employment Status</th>
+                        <td>{{$employee['EmployeeStatus']}}</td>
+                    </tr>
+                    <tr>
+                        <th>Position</th>
+                        <td>{{ $employee['position'] ?? '' }}</td>
+                        <th>Payroll Period</th>
+                        <td>{{$employee['Period']}}</td>
+                    </tr>
+                    <tr>
+                        <th>Monthly Salary</th>
+                        <td>PHP&nbsp;{{ number_format($employee['monthlySalary'] ?? 0, 2) }}</td>
+                        <th>Hourly Rate</th>
+                        <td>PHP&nbsp;{{ number_format($employee['hourlyRate'] ?? 0, 2) }}</td>
+                    </tr>
                 </table>
             </div>
 
