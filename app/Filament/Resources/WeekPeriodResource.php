@@ -25,16 +25,30 @@ class WeekPeriodResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Month')
-                    ->required()
-                    ->numeric()
-                    ->label('Month')
-                    ->maxValue(12),
-                    // ->maxLength(2),
+                Forms\Components\Select::make('Month')
+                ->options([
+                    1 => 'January',
+                    2 => 'February',
+                    3 => 'March',
+                    4 => 'April',
+                    5 => 'May',
+                    6 => 'June',
+                    7 => 'July',
+                    8 => 'August',
+                    9 => 'September',
+                    10 => 'October',
+                    11 => 'November',
+                    12 => 'December'
+                ])
+                ->required(fn (string $context) => $context === 'create')
+                ->label('Category'),
+                    
+
                 Forms\Components\TextInput::make('Year')
                     ->required()
                     ->numeric()
                     ->label('Year'),
+
                 Forms\Components\Select::make('Category')
                     ->options([
                         'Weekly' => 'Weekly',
@@ -43,6 +57,7 @@ class WeekPeriodResource extends Resource
                     ->required()
                     ->reactive()
                     ->label('Category'),
+                    
                 Forms\Components\Select::make('Type')
                     ->options(function (callable $get) {
                         // Dynamically update the options based on the selected Category
@@ -70,6 +85,8 @@ class WeekPeriodResource extends Resource
     
                         // Ensure Month and Year are valid before calculating dates
                         if (!empty($month) && !empty($year)) {
+                            $month = str_pad($month, 2, '0', STR_PAD_LEFT);
+
                             if ($get('Category') === 'Weekly') {
                                 // Set StartDate and EndDate based on selected week
                                 switch ($state) {
@@ -105,6 +122,7 @@ class WeekPeriodResource extends Resource
                             }
                         }
                     }),
+
                 Forms\Components\DatePicker::make('StartDate')
                     ->required()
                     ->label('Start Date')->readOnly(),
@@ -123,7 +141,25 @@ class WeekPeriodResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('StartDate')->label('Start Date')->date('m, d, Y')->sortable(),
                 Tables\Columns\TextColumn::make('EndDate')->label('End Date')->date('m, d, Y')->sortable(),
-                Tables\Columns\TextColumn::make('Month')->sortable(),
+                Tables\Columns\TextColumn::make('Month')
+                ->sortable()
+                ->formatStateUsing(function ($state) {
+                    $months = [
+                        1 => 'January',
+                        2 => 'February',
+                        3 => 'March',
+                        4 => 'April',
+                        5 => 'May',
+                        6 => 'June',
+                        7 => 'July',
+                        8 => 'August',
+                        9 => 'September',
+                        10 => 'October',
+                        11 => 'November',
+                        12 => 'December'
+                    ];
+                    return $months[$state] ?? $state;
+                }),
                 Tables\Columns\TextColumn::make('Year')->sortable(),
                 Tables\Columns\TextColumn::make('Category'),
                 Tables\Columns\TextColumn::make('Type'),

@@ -65,10 +65,17 @@ class EarningsResource extends Resource
 
                     // Amount Input Field
                     TextInput::make('Amount')
-                        ->label('Amount')
-                        ->required()
-                        ->numeric()
-                        ->minValue(0), // Ensure no negative amounts are input
+                    ->label('Amount')
+                    ->required(fn (string $context) => $context === 'create')
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(150000) // Ensures the amount does not exceed 150,000
+                    ->validationMessages([
+                        'required' => 'The amount is required.',
+                        'numeric' => 'The amount must be a number.',
+                        'min' => 'The amount must be at least 0.',
+                        'max' => 'The amount must not exceed 150,000.',
+                    ]), // Ensure no negative amounts are input
 
                     // PeriodID Select Field
                     Select::make('PeriodID')

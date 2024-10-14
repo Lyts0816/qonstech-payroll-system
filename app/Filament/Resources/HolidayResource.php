@@ -33,14 +33,30 @@ class HolidayResource extends Resource
 				Section::make('Holiday')
 					->schema([
 						TextInput::make('HolidayName')
-							->label('Holiday Name')
-							->required(fn(string $context) => $context === 'create' || $context === 'edit')
-							->unique(ignoreRecord: true)
-							->rules('regex:/^[^\d]*$/'),
+                            ->label('Holiday Name')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->unique(ignoreRecord: true)
+                            ->rules([
+                                'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
+                                'min:3',                 // Ensures the holiday name is at least 3 characters long
+                                'max:30'                 // Ensures the holiday name is no more than 50 characters long
+                            ])
+                            ->validationMessages([
+                                'regex' => 'The holiday name must not contain any digits or special characters.',
+                                'min' => 'The holiday name must be at least 3 characters long.',
+                                'max' => 'The holiday name must not exceed 30 characters.'
+                            ]),
 
-						DatePicker::make('HolidayDate')
-							->label('Holiday Date')
-							->required(fn(string $context) => $context === 'create' || $context === 'edit'),
+                        DatePicker::make('HolidayDate')
+                            ->label('Holiday Date')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->rules([
+                                'date', // Ensures the value is a valid date
+                            ])
+                            ->validationMessages([
+                                'required' => 'The holiday date is required.',
+                                'date' => 'The holiday date must be a valid date.',
+                            ]),
 
 						Select::make('HolidayType')
 							->label('Holiday Type')
@@ -50,12 +66,7 @@ class HolidayResource extends Resource
 								'Special' => 'Special'
 							])->native(false),
 
-						// Select::make('ProjectID')
-						// 	->label('Project')
-						// 	->required(fn(string $context) => $context === 'create' || $context === 'edit')
-						// 	->options(function () {
-						// 		return \App\Models\Project::pluck('ProjectName', 'id'); // Change 'name' to the actual field for project name
-						// 	}),
+						
 					])->columns(3)->collapsible(true),
 			]);
 	}
@@ -76,15 +87,6 @@ class HolidayResource extends Resource
 
 				TextColumn::make('HolidayType')
 					->label('Holiday Type'),
-
-
-				// TextColumn::make('project.ProjectName') 
-				// 	->label('Project')
-				// 	->formatStateUsing(function ($record) {
-				// 		return $record->project->ProjectName . ' - ' . $record->project->PR_City;
-				// 	})
-				// 	->searchable()
-				// 	->sortable(),
 
 			])
 			->filters([

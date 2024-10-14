@@ -8,11 +8,14 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use App\Models\Employee;
+use Dompdf\FrameDecorator\Text;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Fieldset;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,17 +51,35 @@ class UserResource extends Resource
                     }),
 
 
-                TextInput::make('name')
+                    TextInput::make('name')
+                    ->label('Name')
                     ->required(fn(string $context) => $context === 'create')
-                    ->string()->rules('regex:/^[^\d]*$/')
-                    ->maxLength(30),
-
+                    ->string()
+                    ->rules([
+                        'regex:/^[a-zA-Z\s]*$/', 
+                        'min:3',            
+                        'max:30'            
+                    ])
+                    ->validationMessages([
+                        'regex' => 'The user name must not contain any digits or special characters.',
+                        'min' => 'The name must be at least 3 characters long.',
+                        'max' => 'The name must not exceed 30 characters.'
+                    ]),
+                
                 TextInput::make('email')
+                    ->label('Email')
                     ->required(fn(string $context) => $context === 'create')
                     ->unique(ignoreRecord: true)
                     ->email()
                     ->placeholder('Example@gmail.com')
-                    ->maxLength(50),
+                    ->rules([
+                        'max:30' // Ensures the email is no more than 50 characters long
+                    ])
+                    ->validationMessages([
+                        'email' => 'The email must be a valid email address.',
+                        'unique' => 'The email has already been taken.',
+                        'max' => 'The email must not exceed 30 characters.'
+                    ]),
 
                 Select::make('role') // Field name
                     ->label('Role')
@@ -71,12 +92,26 @@ class UserResource extends Resource
                         'Finance Vice President' => 'Finance Vice President',
                     ]), 
 
-                    TextInput::make('password')
-                    ->required(fn(string $context) => $context === 'create')
-                    ->visible(fn(string $context) => $context === 'create') // Only show on create
-                    ->password()
-                    ->rule(Password::default()->letters()->mixedCase()->numbers()->symbols())
-                    ->maxLength(20),
+                    Fieldset::make('Password')
+                        ->schema([
+                            TextInput::make('password')
+                                ->required(fn(string $context) => $context === 'create')
+                                ->visible(fn(string $context) => $context === 'create') // Only show on create
+                                ->password()
+                                ->confirmed()
+                                ->placeholder('Password')
+                                ->rule(Password::default()->letters()->mixedCase()->numbers()->symbols())
+                                ->maxLength(20),
+
+                            TextInput::make('password_confirmation')
+                                ->label('Confirm Password')
+                                ->required(fn(string $context) => $context === 'create')
+                                ->visible(fn(string $context) => $context === 'create')
+                                ->password()
+                                ->placeholder('Confirm Password')
+                                ->maxLength(20),
+                        ])->columns(2),
+
             ]);
     }
 

@@ -29,7 +29,7 @@ class PayrollPolicy
      */
     public function create(User $user): bool
     {
-        return   $user->isFiVp();
+        return   $user->isFiVp() || $user->isHR();
     }
 
     /**
@@ -37,7 +37,7 @@ class PayrollPolicy
      */
     public function update(User $user, Payroll $payroll): bool
     {
-        return   $user->isFiVp(); 
+        return   $user->isFiVp() || $user->isHR(); 
     }
 
     /**
@@ -45,7 +45,7 @@ class PayrollPolicy
      */
     public function delete(User $user, Payroll $payroll): bool
     {
-        return   $user->isFiVp();
+        return   $user->isFiVp() || $user->isHR();
     }
 
     /**

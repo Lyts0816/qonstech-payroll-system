@@ -47,75 +47,112 @@ class ProjectResource extends Resource
                         ->label('Project Name')
                         ->required(fn (string $context) => $context === 'create')
                         ->unique(ignoreRecord: true)
-                        ->rules('regex:/^[^\d]*$/'),
+                        ->rules([
+                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits are present
+                            'min:3',            // Ensures the project name is at least 3 characters long
+                            'max:50'            // Ensures the project name is no more than 50 characters long
+                        ])
+                        ->reactive()              // This triggers validation on each input change
+                        ->debounce(500)           // Debounce to avoid rapid validation (500ms delay)
+                        ->validationMessages([
+                            'regex' => 'The project name must not contain any digits or special characters.',
+                            'min' => 'The project name must be at least 3 characters long.',
+                            'max' => 'The project name must not exceed 50 characters.'
+                        ]),
+                    
 
                     
                     Section::make('Location')
                     ->schema([
-                        Select::make('PR_Province')
-                                ->label('Province')
-                                ->required(fn (string $context) => $context === 'create')
-                                ->options([
-                                'South Cotabato' => 'South Cotabato',
-                                ]),
+                        TextInput::make('PR_Province')
+                        ->label('Province')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->rules([
+                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
+                            'min:3',                 // Ensures the province name is at least 3 characters long
+                            'max:50'                 // Ensures the province name is no more than 50 characters long
+                        ])
+                        ->validationMessages([
+                            'regex' => 'The province name must not contain any digits or special characters.',
+                            'min' => 'The province name must be at least 3 characters long.',
+                            'max' => 'The province name must not exceed 50 characters.'
+                        ]),
 
-                        Select::make('PR_City')
-                            ->label('City')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->options([
-                                'Koronadal City' => 'Koronadal City',
-                                'Polomolok' => 'Polomolok',
-                                'Tupi' => 'Tupi',
-                                'Tantangan' => 'Tantangan',
-                                'Surallah' => 'Surallah',
-                                'Lake Sebu' => 'Lake Sebu',
-                                'Banga' => 'Banga',
-                            ]),
+                        TextInput::make('PR_City')
+                        ->label('City')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->rules([
+                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
+                            'min:3',                 // Ensures the city name is at least 3 characters long
+                            'max:50'                 // Ensures the city name is no more than 50 characters long
+                        ])
+                        ->validationMessages([
+                            'regex' => 'The city name must not contain any digits or special characters.',
+                            'min' => 'The city name must be at least 3 characters long.',
+                            'max' => 'The city name must not exceed 50 characters.'
+                        ]),
 
-                        Select::make('PR_Barangay')
-                            ->label('Barangay')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->options([
-                                'Barangay Zone III' => 'Barangay Zone III',
-                                'Cannery Site' => 'Cannery Site',
-                                'Poblacion' => 'Poblacion',
-                                'Crossing Rubber' => 'Crossing Rubber',
-                                'Liberty' => 'Liberty',
-                                'Lamian' => 'Lamian',
-                                'Rizal' => 'Rizal',
-                            ]),
+                        TextInput::make('PR_Barangay')
+                        ->label('Barangay')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->rules([
+                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
+                            'min:3',                 // Ensures the barangay name is at least 3 characters long
+                            'max:50'                 // Ensures the barangay name is no more than 50 characters long
+                        ])
+                        ->validationMessages([
+                            'regex' => 'The barangay name must not contain any digits or special characters.',
+                            'min' => 'The barangay name must be at least 3 characters long.',
+                            'max' => 'The barangay name must not exceed 50 characters.'
+                        ]),
 
-                        Select::make('PR_Street')
-                            ->label('Street')
-                            ->required(fn (string $context) => $context === 'create')
-                            ->options([
-                                'Sanchez St.' => 'Sanchez St.',
-                                'Roxas St.' => 'Roxas St.',
-                                'GenSan Drive' => 'GenSan Drive',
-                                'Polomolok Road' => 'Polomolok Road',
-                                'Apolinario Mabini St.' => 'Apolinario Mabini St.',
-                                'Bonifacio St.' => 'Bonifacio St.',
-                            ]),
-
+                        TextInput::make('PR_Street')
+                        ->label('Street')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->rules([
+                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
+                            'min:3',                 // Ensures the street name is at least 3 characters long
+                            'max:50'                 // Ensures the street name is no more than 50 characters long
+                        ])
+                        ->validationMessages([
+                            'regex' => 'The street name must not contain any digits or special characters.',
+                            'min' => 'The street name must be at least 3 characters long.',
+                            'max' => 'The street name must not exceed 50 characters.'
+                        ]),
                     ])
                     ->columns(4)
                     ->collapsible(true),
 
                     Section::make('Date')
                     ->schema([
-
                         DatePicker::make('StartDate')
-                        ->required(fn (string $context) => $context === 'create'),
+                        ->label('Start Date')
+                        ->required(fn (string $context) => $context === 'create')
+                        ->rules([
+                            'date', // Ensures the value is a valid date
+                        ])
+                        ->validationMessages([
+                            'required' => 'The start date is required.',
+                            'date' => 'The start date must be a valid date.',
+                        ]),
 
                         DatePicker::make('EndDate')
+                        ->label('End Date')
                         ->required(fn (string $context) => $context === 'create')
                         ->after('StartDate')
+                        ->rules([
+                            'date', // Ensures the value is a valid date
+                            'after:StartDate', // Ensures the end date is strictly after the start date
+                        ])
+                        ->validationMessages([
+                            'required' => 'The end date is required.',
+                            'date' => 'The end date must be a valid date.',
+                            'after' => 'The end date must be after the start date.',
+                        ]),
                     ])
                     ->columns(2)
                     ->collapsible(true),
                 ])->collapsible(true)->collapsed(true),
-                
-
             ]);
             
             

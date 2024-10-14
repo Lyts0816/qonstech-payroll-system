@@ -26,11 +26,12 @@ class Employees extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('id'),
+                
                 Tables\Columns\TextColumn::make('full_name') 
                 ->label('Name')
                 ->formatStateUsing(fn ($record) => $record->first_name . ' ' . ($record->middle_name ? $record->middle_name . ' ' : '') . $record->last_name)
                 ->sortable()
-                ->searchable(),
+                ->searchable(['first_name', 'middle_name', 'last_name']),
                 
                 Tables\Columns\TextColumn::make('position.PositionName'),
 
@@ -48,13 +49,10 @@ class Employees extends BaseWidget
                 Tables\Columns\TextColumn::make('status')
             ])
             ->filters([
-                SelectFilter::make('first_name')
-                ->label('Filter by Employee First Name')
-                ->options(
-                    \App\Models\Employee::query()
-                        ->pluck('first_name', 'first_name')
-                        ->toArray()
-                )
+
+                SelectFilter::make('position_id')
+                ->label('Filter by Position')
+                ->relationship('position', 'PositionName')
                 ->searchable()
                 ->multiple()
                 ->preload(),
@@ -77,13 +75,6 @@ class Employees extends BaseWidget
                         ->pluck('province', 'province')
                         ->toArray()
                 )
-                ->searchable()
-                ->multiple()
-                ->preload(),
-
-                SelectFilter::make('position_id')
-                ->label('Filter by Position')
-                ->relationship('position', 'PositionName')
                 ->searchable()
                 ->multiple()
                 ->preload(),

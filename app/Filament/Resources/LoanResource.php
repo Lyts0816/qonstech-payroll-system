@@ -121,10 +121,22 @@ class LoanResource extends Resource
     
                         TextInput::make('MonthlyDeduction')
                             ->numeric()
-                            ->dehydrated(true),
+                            ->rules([
+                                'min:0',                     // Ensures the deduction is at least 0
+                                'max:150000',                // Ensures the deduction does not exceed 150,000
+                            ])
+                            ->dehydrated(true)->validationMessages([
+                                'numeric' => 'The monthly deduction must be a number.',
+                                'min' => 'The monthly deduction must be at least 0.',
+                                'max' => 'The monthly deduction must not exceed 150,000.',
+                            ]),
     
                         TextInput::make('KinsenaDeduction')
                             ->numeric()
+                            ->rules([
+                                'min:0',                     // Ensures the deduction is at least 0
+                                'max:150000',                // Ensures the deduction does not exceed 150,000
+                            ])
                             ->dehydrated(true),
     
                         // New field for Balance
