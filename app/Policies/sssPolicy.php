@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\sss;
+use App\Models\Sss;
 use Illuminate\Auth\Access\Response;
 
 class SssPolicy

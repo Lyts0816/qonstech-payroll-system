@@ -8,6 +8,7 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use App\Models\Employee;
+use Illuminate\Validation\Rule;
 use Dompdf\FrameDecorator\Text;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -37,7 +38,16 @@ class UserResource extends Resource
             ->schema([
                 Select::make('EmployeeID')
                     ->label('Employee')
-                    ->options(Employee::all()->pluck('full_name', 'id'))
+                    ->options(Employee::whereHas('position', function ($query) {
+                        $query->whereIn('PositionName', [
+                            'Project Clerk', 
+                            'Human Resource', 
+                            'Admin Vice President', 
+                            'Finance Vice President'
+                        ]);
+                    })->get()->mapWithKeys(function ($employee) {
+                        return [$employee->id => $employee->full_name . ' (' . $employee->position->PositionName . ')'];
+                    }))
                     ->searchable()
                     ->reactive()
                     ->afterStateUpdated(function (callable $set, $state) {
@@ -52,7 +62,7 @@ class UserResource extends Resource
 
 
                     TextInput::make('name')
-                    ->label('Name')
+                    ->label('User Name')
                     ->required(fn(string $context) => $context === 'create')
                     ->string()
                     ->rules([
@@ -90,6 +100,14 @@ class UserResource extends Resource
                         'Human Resource' => 'Human Resource',
                         'Admin Vice President' => 'Admin Vice President',
                         'Finance Vice President' => 'Finance Vice President',
+                    ])
+                    ->rules([
+                        Rule::unique('users', 'role')->where(function ($query) {
+                            return $query->where('role', 'Human Resource');
+                        })->whereNot('id', request()->route('record'))
+                    ])
+                    ->validationMessages([
+                        'unique' => 'Only one user with the Human Resource role can be created.',
                     ]), 
 
                     Fieldset::make('Password')
@@ -98,13 +116,16 @@ class UserResource extends Resource
                                 ->required(fn(string $context) => $context === 'create')
                                 ->visible(fn(string $context) => $context === 'create') // Only show on create
                                 ->password()
+                                ->revealable(true)
                                 ->confirmed()
                                 ->placeholder('Password')
+                                ->helperText('Password must be 8-20 characters, include at least one uppercase letter, one lowercase letter, one number, and one symbol.')
                                 ->rule(Password::default()->letters()->mixedCase()->numbers()->symbols())
                                 ->maxLength(20),
 
                             TextInput::make('password_confirmation')
                                 ->label('Confirm Password')
+                                ->revealable(true)
                                 ->required(fn(string $context) => $context === 'create')
                                 ->visible(fn(string $context) => $context === 'create')
                                 ->password()
