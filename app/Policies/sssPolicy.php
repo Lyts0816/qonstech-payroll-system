@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\sss;
 use Illuminate\Auth\Access\Response;
 
-class sssPolicy
+class SssPolicy
 {
     /**
      * Determine whether the user can view any models.

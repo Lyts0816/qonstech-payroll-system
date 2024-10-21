@@ -64,7 +64,7 @@ class UserResource extends Resource
                         'regex' => 'The user name must not contain any digits or special characters.',
                         'min' => 'The name must be at least 3 characters long.',
                         'max' => 'The name must not exceed 30 characters.'
-                    ]),
+                    ])->readOnly(fn($get) => $get('EmployeeID') !== null),
                 
                 TextInput::make('email')
                     ->label('Email')
