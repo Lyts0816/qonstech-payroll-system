@@ -208,6 +208,7 @@ class EmployeesRelationManager extends RelationManager
                             foreach ($records as $record) {
                                 $record->update([
                                     'project_id' => null,  
+                                    'schedule_id' => null,  // Remove schedule assignment
                                     'status' => 'Available',
                                 ]);
                             }
