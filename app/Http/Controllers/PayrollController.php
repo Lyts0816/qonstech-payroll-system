@@ -707,7 +707,7 @@ class PayrollController extends Controller
             // return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $request->id . '.xlsx');
 
         }
-        dd($payrollRecords);
+        // dd($payrollRecords);
         // return Excel::download(new PayrollExport($payrollRecords), 'payroll_' . $request->EmployeeID . '.xlsx');
         // } 
         // else {
