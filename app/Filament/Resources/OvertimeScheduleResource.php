@@ -68,15 +68,15 @@ class OvertimeScheduleResource extends Resource
                         Forms\Components\DatePicker::make('Date')
                             ->required(),
 
-                        // Status Select Field
-                        Forms\Components\Select::make('Status')
-                            ->label('Status')
-                            ->options([
-                                'approved' => 'Approved',
-                                'pending' => 'Pending',
-                                'rejected' => 'Rejected',
-                            ])
-                            ->required(),
+                        // // Status Select Field
+                        // Forms\Components\Select::make('Status')
+                        //     ->label('Status')
+                        //     ->options([
+                        //         'approved' => 'Approved',
+                        //         'pending' => 'Pending',
+                        //         'rejected' => 'Rejected',
+                        //     ])
+                        //     ->required(),
                     ])
                     ->columns(2) // Set the layout to two columns for better UI alignment
                     ->collapsible(true), // Allow the section to collapse for better user experience
@@ -111,6 +111,7 @@ class OvertimeScheduleResource extends Resource
             }
         }
     }
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -130,8 +131,8 @@ class OvertimeScheduleResource extends Resource
                 TextColumn::make('Date')
                     ->label('Date'),
 
-                TextColumn::make('Status')
-                    ->label('Status'),
+                // TextColumn::make('Status')
+                //     ->label('Status'),
             ])
             ->filters([
                 // Add filters here if needed

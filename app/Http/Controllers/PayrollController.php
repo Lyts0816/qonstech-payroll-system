@@ -250,6 +250,8 @@ class PayrollController extends Controller
 
                         $newRecord['TotalTardiness'] = $TotalTardiness;
                         $newRecord['TotalUndertime'] = $TotalUndertime;
+                        $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
+                        $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
                         $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
                         // If date is Holiday
@@ -325,6 +327,8 @@ class PayrollController extends Controller
 
                             $newRecord['TotalTardiness'] = $TotalTardiness;
                             $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
+                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -400,6 +404,8 @@ class PayrollController extends Controller
 
                             $newRecord['TotalTardiness'] = $TotalTardiness;
                             $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
+                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }
@@ -696,6 +702,8 @@ class PayrollController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
+            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
+            $newRecord['TotalDeductions'] = $TotalDeductions;
 
             $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
