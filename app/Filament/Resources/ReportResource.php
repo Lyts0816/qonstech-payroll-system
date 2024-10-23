@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ReportResource\Pages;
 use App\Filament\Resources\ReportResource\RelationManagers;
 use App\Models\Report;
+use App\Models\Employee;
 use Filament\Forms;
 use App\Models\Payroll;
 use Filament\Forms\Components\Hidden;
@@ -25,13 +26,13 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Employee;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\ButtonAction;
 use Filament\Forms\Components\Fieldset;
+
 class ReportResource extends Resource
 {
     protected static ?string $model = Report::class;
@@ -81,25 +82,10 @@ class ReportResource extends Resource
                             $payrollsQuery->where('EmployeeStatus', 'Regular');
                         }
 
-                        // Fetch and format payroll options
-                        $payrolls = $payrollsQuery->get();
-
-                        $payrollOptions = [];
-
-                        foreach ($payrolls as $payroll) {
-                            $key = "{$payroll->PayrollMonth},{$payroll->PayrollYear},{$payroll->EmployeeStatus}"; // Unique key for month, year, and status
-            
-                            // Create display text for each entry
+                        return $payrollsQuery->get()->mapWithKeys(function ($payroll) {
                             $displayText = "{$payroll->PayrollMonth}, {$payroll->PayrollYear} | {$payroll->EmployeeStatus} - {$payroll->assignment}";
-
-                            // Only add if the key is not already set
-                            if (!isset($payrollOptions[$key])) {
-                                $payrollOptions[$key] = $displayText;
-                            }
-                        }
-
-                        // Return the formatted options as an array
-                        return [$payroll->id => $displayText];
+                            return [$payroll->id => $displayText];
+                        });
                     })
                     ->placeholder('Select Date Option')
                     ->reactive()
@@ -276,18 +262,16 @@ class ReportResource extends Resource
                                         $monthId = Carbon::createFromFormat('F', $month)->format('m');
 
                                         // Fetch WeekPeriod entries based on the selected criteria
-                                        $weekPeriods = WeekPeriod::where('Month', $monthId)
+                                        return WeekPeriod::where('Month', $monthId)
                                             ->where('Category', $frequency)
                                             ->where('Type', $payrollDate)
                                             ->where('Year', $year)
-                                            ->get();
-
-                                        // Return options if data exists
-                                        return $weekPeriods->isNotEmpty() ? $weekPeriods->mapWithKeys(function ($period) {
+                                            ->get()
+                                            ->mapWithKeys(function ($period) {
                                             return [
                                                 $period->id => $period->StartDate . ' - ' . $period->EndDate,
                                             ];
-                                        }) : [];
+                                        });
                                     } catch (\Exception $e) {
                                         // Log the exception or handle it as needed
                                         \Log::error('Error fetching week periods: ' . $e->getMessage());
@@ -301,9 +285,10 @@ class ReportResource extends Resource
                             ->native(false)
                             ->reactive() // Make this field reactive to other fields
                             ->placeholder('Select the payroll period')
-                            ->hidden()
-
-
+                            ->visible(function (callable $get) {
+                                // Display if SelectPayroll has a value
+                                return !empty($get('SelectPayroll') &&  $get('ReportType') === 'Payslip');
+                            }),
                     ])
             ]);
     }
@@ -347,14 +332,55 @@ class ReportResource extends Resource
                 //     ->sortable(),
             ])
             ->actions([
-
-                Tables\Actions\Action::make('viewPayslip')
+                Tables\Actions\Action::make('viewSummary')
                     ->label('View Payslip')
-                    ->icon('heroicon-o-calculator')
                     ->color('success')
-                    ->url(fn($record) => route('generate.payslips', $record->toArray()))
+                    ->form([
+                        Select::make('SelectEmployee')
+                            ->label('Select Employee')
+                            ->required(fn(string $context) => $context === 'create' || $context === 'edit')
+                            ->options(function (callable $get, $record) {
+                                $projectID = $record->ProjectID;
+                                $EmployeeStatus = $record->EmployeeStatus;
+
+                                if ($projectID) {
+                                    // Fetch employees associated with the selected project and concatenate first_name and last_name
+                                    $employees = \App\Models\Employee::where('project_id', $projectID)
+                                        ->get()
+                                        ->mapWithKeys(function ($employee) {
+                                        return [$employee->id => "{$employee->first_name} {$employee->last_name}"];
+                                    });
+
+                                    // Add "All Employees in this Project" option
+                                    return ['All' => 'All Employees'] + $employees->toArray();
+                                } 
+                                else {
+                                    $employees = \App\Models\Employee::where('employment_type', $EmployeeStatus)
+                                    ->get()
+                                    ->mapWithKeys(function ($employee) {
+                                    return [$employee->id => "{$employee->first_name} {$employee->last_name}"];
+                                });
+
+                                // Add "All Employees in this Project" option
+                                return ['All' => 'All Employees'] + $employees->toArray();
+                                }
+                                return []; // Return empty if no projectID
+                            })
+                            ->placeholder('Select Employee')
+                            ->reactive()
+                    ])
                     ->openUrlInNewTab()
-                    ->visible(fn($record) => $record->ReportType === 'Payslip'),
+                    ->visible(fn($record) => $record->ReportType === 'Payslip')
+                    ->action(function (array $data, $record) {
+                        $employeeId = $data['SelectEmployee'] === 'All' ? 'All' : $data['SelectEmployee'];
+
+                        return redirect()->to(route('generate.payslips', [
+                            'employee_id' => $employeeId,
+                            'record' => $record->toArray(),
+                        ]));
+                    }),
+
+
                 Tables\Actions\Action::make('generateReport')
                     ->label('Generate Report')
                     ->icon('heroicon-o-calculator')
