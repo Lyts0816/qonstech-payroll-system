@@ -107,40 +107,41 @@ $src = 'data:image/png;base64,' . $imageData;
                         <td colspan="3" style="text-align: left"><b>Project Name:</b>
                             {{ $employee['ProjectName'] ?? 'N/A' }}</td>
                         <td colspan="3" style="text-align: left"><b>Work Schedule:</b> 8:00 AM – 5:00 PM</td>
-                        <td colspan="3" style="text-align: left"><b>Payroll Period:</b> {{ $formattedPeriod }}</td>
+                        <td colspan="4" style="text-align: left"><b>Payroll Period:</b> {{ $formattedPeriod }}</td>
                     </tr>
                 @endif
 
 
                 <thead>
-                    <tr>
-                        <th style="text-align:left">Employee Name</th>
-                        <th>Monday</th>
-                        <th>Tuesday</th>
-                        <th>Wednesday</th>
-                        <th>Thursday</th>
-                        <th>Friday</th>
-                        <th>Saturday</th>
-                        <th>Sunday</th>
-                        <th>Total Hours Worked</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($payrollRecords as $employee)
-                        <tr>
-                            <td style="text-align:left">
-                                {{ $employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . ($employee['last_name'] ?? '') }}
-                            <td>{{ number_format($employee['Monday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Tuesday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Wednesday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Thursday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Friday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Saturday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['Sunday'] ?? 0, 2) }}</td>
-                            <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
+                <tr>
+                    <th>ID</th>
+                    <th style="text-align: left;">Name</th>
+                    <th>Date</th>
+                    <th>Morning Check In</th>
+                    <th>Morning Check Out</th>
+                    <th>Afternoon Check In</th>
+                    <th>Afternoon Check Out</th>
+                    <th>Tardiness</th>
+                    <th>Undertime</th>
+                    <th>Total Hours Worked</th>
+                </tr>
+								</thead>
+								<tbody>
+										@foreach ($payrollRecords as $record)
+												<tr>
+														<td>{{ isset($record['EmployeeID']) ? $record['EmployeeID'] : '' }}</td>
+														<td style="text-align: left;">{{ $record['first_name'] . ' ' . ($record['middle_name'] ?? '') . ' ' . ($record['last_name'] ?? '') }}</td>
+														<td>{{ isset($record['DateNow']) ? $record['DateNow'] : '' }}</td>
+														<td>{{ isset($record['MorningCheckIn']) ? $record['MorningCheckIn'] : '' }}</td>
+														<td>{{ isset($record['MorningCheckOut']) ? $record['MorningCheckOut'] : '' }}</td>
+														<td>{{ isset($record['AfternoonCheckIn']) ? $record['AfternoonCheckIn'] : '' }}</td>
+														<td>{{ isset($record['AfternoonCheckOut']) ? $record['AfternoonCheckOut'] : '' }}</td>
+														<td>{{ isset($record['TotalTardiness']) ? round($record['TotalTardiness'], 2) . ' minute/s': '0 minute' }}</td>
+														<td>{{ isset($record['TotalUndertime']) ? round($record['TotalUndertime'], 2) . ' minute/s': '0 minute' }}</td>
+														<td>{{ isset($record['TotalHours']) ? round($record['TotalHours'], 2) . ' hour/s': '0 hour' }}</td>
+												</tr>
+										@endforeach
+								</tbody>
             </table>
             <div class="footer">
                 <div class="footer-section">
