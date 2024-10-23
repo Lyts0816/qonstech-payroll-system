@@ -148,8 +148,6 @@
                     {{-- <th rowspan="2">Salary Type</th>
                     <th rowspan="2">Regular Status</th> --}}
                     <th rowspan="2">Regular Hours</th>
-                    <th rowspan="2">Tardiness</th>
-                    <th rowspan="2">Undertime</th>
                     <!-- <th rowspan="2">Absences</th> -->
                     <th rowspan="2">Total Hours</th>
                     <th rowspan="2">O.T Hours</th>
@@ -162,7 +160,7 @@
                     <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
                     {{-- <th rowspan="2">Other Allowance</th> --}}
                     <th rowspan="2">Gross Amount</th>
-                    <th colspan="9">Deductions</th>
+                    <th colspan=11">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
                     <th rowspan="2">NET PAY</th>
                     <th rowspan="2">SIGNATURE</th>
@@ -170,6 +168,8 @@
                 <tr>
                     <th>Regular Holiday Hours</th>
                     <th>Special Holiday Hours</th>
+                    <th>Tardiness</th>
+                    <th>Undertime</th>
                     <th>TAXES</th>
                     <th>SSS</th>
                     <th>PHIC</th>
@@ -198,8 +198,7 @@
 
 
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        <td>{{ number_format($employee['TotalTardiness'] ?? 0, 2) }}</td>
-                        <td>{{ number_format($employee['TotalUndertime'] ?? 0, 2) }}</td>
+
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
@@ -215,7 +214,10 @@
                         <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
                         <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['TotalTardinessDed'] ?? 0, 2) }}</td>
+                        <td>P{{ number_format($employee['TotalUndertimeDed'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['WTAXDeduction'] ?? 0, 2) }}</td>
+
                         <td>P{{ number_format($employee['SSSDeduction'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
@@ -228,8 +230,8 @@
                         {{-- <td>P{{ number_format($employee['TotalOfficeDeductions'] ?? 0) }}</td> --}}
 
                         <!-- <td>P{{ number_format('0') }}</td>
-                            <td>P{{ number_format('0') }}</td>
-                            <td>P{{ number_format('0') }}</td> -->
+                                <td>P{{ number_format('0') }}</td>
+                                <td>P{{ number_format('0') }}</td> -->
 
                         <td>P{{ number_format($employee['TotalDeductions'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['NetPay'] ?? 0, 2) }}</td>
