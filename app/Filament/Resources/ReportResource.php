@@ -7,6 +7,7 @@ use App\Filament\Resources\ReportResource\RelationManagers;
 use App\Models\Report;
 use Filament\Forms;
 use App\Models\Payroll;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -48,7 +49,8 @@ class ReportResource extends Resource
                     ->options([
                         'SSS Contribution' => 'SSS Contribution',
                         'Philhealth Contribution' => 'Philhealth Contribution',
-                        'Pagibig Contribution' => 'Pagibig Contribution'
+                        'Pagibig Contribution' => 'Pagibig Contribution',
+                        'Payslip' => 'Payslip'
                     ])
                     ->default(request()->query('employee'))
                     ->reactive()
@@ -62,30 +64,44 @@ class ReportResource extends Resource
                         $set('SelectPayroll', null);
                     }),
 
-                    Select::make('SelectPayroll')
-                    ->label('Select Payroll')
+                Select::make('SelectPayroll')
+                    ->label('Select Date')
                     ->required(fn(string $context) => $context === 'create' || $context === 'edit')
                     ->options(function (callable $get) {
                         // Get the current ReportType value
                         $reportType = $get('ReportType');
-                
+
                         // Start the query to fetch payrolls
                         $payrollsQuery = Payroll::orderBy('PayrollYear')
                             ->orderBy('PayrollMonth')
                             ->orderBy('PayrollDate2');
-                
+
                         // Apply filter only for "SSS Contribution" to show Regular employees only
                         if ($reportType === 'SSS Contribution' || $reportType === 'Pagibig Contribution') {
                             $payrollsQuery->where('EmployeeStatus', 'Regular');
                         }
-                
+
                         // Fetch and format payroll options
-                        return $payrollsQuery->get()->mapWithKeys(function ($payroll) {
-                            $displayText = "{$payroll->PayrollMonth},{$payroll->PayrollYear} - {$payroll->PayrollDate2} | {$payroll->EmployeeStatus} - {$payroll->assignment} ";
-                            return [$payroll->id => $displayText];
-                        });
+                        $payrolls = $payrollsQuery->get();
+
+                        $payrollOptions = [];
+
+                        foreach ($payrolls as $payroll) {
+                            $key = "{$payroll->PayrollMonth},{$payroll->PayrollYear},{$payroll->EmployeeStatus}"; // Unique key for month, year, and status
+            
+                            // Create display text for each entry
+                            $displayText = "{$payroll->PayrollMonth}, {$payroll->PayrollYear} | {$payroll->EmployeeStatus} - {$payroll->assignment}";
+
+                            // Only add if the key is not already set
+                            if (!isset($payrollOptions[$key])) {
+                                $payrollOptions[$key] = $displayText;
+                            }
+                        }
+
+                        // Return the formatted options as an array
+                        return [$payroll->id => $displayText];
                     })
-                    ->placeholder('Select Payroll Option')
+                    ->placeholder('Select Date Option')
                     ->reactive()
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('EmployeeStatus', null);
@@ -96,7 +112,7 @@ class ReportResource extends Resource
                         $set('assignment', null);
                         $set('ProjectID', null);
                         $set('weekPeriodID', null);
-                
+
                         if ($state) {
                             $payroll = Payroll::find($state);
                             if ($payroll) {
@@ -111,7 +127,7 @@ class ReportResource extends Resource
                             }
                         }
                     }),
-                
+
                 Fieldset::make('Payroll Details')// Create a two-column grid layout for the first two fields
                     ->schema([
 
@@ -177,7 +193,8 @@ class ReportResource extends Resource
                                 } else {
                                     $set('PayrollFrequency', 'Weekly');
                                 }
-                            }),
+                            })
+                            ->hidden(),
 
 
                         // PayrollDate Select Field
@@ -202,7 +219,8 @@ class ReportResource extends Resource
 
                                 return [];
                             })
-                            ->reactive(),
+                            ->reactive()
+                            ->hidden(),
 
                         // PayrollMonth Select Field
                         Select::make('PayrollMonth')
@@ -258,18 +276,21 @@ class ReportResource extends Resource
                                         $monthId = Carbon::createFromFormat('F', $month)->format('m');
 
                                         // Fetch WeekPeriod entries based on the selected criteria
-                                        return WeekPeriod::where('Month', $monthId)
+                                        $weekPeriods = WeekPeriod::where('Month', $monthId)
                                             ->where('Category', $frequency)
                                             ->where('Type', $payrollDate)
                                             ->where('Year', $year)
-                                            ->get()
-                                            ->mapWithKeys(function ($period) {
+                                            ->get();
+
+                                        // Return options if data exists
+                                        return $weekPeriods->isNotEmpty() ? $weekPeriods->mapWithKeys(function ($period) {
                                             return [
                                                 $period->id => $period->StartDate . ' - ' . $period->EndDate,
                                             ];
-                                        });
+                                        }) : [];
                                     } catch (\Exception $e) {
-                                        // In case there is an issue with parsing the date or any other issue
+                                        // Log the exception or handle it as needed
+                                        \Log::error('Error fetching week periods: ' . $e->getMessage());
                                         return [];
                                     }
                                 }
@@ -279,7 +300,9 @@ class ReportResource extends Resource
                             })
                             ->native(false)
                             ->reactive() // Make this field reactive to other fields
-                            ->placeholder('Select the payroll period'),
+                            ->placeholder('Select the payroll period')
+                            ->hidden()
+
 
                     ])
             ]);
@@ -315,23 +338,33 @@ class ReportResource extends Resource
                 Tables\Columns\TextColumn::make('PayrollYear')
                     ->Label('Payroll Year'),
 
-                Tables\Columns\TextColumn::make('PayrollFrequency')
-                    ->Label('Payroll Frequency'),
+                // Tables\Columns\TextColumn::make('PayrollFrequency')
+                //     ->Label('Payroll Frequency'),
 
-                Tables\Columns\TextColumn::make('PayrollDate2')
-                    ->label('Payroll Dates')
-                    ->searchable()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('PayrollDate2')
+                //     ->label('Payroll Dates')
+                //     ->searchable()
+                //     ->sortable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+
+                Tables\Actions\Action::make('viewPayslip')
+                    ->label('View Payslip')
+                    ->icon('heroicon-o-calculator')
+                    ->color('success')
+                    ->url(fn($record) => route('generate.payslips', $record->toArray()))
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => $record->ReportType === 'Payslip'),
                 Tables\Actions\Action::make('generateReport')
                     ->label('Generate Report')
                     ->icon('heroicon-o-calculator')
                     ->color('info')
                     ->url(fn($record) => route('generate.reports', $record->toArray()))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => $record->ReportType != 'Payslip'),
 
+
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
