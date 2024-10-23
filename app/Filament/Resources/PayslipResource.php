@@ -322,8 +322,11 @@ class PayslipResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
+            ->recordUrl(function ($record) {
+                return null;
+            })
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('viewPayslip')
                     ->label('View Payslip')
                     ->icon('heroicon-o-calculator')

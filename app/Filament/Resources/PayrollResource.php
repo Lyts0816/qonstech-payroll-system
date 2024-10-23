@@ -239,6 +239,9 @@ class PayrollResource extends Resource
 					->sortable(),
 
 			])
+			->recordUrl(function ($record) {
+                return null;
+            })
 			->filters([
 				SelectFilter::make('project_id')
 					->label('Select Project')
@@ -267,7 +270,7 @@ class PayrollResource extends Resource
 					
 			], layout: FiltersLayout::AboveContent)
 			->actions([
-				Tables\Actions\EditAction::make(),
+				// Tables\Actions\EditAction::make(),
 				Tables\Actions\Action::make('viewPayroll')
 				->label('Generate Payroll Summary')
 				->icon('heroicon-o-calculator')

@@ -235,11 +235,15 @@ class PayslipController extends Controller
                         $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                             + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                        $newRecord['TotalTardiness'] = $TotalTardiness;
-                        $newRecord['TotalUndertime'] = $TotalUndertime;
-                        $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                        $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
-                        $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
+                            $hourRtomin = $employee->HourlyRate / 60;
+                            $totalTardiness = $TotalTardiness * $hourRtomin;
+                            $totalUndertime = $TotalUndertime * $hourRtomin;
+                            
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $totalTardiness;
+                            $newRecord['TotalUndertimeDed'] = $totalUndertime;
+                            $newRecord['TotalHours'] = $TotalHours;
                     } else { // regular day monday to saturday
                         // If date is Holiday
                         // dd(count(value: $Holiday));
@@ -301,10 +305,15 @@ class PayslipController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                            $newRecord['TotalTardiness'] = $TotalTardiness;
-                            $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
+                                $hourRtomin = $employee->HourlyRate / 60;
+                                $totalTardiness = $TotalTardiness * $hourRtomin;
+                                $totalUndertime = $TotalUndertime * $hourRtomin;
+                                
+                                $newRecord['TotalTardiness'] = $TotalTardiness;
+                                $newRecord['TotalUndertime'] = $TotalUndertime;
+                                $newRecord['TotalTardinessDed'] = $totalTardiness;
+                                $newRecord['TotalUndertimeDed'] = $totalUndertime;
+                                $newRecord['TotalHours'] = $TotalHours;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -355,10 +364,14 @@ class PayslipController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
+                            $hourRtomin = $employee->HourlyRate / 60;
+                            $totalTardiness = $TotalTardiness * $hourRtomin;
+                            $totalUndertime = $TotalUndertime * $hourRtomin;
+                            
                             $newRecord['TotalTardiness'] = $TotalTardiness;
                             $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
+                            $newRecord['TotalTardinessDed'] = $totalTardiness;
+                            $newRecord['TotalUndertimeDed'] = $totalUndertime;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }
@@ -679,7 +692,7 @@ class PayslipController extends Controller
             $SundayPay = $TotalHoursSunday * $employee->HourlyRate * 1.30;
             $newRecord['SundayPay'] = $SundayPay;
 
-            $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.30 : 0;
+            $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.3 : 0;
             $newRecord['SpecialHolidayPay'] = $SpecialHolidayPay;
 
             $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate : 0;
@@ -688,8 +701,12 @@ class PayslipController extends Controller
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
 
+
+            
             $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
+
+
 
             $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction;
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;

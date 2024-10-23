@@ -89,6 +89,7 @@ class HolidayResource extends Resource
 					->label('Holiday Type'),
 
 			])
+			
 			->filters([
 				SelectFilter::make('HolidayType')
 					->label('Filter by Holiday Type')
@@ -105,9 +106,9 @@ class HolidayResource extends Resource
 				Tables\Actions\EditAction::make(),
 			])
 			->bulkActions([
-				Tables\Actions\BulkActionGroup::make([
-					Tables\Actions\DeleteBulkAction::make(),
-				]),
+				// Tables\Actions\BulkActionGroup::make([
+				// 	Tables\Actions\DeleteBulkAction::make(),
+				// ]),
 			]);
 	}
 

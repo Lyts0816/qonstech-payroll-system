@@ -248,11 +248,15 @@ class PayrollController extends Controller
                         $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                             + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                        $newRecord['TotalTardiness'] = $TotalTardiness;
-                        $newRecord['TotalUndertime'] = $TotalUndertime;
-                        $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                        $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
-                        $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
+                            $hourRtomin = $employee->HourlyRate / 60;
+                            $totalTardiness = $TotalTardiness * $hourRtomin;
+                            $totalUndertime = $TotalUndertime * $hourRtomin;
+                            
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $totalTardiness;
+                            $newRecord['TotalUndertimeDed'] = $totalUndertime;
+                            $newRecord['TotalHours'] = $TotalHours;
                     } else { // regular day monday to saturday
                         // If date is Holiday
                         // dd(count(value: $Holiday));
@@ -325,10 +329,14 @@ class PayrollController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                            $newRecord['TotalTardiness'] = $TotalTardiness;
-                            $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
+                                $hourRtomin = $employee->HourlyRate / 60;
+                                $totalTardiness = $TotalTardiness * $hourRtomin;
+                                $totalUndertime = $TotalUndertime * $hourRtomin;
+                                
+                                $newRecord['TotalTardiness'] = $TotalTardiness;
+                                $newRecord['TotalUndertime'] = $TotalUndertime;
+                                $newRecord['TotalTardinessDed'] = $totalTardiness;
+                                $newRecord['TotalUndertimeDed'] = $totalUndertime;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -402,10 +410,14 @@ class PayrollController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                            $newRecord['TotalTardiness'] = $TotalTardiness;
-                            $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime * $employee->HourlyRate;
+                                $hourRtomin = $employee->HourlyRate / 60;
+                                $totalTardiness = $TotalTardiness * $hourRtomin;
+                                $totalUndertime = $TotalUndertime * $hourRtomin;
+                                
+                                $newRecord['TotalTardiness'] = $TotalTardiness;
+                                $newRecord['TotalUndertime'] = $TotalUndertime;
+                                $newRecord['TotalTardinessDed'] = $totalTardiness;
+                                $newRecord['TotalUndertimeDed'] = $totalUndertime;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }
@@ -702,11 +714,14 @@ class PayrollController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
+
             $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
+            
             $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
-            $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
+            $newGovDed = $TotalGovDeductions + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
+            $newRecord['TotalGovDeductions'] = $newGovDed;
 
             $TotalOfficeDeductions = $DeductionFee;
             $newRecord['TotalOfficeDeductions'] = $TotalOfficeDeductions;
@@ -714,7 +729,9 @@ class PayrollController extends Controller
 
             $totaltest = $TotalGovDeductions;
             $TotalDeductions =$TotalGovDeductions + $TotalOfficeDeductions + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
-            $newRecord['TotalDeductions'] = $TotalDeductions;
+            $NewtotalDedcutions = $TotalDeductions + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
+
+            $newRecord['TotalDeductions'] = $NewtotalDedcutions;
 
 
 
