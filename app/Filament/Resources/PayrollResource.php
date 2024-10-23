@@ -269,7 +269,7 @@ class PayrollResource extends Resource
 			->actions([
 				Tables\Actions\EditAction::make(),
 				Tables\Actions\Action::make('viewPayroll')
-				->label('Calculate & Export PDF')
+				->label('Generate Payroll Summary')
 				->icon('heroicon-o-calculator')
 				->color('success')
 				->url(fn($record) => route('payroll-report', $record->toArray())) // Pass all attributes from the record as an array

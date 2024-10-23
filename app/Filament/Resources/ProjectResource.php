@@ -64,61 +64,29 @@ class ProjectResource extends Resource
                     
                     Section::make('Location')
                     ->schema([
-                        TextInput::make('PR_Province')
-                        ->label('Province')
-                        ->required(fn (string $context) => $context === 'create')
-                        ->rules([
-                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
-                            'min:3',                 // Ensures the province name is at least 3 characters long
-                            'max:50'                 // Ensures the province name is no more than 50 characters long
-                        ])
-                        ->validationMessages([
-                            'regex' => 'The province name must not contain any digits or special characters.',
-                            'min' => 'The province name must be at least 3 characters long.',
-                            'max' => 'The province name must not exceed 50 characters.'
-                        ]),
+                        TextInput::make('province')
+    ->label('Province')
+    ->required(fn (string $context) => $context === 'create' || 'edit')
+    ->placeholder('Enter province')
+    ->rules(['required', 'string', 'max:255']),
 
-                        TextInput::make('PR_City')
-                        ->label('City')
-                        ->required(fn (string $context) => $context === 'create')
-                        ->rules([
-                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
-                            'min:3',                 // Ensures the city name is at least 3 characters long
-                            'max:50'                 // Ensures the city name is no more than 50 characters long
-                        ])
-                        ->validationMessages([
-                            'regex' => 'The city name must not contain any digits or special characters.',
-                            'min' => 'The city name must be at least 3 characters long.',
-                            'max' => 'The city name must not exceed 50 characters.'
-                        ]),
+TextInput::make('city')
+    ->label('City')
+    ->required(fn (string $context) => $context === 'create' || 'edit')
+    ->placeholder('Enter city')
+    ->rules(['required', 'string', 'max:255']),
 
-                        TextInput::make('PR_Barangay')
-                        ->label('Barangay')
-                        ->required(fn (string $context) => $context === 'create')
-                        ->rules([
-                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
-                            'min:3',                 // Ensures the barangay name is at least 3 characters long
-                            'max:50'                 // Ensures the barangay name is no more than 50 characters long
-                        ])
-                        ->validationMessages([
-                            'regex' => 'The barangay name must not contain any digits or special characters.',
-                            'min' => 'The barangay name must be at least 3 characters long.',
-                            'max' => 'The barangay name must not exceed 50 characters.'
-                        ]),
+TextInput::make('barangay')
+    ->label('Barangay')
+    ->required(fn (string $context) => $context === 'create' || 'edit')
+    ->placeholder('Enter barangay')
+    ->rules(['required', 'string', 'max:255']),
 
-                        TextInput::make('PR_Street')
-                        ->label('Street')
-                        ->required(fn (string $context) => $context === 'create')
-                        ->rules([
-                            'regex:/^[a-zA-Z\s]*$/', // Ensures no digits and no special characters are present
-                            'min:3',                 // Ensures the street name is at least 3 characters long
-                            'max:50'                 // Ensures the street name is no more than 50 characters long
-                        ])
-                        ->validationMessages([
-                            'regex' => 'The street name must not contain any digits or special characters.',
-                            'min' => 'The street name must be at least 3 characters long.',
-                            'max' => 'The street name must not exceed 50 characters.'
-                        ]),
+TextInput::make('street')
+    ->label('Street')
+    ->required(fn (string $context) => $context === 'create' || 'edit')
+    ->placeholder('Enter street')
+    ->rules(['required', 'string', 'max:255']),
                     ])
                     ->columns(4)
                     ->collapsible(true),
@@ -131,6 +99,7 @@ class ProjectResource extends Resource
                         ->rules([
                             'date', // Ensures the value is a valid date
                         ])
+                        ->minDate(now())
                         ->validationMessages([
                             'required' => 'The start date is required.',
                             'date' => 'The start date must be a valid date.',

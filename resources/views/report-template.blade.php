@@ -151,7 +151,7 @@ switch ($reportType) {
         $titleName = 'Pag-IBIG';
         $src = $pagibig;
         $employerNumber = '12-3456789-0';
-        $IDName = 'PAG-IBIG NO.'; 
+        $IDName = 'PAG-IBIG NO.';
         $personal = 'EMPLOYEE SHARE';
         break;
     case 'Philhealth Contribution':
@@ -166,8 +166,8 @@ switch ($reportType) {
         $titleName = 'Social Security System';
         $src = $sss;
         $employerNumber = '3214-7658-9832';
-        $IDName = 'SSS NUMBER'; 
-        $personal =  'EMPLOYEE SHARE';
+        $IDName = 'SSS NUMBER';
+        $personal = 'EMPLOYEE SHARE';
         break;
 }
 ?>
@@ -177,7 +177,6 @@ switch ($reportType) {
     <div class="container">
         @php
             $employeeda = $payrollData->first();
-            $formattedPeriod = '';
             $totalEmployeeShare = 0;
             $totalEmployerShare = 0;
             $totalDeduction = 0;
@@ -188,7 +187,6 @@ switch ($reportType) {
                 if (count($dates) == 2) {
                     $startDate = \Carbon\Carbon::parse($dates[0])->format('m-d-Y');
                     $endDate = \Carbon\Carbon::parse($dates[1])->format('m-d-Y');
-                    $formattedPeriod = "{$startDate} - {$endDate}";
                 }
             }
         @endphp
@@ -209,7 +207,7 @@ switch ($reportType) {
                     <td><b>EMPLOYER ID NUMBER</b> <br>{{$employerNumber}}
                     </td>
                     <td><b>REGISTERED EMPLOYER NAME</b> <br>Qonstech Construction Corporation </td>
-                    <td><b>PERIOD COVERED</b> <br>{{ $formattedPeriod }}</td>
+                    <td><b>PERIOD COVERED</b> <br>{{ $employeeda['PayrollMonth'] }}, {{$employeeda['PayrollYear']}}</td>
                 </tr>
                 <tr>
                     <td><b>TEL NO.</b> <br>09 1234 567 8912</td>
@@ -250,7 +248,7 @@ switch ($reportType) {
                                     $totalEmployerShare += $employerShare;
                                     $totalDeduction += $totalContribution;
 
-                                    
+
                                 @endphp
                                 <tr>
                                     <td style="text-align:left">{{ $employee['DeductionID'] ?? '' }}</td>
@@ -302,7 +300,7 @@ switch ($reportType) {
             </div>
             <div class="footer-section">
                 <p><b>Date Generated:</b><br>
-                {{ now()->format('F d, Y H:i:s') }}</p>
+                    {{ now()->format('F d, Y H:i:s') }}</p>
                 <br>
 
             </div>

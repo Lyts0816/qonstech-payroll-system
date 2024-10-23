@@ -55,7 +55,7 @@ class WorkSchedResource extends Resource
                             ->rules('regex:/^[^\d]*$/'),
 
                         TextInput::make('RegularHours')
-                            ->label('Regular Hours')
+                            ->label('Number of Work Hours')
                             ->numeric()
                             ->maxLength(2)
                             ->maxValue(12),

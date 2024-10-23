@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -41,13 +42,30 @@ class WeekPeriodResource extends Resource
                     12 => 'December'
                 ])
                 ->required(fn (string $context) => $context === 'create')
-                ->label('Category'),
+                ->label('Month')
+                ->default(date('n'))
+                ->options(fn () => collect([
+                    1 => 'January',
+                    2 => 'February',
+                    3 => 'March',
+                    4 => 'April',
+                    5 => 'May',
+                    6 => 'June',
+                    7 => 'July',
+                    8 => 'August',
+                    9 => 'September',
+                    10 => 'October',
+                    11 => 'November',
+                    12 => 'December'
+                ])->filter(fn ($label, $key) => $key >= date('n'))),
                     
 
                 Forms\Components\TextInput::make('Year')
                     ->required()
                     ->numeric()
-                    ->label('Year'),
+                    ->label('Year')
+                    ->default(date('Y'))
+                    ->readOnly(),
 
                 Forms\Components\Select::make('Category')
                     ->options([
@@ -165,7 +183,8 @@ class WeekPeriodResource extends Resource
                 Tables\Columns\TextColumn::make('Type'),
             ])
             ->filters([
-                // Add any table filters if needed
+                Filter::make('StartDate')
+                ->label('Start Date'),
             ]);
     }
 

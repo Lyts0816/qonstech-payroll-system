@@ -69,12 +69,12 @@ class EarningsResource extends Resource
                     ->required(fn (string $context) => $context === 'create')
                     ->numeric()
                     ->minValue(0)
-                    ->maxValue(150000) // Ensures the amount does not exceed 150,000
+                    ->maxValue(50000) // Ensures the amount does not exceed 150,000
                     ->validationMessages([
                         'required' => 'The amount is required.',
                         'numeric' => 'The amount must be a number.',
                         'min' => 'The amount must be at least 0.',
-                        'max' => 'The amount must not exceed 150,000.',
+                        'max' => 'The amount must not exceed 50,000.',
                     ]), // Ensure no negative amounts are input
 
                     // PeriodID Select Field

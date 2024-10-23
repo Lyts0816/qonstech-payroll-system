@@ -51,14 +51,14 @@ class PagibigResource extends Resource
     
                 // Employee Share Percentage
                 TextInput::make('EmployeeRate')
-                    ->label('Employee Contribution (%)')
+                    ->label('Employee Contribution')
                     ->numeric()
                     ->required()
                     ->placeholder('Enter employee share percentage for this bracket'),
     
                 // Employer Share Percentage
                 TextInput::make('EmployerRate')
-                    ->label('Employer Contribution (%)')
+                    ->label('Employer Contribution')
                     ->numeric()
                     ->required()
                     ->placeholder('Enter employer share percentage for this bracket'),
@@ -107,13 +107,14 @@ class PagibigResource extends Resource
             ->filters([
                 //
             ])
+            ->recordUrl(function ($record) {
+                return null;
+            })
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+
             ]);
     }
 
