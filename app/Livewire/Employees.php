@@ -102,35 +102,42 @@ class Employees extends BaseWidget
                 ->deselectRecordsAfterCompletion()
                 ->requiresConfirmation()
                 ->action(function (array $data, Collection $records) {
-									$projectId = $data['project_id'];
+                    $projectId = $data['project_id'];
 
-                                    $existingClerk = Employee::where('project_id', $projectId)
-                                    ->whereHas('position', function (Builder $query) {
-                                        $query->where('PositionName', 'Project Clerk');
-                                    })
-                                    ->first();
-                        
-                                if ($existingClerk) {
-                                    // Notify the user that there's already a project clerk assigned
-                                    Notification::make()
-                                        ->title('Error')
-                                        ->body('A project clerk is already assigned to this project.')
-                                        ->danger()
-                                        ->send();
-                                    return;
-                                }
-                        
-                                foreach ($records as $record) {
-                                    $record->update(['project_id' => $projectId, 'status' => 'Assigned']);
-                                }
-                        
-                                // Notify success
-                                Notification::make()
-                                    ->title('Success')
-                                    ->body('Employees have been assigned to the project successfully.')
-                                    ->success()
-                                    ->send();
-							}),
+                    // Find if a Project Clerk already exists in the selected project
+                    $existingClerk = Employee::where('project_id', $projectId)
+                        ->whereHas('position', function (Builder $query) {
+                            $query->where('PositionName', 'Project Clerk');
+                        })
+                        ->first();
+
+                    // Check if any of the selected records have a position of Project Clerk
+                    $clerkInSelection = $records->contains(function ($record) {
+                        return $record->position->PositionName === 'Project Clerk';
+                    });
+
+                    // If a clerk exists and there's a clerk in the selection, show an error
+                    if ($existingClerk && $clerkInSelection) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('A project clerk is already assigned to this project.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+
+                    // Assign project to the selected employees
+                    foreach ($records as $record) {
+                        $record->update(['project_id' => $projectId, 'status' => 'Assigned']);
+                    }
+
+                    // Notify success
+                    Notification::make()
+                        ->title('Success')
+                        ->body('Employees have been assigned to the project successfully.')
+                        ->success()
+                        ->send();
+                }),
                 
             ]);
     }

@@ -91,11 +91,10 @@ class UserResource extends Resource
                         'max' => 'The email must not exceed 30 characters.'
                     ]),
 
-                Select::make('role') // Field name
+                    Select::make('role') // Field name
                     ->label('Role')
                     ->required(fn(string $context) => $context === 'create')
                     ->options([
-                    
                         'Project Clerk' => 'Project Clerk',
                         'Human Resource' => 'Human Resource',
                         'Admin Vice President' => 'Admin Vice President',
@@ -103,11 +102,11 @@ class UserResource extends Resource
                     ])
                     ->rules([
                         Rule::unique('users', 'role')->where(function ($query) {
-                            return $query->where('role', 'Human Resource');
+                            return $query->whereIn('role', ['Human Resource', 'Admin Vice President', 'Finance Vice President']);
                         })->whereNot('id', request()->route('record'))
                     ])
                     ->validationMessages([
-                        'unique' => 'Only one user with the Human Resource role can be created.',
+                        'unique' => 'Only one user with the Human Resource, Admin Vice President, or Finance Vice President role can be created.',
                     ]), 
 
                     Fieldset::make('Password')
@@ -131,7 +130,7 @@ class UserResource extends Resource
                                 ->password()
                                 ->placeholder('Confirm Password')
                                 ->maxLength(20),
-                        ])->columns(2),
+                        ])->columns(2)->visibleOn(['create']),
 
             ]);
     }
@@ -141,6 +140,9 @@ class UserResource extends Resource
         return $table
             // ->query(User::with('roles')) // Eager load the role relationship
             ->columns([
+                TextColumn::make('EmployeeID')
+                ->hidden(),
+                    
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
@@ -149,16 +151,23 @@ class UserResource extends Resource
                     ->searchable(), // Allow searching by role name
                     
             ])
-            ->filters([
-            ])
+
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->hidden(fn($record) => $record->trashed()),
+                Tables\Actions\DeleteAction::make()->label('Deactivate'),
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                    
+                //     Tables\Actions\ForceDeleteBulkAction::make(),
+                //     Tables\Actions\RestoreBulkAction::make(),
+                // ]),
+            ])
+            ->defaultSort('EmployeeID', 'desc');
     }
 
     public static function getRelations(): array
@@ -167,6 +176,14 @@ class UserResource extends Resource
             //
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+{
+    return parent::getEloquentQuery()
+        ->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
+}
 
     public static function getPages(): array
     {

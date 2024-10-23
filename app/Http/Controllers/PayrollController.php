@@ -180,8 +180,19 @@ class PayrollController extends Controller
                         $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);  // 5:00 PM
 
                         // Calculate morning shift times (ignoring seconds)
-                        $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
-                        $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
+                        if (isset($attendances["Checkin_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_One"], 0, 5))) {
+                            $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
+                        } else {
+                            // Handle the error or set a default value
+                            $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
+                        }
+                        
+                        if (isset($attendances["Checkout_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_One"], 0, 5))) {
+                            $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
+                        } else {
+                            // Handle the error or set a default value
+                            $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
+                        }
 
                         // Calculate late time for the morning (in hours)
                         // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningEnd) / 60 : 0;
@@ -196,8 +207,19 @@ class PayrollController extends Controller
                         // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
                         // Calculate afternoon shift times (ignoring seconds)
-                        $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                        $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                        if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
+                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                        } else {
+                            // Handle the error or set a default value
+                            $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                        }
+                        
+                        if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
+                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                        } else {
+                            // Handle the error or set a default value
+                            $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                        }
 
                         // Calculate late time for the afternoon (in hours)
                         $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
@@ -253,8 +275,19 @@ class PayrollController extends Controller
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
-                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                            if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
+                                $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
+                            
+                            if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
+                                $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
 
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
@@ -303,8 +336,19 @@ class PayrollController extends Controller
                             $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
                             $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);  // 5:00 PM
 
-                            $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
-                            $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
+                            if (isset($attendances["Checkin_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_One"], 0, 5))) {
+                                $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkinOne = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
+                            
+                            if (isset($attendances["Checkout_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_One"], 0, 5))) {
+                                $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
 
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningStart) / 60 : 0;
 
@@ -316,8 +360,20 @@ class PayrollController extends Controller
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($morningEnd) / 60;
 
-                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                            if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
+                                $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
+                            
+                            if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
+                                $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
+                            } else {
+                                // Handle the error or set a default value
+                                $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
+                            }
+
 
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
@@ -640,11 +696,16 @@ class PayrollController extends Controller
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
-            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'];
+
+            $totaltest = $TotalGovDeductions;
+            $TotalDeductions = $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
-            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'];
+
+            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
+
+            $totaltest = $TotalGovDeductions;
 
             $TotalOfficeDeductions = $DeductionFee;
             $newRecord['TotalOfficeDeductions'] = $TotalOfficeDeductions;

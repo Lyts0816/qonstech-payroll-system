@@ -250,7 +250,7 @@ class ReportsController extends Controller
                                 $newRecord['Deduction'] = $SSSDeduction;
                                 $newRecord['DeductionEmployer'] = $employershare;
                                 $newRecord['DeductionMonthly'] = $SSSDeductionMonthly;
-                                $newRecord['DeductionTotal'] = $SSSDeduction + $sss->EmployerShare;
+                                $newRecord['DeductionTotal'] = $SSSDeduction + $employershare;
                                 break;
                             }
                         }
