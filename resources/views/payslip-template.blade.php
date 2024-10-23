@@ -191,8 +191,14 @@ $src = 'data:image/png;base64,' . $imageData;
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Tax</td>
-                            {{-- <td>PHP&nbsp;{{ number_format($employee['WTAXDeduction'] ?? 0, 2) }}</td> --}}
+                            <td>Tardiness</td>
+                            <td>PHP&nbsp;{{ number_format( $employee['TotalTardinessDed'] ?? 0, 2) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Undertime</td>
+                            <td>PHP&nbsp;{{ number_format($employee['TotalUndertimeDed'] ?? 0, 2) }}
+                            </td>
                         </tr>
                         <tr>
                             <td>SSS</td>
