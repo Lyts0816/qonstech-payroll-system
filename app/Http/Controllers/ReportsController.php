@@ -77,49 +77,7 @@ class ReportsController extends Controller
             } else {
                 $newRecord['ProjectName'] = 'Main Office'; // Handle case where there is no project assigned
             }
-
-
-            // Check if payroll frequency is Kinsenas or Weekly
-            $weekPeriod = \App\Models\WeekPeriod::where('id', $request->weekPeriodID)->first();
-            $newRecord['Period'] = $weekPeriod->StartDate . ' - ' . $weekPeriod->EndDate;
-
-            // dd($newRecord['ProjectName'], $newRecord['Period']);
-            if ($weekPeriod) {
-                // For Kinsenas (1st Kinsena or 2nd Kinsena)
-                if ($weekPeriod->Category == 'Kinsenas') {
-                    if (in_array($weekPeriod->Type, ['1st Kinsena', '2nd Kinsena'])) {
-                        $startDate = $weekPeriod->StartDate;
-                        $endDate = $weekPeriod->EndDate;
-                    } else {
-                        // Default to the first half of the month if no specific Type is found
-                        $startDate = Carbon::create($request->PayrollYear, Carbon::parse($request->PayrollMonth)->month, 1);
-                        $endDate = Carbon::create($request->PayrollYear, Carbon::parse($request->PayrollMonth)->month, 15);
-                    }
-
-                    // Get attendance between startDate and endDate
-                    $attendance = \App\Models\Attendance::where('Employee_ID', $employee->id)
-                        ->whereBetween('Date', [$startDate, $endDate])
-                        ->get();
-
-                } elseif ($weekPeriod->Category == 'Weekly') {
-                    // For Weekly (Week 1, Week 2, Week 3, or Week 4)
-                    if (in_array($weekPeriod->Type, ['Week 1', 'Week 2', 'Week 3', 'Week 4'])) {
-                        $startDate = $weekPeriod->StartDate;
-                        $endDate = $weekPeriod->EndDate;
-                    } else {
-                        // Default to the first week if no specific period is found
-                        $startDate = Carbon::create($request->PayrollYear, Carbon::parse($request->PayrollMonth)->month, 1);
-                        $endDate = Carbon::create($request->PayrollYear, Carbon::parse($request->PayrollMonth)->month, 7);
-                    }
-
-                    // Get attendance between startDate and endDate
-                    $attendance = \App\Models\Attendance::where('Employee_ID', $employee->id)
-                        ->whereBetween('Date', [$startDate, $endDate])
-                        ->orderBy('Date', 'ASC')
-                        ->get();
-                }
-            }
-
+   
 
             $SSSDeduction = 0;
             $PagIbigDeduction = 0;
@@ -218,15 +176,9 @@ class ReportsController extends Controller
 
             // $weekPeriod = \App\Models\WeekPeriod::where('id', $request->weekPeriodID)->first();
 
-            if ($weekPeriod) {
-                $deductionFactor = 1; // Initialize deductionFactor
+            // if ($weekPeriod) {
 
                 // Set deductionFactor based on week period category
-                if ($weekPeriod->Category == 'Kinsenas') {
-                    $deductionFactor = ($weekPeriod->Type == '1st Kinsena' || $weekPeriod->Type == '2nd Kinsena') ? 2 : 1;
-                } elseif ($weekPeriod->Category == 'Weekly') {
-                    $deductionFactor = 4; // Weekly deductions are typically divided into 4 parts
-                }
 
                 // Initialize Deduction to 0 to avoid undefined issues
                 $newRecord['DeductionID'] = null;
@@ -241,10 +193,10 @@ class ReportsController extends Controller
                         $newRecord['DeductionID'] = $employee->SSSNumber;
                         foreach ($GetSSS as $sss) {
                             if ($sss->MinSalary <= $employee->MonthlySalary && $sss->MaxSalary >= $employee->MonthlySalary) {
-                                $SSSDeduction = $sss->EmployeeShare / $deductionFactor;
+                                $SSSDeduction = $sss->EmployeeShare;
                                 $SSSDeductionMonthly = $sss->EmployeeShare;
 
-                                $employershare = $sss->EmployerShare / $deductionFactor;
+                                $employershare = $sss->EmployerShare ;
 
 
                                 $newRecord['Deduction'] = $SSSDeduction;
@@ -267,8 +219,8 @@ class ReportsController extends Controller
                                     $PhilHealthDeduction = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary);
                                     $PhilHealthDeductionMonthly = (($philhealth->PremiumRate / 100) * $employee->MonthlySalary);
                                 }
-                                $personal = $PhilHealthDeduction / $deductionFactor;
-                                $employer = $PhilHealthDeduction / $deductionFactor;
+                                $personal = $PhilHealthDeduction;
+                                $employer = $PhilHealthDeduction;
                                 $total = $personal + $employer;
                                 // PhilHealthDeductionMonthly
 
@@ -288,8 +240,8 @@ class ReportsController extends Controller
                                 // $PagIbigDeduction = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary) / $deductionFactor;
                                 // $PagIbigDeductionEmployer = (($pagibig->EmployeeRate / 50) * $employee->MonthlySalary) / $deductionFactor;
                                 // $PagIbigDeductionMonthly = (($pagibig->EmployeeRate / 100) * $employee->MonthlySalary);
-                                $PagIbigDeduction = $pagibig->EmployeeRate / $deductionFactor;
-                                $PagIbigDeductionMonthly = $pagibig->EmployeeRate / $deductionFactor;
+                                $PagIbigDeduction = $pagibig->EmployeeRate;
+                                $PagIbigDeductionMonthly = $pagibig->EmployeeRate;
 
                                 $newRecord['Deduction'] = $PagIbigDeduction;
                                 $newRecord['DeductionEmployer'] = $PagIbigDeductionMonthly;
@@ -313,7 +265,7 @@ class ReportsController extends Controller
 
                 // Always store the report type to newRecord for reference
                 $newRecord['ReportType'] = $request->ReportType;
-            }
+            // }
 
 
 
