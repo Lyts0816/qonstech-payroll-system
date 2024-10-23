@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\sss;
+use App\Models\Sss;
 use Illuminate\Auth\Access\Response;
 
-class sssPolicy
+class SssPolicy
 {
     /**
      * Determine whether the user can view any models.

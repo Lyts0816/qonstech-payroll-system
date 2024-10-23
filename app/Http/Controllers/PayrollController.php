@@ -509,9 +509,9 @@ class PayrollController extends Controller
 
 
 
-            $GetSSS = \App\Models\sss::get();
+            $GetSSS = \App\Models\Sss::get();
 
-            $GetPagibig = \App\Models\pagibig::get();
+            $GetPagibig = \App\Models\Pagibig::get();
 
             $GetPhilHealth = \App\Models\philhealth::get();
 
