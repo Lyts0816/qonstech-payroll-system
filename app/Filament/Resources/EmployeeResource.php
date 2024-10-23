@@ -134,7 +134,55 @@ class EmployeeResource extends Resource
                             }
                         }),
 
+                        TextInput::make('attendance_code')
+                        ->label('Attendance Code/ID')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+												->unique(ignoreRecord: true)
+												->rules('regex:/^[0-9]+$/'),
+
                 ])->columns(4)->collapsible(true)->live(),
+
+                Section::make('Contact Number/Status')
+                ->schema([
+
+                    TextInput::make('contact_number')
+                    ->label('Contact Number')
+                    ->required(fn (string $context) => $context === 'create' || 'edit')
+                    ->unique(ignoreRecord: true)
+                    ->rules('regex:/^[\d]*$/')
+                    ->maxLength(11)
+                    ->minLength(11)
+                    ,
+
+                    Select::make('employment_type')
+										->label('Employment Type')
+										->required(fn (string $context) => $context === 'create' || $context === 'edit')
+										->options([
+												'Regular' => 'Regular',
+												'Contractual' => 'Contractual',
+										])
+										->native(false)
+										->live(), // Ensure that the form updates when this field changes.
+
+                    Select::make('assignment')
+                        ->label('Assignment')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+                        ->options([
+                            'Main Office' => 'Main Office',
+                            'Project Based' => 'Project Based',
+                        ])->native(false),
+
+                    Select::make('status')
+                        ->label('Status')
+                        ->required(fn (string $context) => $context === 'create' || 'edit')
+                        ->options([
+                            'Office' => 'Office',
+                            'Assigned' => 'Assigned',
+                            'Available' => 'Available',
+                        ])->default('Available'),
+
+                ])->columns(3)->collapsible(true),
+
 
                 Section::make(heading: 'Other Details')
                 ->schema([
@@ -183,51 +231,8 @@ class EmployeeResource extends Resource
                         ->validationAttribute('Pagibig Number'),
                 ])
                 ->columns(4)
-                ->collapsible(true),
-
-
-
-                Section::make('Contact Number/Status')
-                ->schema([
-
-                    TextInput::make('contact_number')
-                    ->label('Contact Number')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->unique(ignoreRecord: true)
-                    ->rules('regex:/^[\d]*$/')
-                    ->maxLength(11)
-                    ->minLength(11)
-                    ,
-
-                    Select::make('employment_type')
-                    ->label('Employment Type')
-                    ->required(fn (string $context) => $context === 'create' || 'edit')
-                    ->options([
-                        'Regular' => 'Regular',
-                        'Contractual' => 'Contractual',
-                    ])->native(false),
-
-                    Select::make('assignment')
-                        ->label('Assignment')
-                        ->required(fn (string $context) => $context === 'create' || 'edit')
-                        ->options([
-                            'Main Office' => 'Main Office',
-                            'Project Based' => 'Project Based',
-                        ])->native(false),
-
-                    Select::make('status')
-                        ->label('Status')
-                        ->required(fn (string $context) => $context === 'create' || 'edit')
-                        ->options([
-                            'Office' => 'Office',
-                            'Assigned' => 'Assigned',
-                            'Available' => 'Available',
-                        ])->default('Available'),
-
-                ])->columns(3)->collapsible(true)
-
-
-
+                // ->collapsible(true)
+								->hidden(fn($get) => $get('employment_type') !== 'Regular'),
                 
             ]);
     }
