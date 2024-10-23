@@ -697,18 +697,18 @@ class PayrollController extends Controller
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
             $newRecord['GrossPay'] = $GrossPay;
 
-            $totaltest = $TotalGovDeductions;
-            $TotalDeductions = $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
-            $newRecord['TotalDeductions'] = $TotalDeductions;
-
-
             $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
             $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
 
-            $totaltest = $TotalGovDeductions;
-
             $TotalOfficeDeductions = $DeductionFee;
             $newRecord['TotalOfficeDeductions'] = $TotalOfficeDeductions;
+
+
+            $totaltest = $TotalGovDeductions;
+            $TotalDeductions =$TotalGovDeductions + $TotalOfficeDeductions + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
+            $newRecord['TotalDeductions'] = $TotalDeductions;
+
+
 
             $NetPay = $GrossPay - $TotalDeductions;
             $newRecord['NetPay'] = $NetPay;
