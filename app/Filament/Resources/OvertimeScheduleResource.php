@@ -51,18 +51,18 @@ class OvertimeScheduleResource extends Resource
                             ->searchable()
                             ->reactive(),
 
-                        // Check-in Time Input Field
-                        Forms\Components\TextInput::make('Checkin')
-                            ->label('Check-in Time')
-                            ->type('time')
-                            ->required(),
+                        // // Check-in Time Input Field
+                        // Forms\Components\TextInput::make('Checkin')
+                        //     ->label('Check-in Time')
+                        //     ->type('time')
+                        //     ->required(),
 
-                        // Check-out Time Input Field
-                        Forms\Components\TextInput::make('Checkout')
-                            ->label('Check-out Time')
-                            ->type('time')
-                            ->after('Checkin')
-                            ->required(),
+                        // // Check-out Time Input Field
+                        // Forms\Components\TextInput::make('Checkout')
+                        //     ->label('Check-out Time')
+                        //     ->type('time')
+                        //     ->after('Checkin')
+                        //     ->required(),
 
                         // Date Picker
                         Forms\Components\DatePicker::make('Date')
@@ -122,11 +122,11 @@ class OvertimeScheduleResource extends Resource
                 TextColumn::make('Reason')
                     ->label('Reason'),
 
-                TextColumn::make('Checkin')
-                    ->label('Check-in'),
+                // TextColumn::make('Checkin')
+                //     ->label('Check-in'),
 
-                TextColumn::make('Checkout')
-                    ->label('Check-out'),
+                // TextColumn::make('Checkout')
+                //     ->label('Check-out'),
 
                 TextColumn::make('Date')
                     ->label('Date'),

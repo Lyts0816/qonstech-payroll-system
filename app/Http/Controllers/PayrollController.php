@@ -248,15 +248,13 @@ class PayrollController extends Controller
                         $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                             + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                            $hourRtomin = $employee->HourlyRate / 60;
-                            $totalTardiness = $TotalTardiness * $hourRtomin;
-                            $totalUndertime = $TotalUndertime * $hourRtomin;
-                            
-                            $newRecord['TotalTardiness'] = $TotalTardiness;
-                            $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $totalTardiness;
-                            $newRecord['TotalUndertimeDed'] = $totalUndertime;
-                            $newRecord['TotalHours'] = $TotalHours;
+                        $newRecord['TotalTardiness'] = $TotalTardiness;
+                        $newRecord['TotalUndertime'] = $TotalUndertime;
+                        $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+                        // * $employee->HourlyRate;
+                        $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+                        // * $employee->HourlyRate;
+                        $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
                         // If date is Holiday
                         // dd(count(value: $Holiday));
@@ -329,14 +327,12 @@ class PayrollController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                                $hourRtomin = $employee->HourlyRate / 60;
-                                $totalTardiness = $TotalTardiness * $hourRtomin;
-                                $totalUndertime = $TotalUndertime * $hourRtomin;
-                                
-                                $newRecord['TotalTardiness'] = $TotalTardiness;
-                                $newRecord['TotalUndertime'] = $TotalUndertime;
-                                $newRecord['TotalTardinessDed'] = $totalTardiness;
-                                $newRecord['TotalUndertimeDed'] = $totalUndertime;
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+                            // * $employee->HourlyRate;
+                            $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+                            // * $employee->HourlyRate;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
                             // }
@@ -410,91 +406,98 @@ class PayrollController extends Controller
                             $TotalUndertime += ($underTimeMorningMinutes > 0 ? $underTimeMorningMinutes : 0)
                                 + ($underTimeAfternoonMinutes > 0 ? $underTimeAfternoonMinutes : 0);
 
-                                $hourRtomin = $employee->HourlyRate / 60;
-                                $totalTardiness = $TotalTardiness * $hourRtomin;
-                                $totalUndertime = $TotalUndertime * $hourRtomin;
-                                
-                                $newRecord['TotalTardiness'] = $TotalTardiness;
-                                $newRecord['TotalUndertime'] = $TotalUndertime;
-                                $newRecord['TotalTardinessDed'] = $totalTardiness;
-                                $newRecord['TotalUndertimeDed'] = $totalUndertime;
+                            $newRecord['TotalTardiness'] = $TotalTardiness;
+                            $newRecord['TotalUndertime'] = $TotalUndertime;
+                            $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+                            // * $employee->HourlyRate;
+                            $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+                            // * $employee->HourlyRate;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
                     }
                 }
 
             }
-            // dd($newRecord['EmployeeID);
-// Fetch the selected WeekPeriod
-            $otweekPeriod = \App\Models\WeekPeriod::where('id', $request->weekPeriodID)->first();
 
-            // Assuming $weekPeriod has StartDate and EndDate fields
-            $startDate = Carbon::parse($otweekPeriod->StartDate);
-            $endDate = Carbon::parse($otweekPeriod->EndDate);
-
-            // Fetch approved overtime records for the employee within the selected week period
-            $OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord['EmployeeID'])
-                ->where('Status', 'approved') // Only consider approved overtime
-                ->whereBetween('Date', [$startDate, $endDate]) // Filter by date range
+            $attendance = \App\Models\Attendance::where('Employee_ID', $employee->id)
+                ->whereBetween('Date', [$startDate, $endDate])
                 ->get();
 
-            // Initialize total overtime hours
-            $TotalOvertimeHours = 0;
+            // Fetch approved overtime records for the employee within the selected week period
+            $approvedOvertimeRecords = \App\Models\Overtime::where('EmployeeID', $employee->id)
+                ->get();
 
-            if ($OtDate->count() > 0) {
-                foreach ($OtDate as $otRecord) {
-                    // Extract the check-in and check-out times from the overtime record
-                    $In1s = $otRecord->Checkin;
-                    $InOT = explode(':', $In1s);
+            // Get the work schedule for the employee using the related schedule
+            $GetWorkSched = \App\Models\WorkSched::where('ScheduleName', $employee['schedule']->ScheduleName)->first();
 
-                    $Out1s = $otRecord->Checkout;
-                    $OutOT = explode(':', $Out1s);
+            $totalOvertimeHours = 0;
 
-                    // Create Carbon instances for the check-in and check-out times
-                    $OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]);
-                    $OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);
+            foreach ($attendance as $attendanceRecord) {
+                // Get the day of the week (e.g., 'monday', 'tuesday')
+                $dayOfWeek = strtolower(Carbon::parse($attendanceRecord->Date)->format('l'));
 
-                    // Calculate the overtime worked in minutes, then convert to hours
-                    $workedOTMinutes = $OTStart->diffInMinutes($OTEnd);
-                    $workedOTHours = $workedOTMinutes / 60;
+                // Ensure that the employee has a schedule for the specific day
+                if (!empty($GetWorkSched) && $GetWorkSched->$dayOfWeek) {
+                    // Parse the regular work hours (CheckinOne, CheckoutOne)
+                    $workStart = Carbon::parse($GetWorkSched->CheckinOne);
+                    $workEnd = Carbon::parse($GetWorkSched->CheckoutTwo);
 
-                    // Add to the total overtime hours
-                    $TotalOvertimeHours += $workedOTHours;
+                    // Attendance check-in and check-out times
+                    $attendanceCheckin = Carbon::parse($attendanceRecord->Checkin_One);
+                    $attendanceCheckout = Carbon::parse($attendanceRecord->Checkout_Two);
+
+                    // Check if the employee has approved overtime for this date
+                    $overtimeRecord = $approvedOvertimeRecords->firstWhere('Date', $attendanceRecord->Date);
+
+                    if ($overtimeRecord) {
+                        // Calculate overtime if attendance is outside regular work hours and there is an approved overtime schedule
+                        $overtimeHoursForDay = 0;
+
+                        // Check if check-in is before regular work hours
+                        if ($attendanceCheckin->lt($workStart)) {
+                            $overtimeMinutesBefore = $attendanceCheckin->diffInMinutes($workStart);
+                            $overtimeHoursForDay += $overtimeMinutesBefore / 60;
+                        }
+
+                        // Check if check-out is after regular work hours
+                        if ($attendanceCheckout->gt($workEnd)) {
+                            $overtimeMinutesAfter = $workEnd->diffInMinutes($attendanceCheckout);
+                            $overtimeHoursForDay += $overtimeMinutesAfter / 60;
+                        }
+
+                        // If the attendance is outside regular work hours and overtime is approved, add to the total overtime hours
+                        if ($overtimeHoursForDay > 0) {
+                            $totalOvertimeHours += $overtimeHoursForDay;
+                        }
+                    }
                 }
 
-                // Store the total overtime hours in the new record
-                $newRecord['TotalOvertimeHours'] = $TotalOvertimeHours;
+                // Additional check for overtime that is outside of regular work schedule
+                if ($approvedOvertimeRecords->contains('Date', $attendanceRecord->Date) && !$GetWorkSched->$dayOfWeek) {
+                    $overtimeRecord = $approvedOvertimeRecords->firstWhere('Date', $attendanceRecord->Date);
+                    if ($overtimeRecord) {
+                        // Calculate total hours based on check-in and check-out times without work schedule comparison
+                        $attendanceCheckin = Carbon::parse($attendanceRecord->Checkin_One);
+                        $attendanceCheckout = Carbon::parse($attendanceRecord->Checkout_Two);
+
+                        // Calculate the total overtime hours for the day
+                        $overtimeHoursForDay = $attendanceCheckin->diffInMinutes($attendanceCheckout) / 60;
+
+                        // Adjust for break if overtime exceeds 8 hours
+                        if ($overtimeHoursForDay > 8) {
+                            $overtimeHoursForDay -= 1; // Subtract 1 hour for the break
+                        }
+
+                        // Add to total overtime hours
+                        if ($overtimeHoursForDay > 0) {
+                            $totalOvertimeHours += $overtimeHoursForDay;
+                        }
+                    }
+                }
             }
 
-            // $OtDate = \App\Models\Overtime::where('EmployeeID', $newRecord['EmployeeID'])
-            //     ->where('Status', 'approved') // Only consider approved overtime
-            //     ->get();
-
-            // if (count($OtDate) > 0) {
-
-            //     foreach ($OtDate as $otRecord) {
-            //         // Extract the check-in and check-out times from the overtime record
-            //         $In1s = $otRecord->Checkin;
-            //         $InOT = explode(':', $In1s);
-
-            //         $Out1s = $otRecord->Checkout;
-            //         $OutOT = explode(':', $Out1s);
-
-            //         // Create Carbon instances for the check-in and check-out times
-            //         $OTStart = Carbon::createFromTime($InOT[0], $InOT[1], $InOT[2]);
-            //         $OTEnd = Carbon::createFromTime($OutOT[0], $OutOT[1], $OutOT[2]);
-
-            //         // Calculate the overtime worked in minutes, then convert to hours
-            //         $workedOTMinutes = $OTStart->diffInMinutes($OTEnd);
-            //         $workedOTHours = $workedOTMinutes / 60;
-
-            //         // Add to the total overtime hours
-            //         $TotalOvertimeHours += $workedOTHours;
-            //     }
-
-            //     // Store the total overtime hours in the new record
-            //     $newRecord['TotalOvertimeHours'] = $TotalOvertimeHours;
-            // }
+            // Store the total overtime hours in the new record
+            $newRecord['TotalOvertimeHours'] = $totalOvertimeHours;
 
 
             // For Earnings
