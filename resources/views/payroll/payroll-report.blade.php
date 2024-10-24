@@ -159,6 +159,7 @@
                     {{-- <th rowspan="2">Paid Amount For Legal Holiday</th>
                     <th rowspan="2">Paid Amount For Special Holiday 30%</th> --}}
                     {{-- <th rowspan="2">Other Allowance</th> --}}
+                    <th rowspan="2">Earnings Amount</th>
                     <th rowspan="2">Gross Amount</th>
                     <th colspan=11">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
@@ -166,6 +167,7 @@
                     <th rowspan="2">SIGNATURE</th>
                 </tr>
                 <tr>
+                    
                     <th>Regular Holiday Hours</th>
                     <th>Special Holiday Hours</th>
                     <th>Tardiness</th>
@@ -213,6 +215,7 @@
                         {{-- <td>p{{ number_format($employee['RegularHolidayPay'] ?? 0, 2) }}</td>
                         <td>p{{ number_format($employee['SpecialHolidayPay'] ?? 0, 2) }}</td> --}}
                         {{-- <td>p{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td> --}}
+                        <td>P{{ number_format($employee['EarningPay'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['GrossPay'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['TotalTardinessDed'] ?? 0, 2) }}</td>
                         <td>P{{ number_format($employee['TotalUndertimeDed'] ?? 0, 2) }}</td>

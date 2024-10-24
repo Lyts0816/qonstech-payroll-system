@@ -706,17 +706,17 @@ class PayrollController extends Controller
             $SundayPay = $TotalHoursSunday * $employee->HourlyRate * 1.30;
             $newRecord['SundayPay'] = $SundayPay;
 
-            $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.30 : 0;
+            $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.3 : 0;
             $newRecord['SpecialHolidayPay'] = $SpecialHolidayPay;
 
-            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate : 0;
+            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate * 2: 0;
             $newRecord['RegularHolidayPay'] = $RegularHolidayPay;
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
+            $testgross = $EarningPay;
             $newRecord['GrossPay'] = $GrossPay;
 
-            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
-            $newRecord['TotalDeductions'] = $TotalDeductions;
+            
 
             
             $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
@@ -733,9 +733,11 @@ class PayrollController extends Controller
 
             $newRecord['TotalDeductions'] = $NewtotalDedcutions;
 
-
+            $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
+            $newRecord['TotalDeductions'] = $TotalDeductions;
 
             $NetPay = $GrossPay - $TotalDeductions;
+            $test = $TotalDeductions;
             $newRecord['NetPay'] = $NetPay;
             // dd(
             // 	$TotalHours,

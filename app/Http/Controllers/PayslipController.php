@@ -695,7 +695,7 @@ class PayslipController extends Controller
             $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.3 : 0;
             $newRecord['SpecialHolidayPay'] = $SpecialHolidayPay;
 
-            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate : 0;
+            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate * 2: 0;
             $newRecord['RegularHolidayPay'] = $RegularHolidayPay;
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
