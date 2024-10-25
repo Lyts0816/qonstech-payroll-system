@@ -134,11 +134,11 @@ class EmployeeResource extends Resource
                             }
                         }),
 
-                        TextInput::make('attendance_code')
-                        ->label('Attendance Code/ID')
-                        ->required(fn (string $context) => $context === 'create' || 'edit')
-												->unique(ignoreRecord: true)
-												->rules('regex:/^[0-9]+$/'),
+                        // TextInput::make('attendance_code')
+                        // ->label('Attendance Code/ID')
+                        // ->required(fn (string $context) => $context === 'create' || 'edit')
+						// 						->unique(ignoreRecord: true)
+						// 						->rules('regex:/^[0-9]+$/'),
 
                 ])->columns(4)->collapsible(true)->live(),
 

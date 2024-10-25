@@ -28,7 +28,7 @@ class Employee extends Model
         'province',
         'contact_number',
         'status',
-        'attendance_code',
+        // 'attendance_code',
 
         'SSSNumber',
         'PhilHealthNumber',

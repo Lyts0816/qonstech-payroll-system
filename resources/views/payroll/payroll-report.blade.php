@@ -161,7 +161,7 @@
                     {{-- <th rowspan="2">Other Allowance</th> --}}
                     <th rowspan="2">Earnings Amount</th>
                     <th rowspan="2">Gross Amount</th>
-                    <th colspan=11">Deductions</th>
+                    <th colspan=10">Deductions</th>
                     <th rowspan="2">Total Deductions & Adjustment</th>
                     <th rowspan="2">NET PAY</th>
                     <th rowspan="2">SIGNATURE</th>
@@ -176,7 +176,7 @@
                     <th>SSS</th>
                     <th>PHIC</th>
                     <th>HDMF</th>
-                    <th>Total Government Deduction</th>
+                    {{-- <th>Total Government Deduction</th> --}}
                     <th>Cash Advances</th>
                     <th>SSS LOAN</th>
                     <th>SALARY LOAN</th>
@@ -204,8 +204,8 @@
                         {{-- <td>{{ $employee['SalaryType'] ?? '' }}</td>
                         <td>{{ $employee['RegularStatus'] ?? '' }}</td> --}}
                         <td>{{ number_format($employee['TotalHours'] ?? 0, 2) }}</td>
-                        <td>{{ $employee['TotalOvertimeHours'] ?? 0 }}</td>
-
+                        <td>{{ number_format($employee['TotalOvertimeHours'] ?? 0, 2) }}</td>
+                        
                         {{-- <td>{{ $employee['TotalHoursSunday'] ?? 0 }}</td> --}}
                         <td>{{ $employee['TotalHrsRegularHol'] ?? 0 }}</td>
                         <td>{{ $employee['TotalHrsSpecialHol'] ?? 0 }}</td>
@@ -225,7 +225,7 @@
                         <td>P{{ number_format($employee['PhilHealthDeduction'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['PagIbigDeduction'] ?? 0, 2) }}</td>
 
-                        <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td>
+                        {{-- <td>P{{ number_format($employee['TotalGovDeductions'] ?? 0, 2) }}</td> --}}
                         <td>P{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SSSLoan'] ?? 0, 2) }}</td>
                         <td>P{{number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>

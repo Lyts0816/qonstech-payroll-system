@@ -37,6 +37,7 @@ class OvertimeResource extends Resource
                 Section::make('Overtime Information')
                 ->schema([
                     TextInput::make('Reason')
+                    ->label('Reasonss')
                     ->required(fn (string $context) => $context === 'create')
                     ->unique(ignoreRecord: true)
                     ->rules('regex:/^[^\d]*$/'),

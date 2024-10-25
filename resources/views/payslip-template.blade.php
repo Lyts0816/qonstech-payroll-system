@@ -229,7 +229,7 @@ $src = 'data:image/png;base64,' . $imageData;
                             <td>PHP&nbsp;{{ number_format($employee['SalaryLoan'] ?? 0, 2) }}</td>
                         </tr>
                         <tr>
-                            <td>Other Deductions</td>
+                            <td>Cash Advances</td>
                             <td>PHP&nbsp;{{ number_format($employee['DeductionFee'] ?? 0, 2) }}</td>
                         </tr>
 

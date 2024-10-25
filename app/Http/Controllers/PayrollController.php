@@ -180,19 +180,8 @@ class PayrollController extends Controller
                         $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);  // 5:00 PM
 
                         // Calculate morning shift times (ignoring seconds)
-                        if (isset($attendances["Checkin_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_One"], 0, 5))) {
-                            $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
-                        } else {
-                            // Handle the error or set a default value
-                            $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
-                        }
-                        
-                        if (isset($attendances["Checkout_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_One"], 0, 5))) {
-                            $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
-                        } else {
-                            // Handle the error or set a default value
-                            $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
-                        }
+                        $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
+                        $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
 
                         // Calculate late time for the morning (in hours)
                         // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningEnd) / 60 : 0;
@@ -207,19 +196,8 @@ class PayrollController extends Controller
                         // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
                         // Calculate afternoon shift times (ignoring seconds)
-                        if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
-                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                        } else {
-                            // Handle the error or set a default value
-                            $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                        }
-                        
-                        if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
-                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
-                        } else {
-                            // Handle the error or set a default value
-                            $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                        }
+                        $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                        $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
 
                         // Calculate late time for the afternoon (in hours)
                         $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
@@ -250,9 +228,15 @@ class PayrollController extends Controller
 
                         $newRecord['TotalTardiness'] = $TotalTardiness;
                         $newRecord['TotalUndertime'] = $TotalUndertime;
-                        $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+
+
+                        $deduction = $employee->HourlyRate * ($TotalTardiness / 60);
+
+                        $newRecord['TotalTardinessDed'] = $deduction;
                         // * $employee->HourlyRate;
-                        $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+                        $UndertimetoHours = $TotalUndertime / 60;
+
+                            $newRecord['TotalUndertimeDed'] = $employee->HourlyRate * $UndertimetoHours;
                         // * $employee->HourlyRate;
                         $newRecord['TotalHoursSunday'] = $TotalHoursSunday;
                     } else { // regular day monday to saturday
@@ -279,19 +263,8 @@ class PayrollController extends Controller
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($checkoutOne) / 60;
 
-                            if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
-                                $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
-                            
-                            if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
-                                $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
+                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
 
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
@@ -329,9 +302,13 @@ class PayrollController extends Controller
 
                             $newRecord['TotalTardiness'] = $TotalTardiness;
                             $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+                            $deduction = $employee->HourlyRate * ($TotalTardiness / 60);
+
+                            $newRecord['TotalTardinessDed'] = $deduction;
                             // * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+                            $UndertimetoHours = $TotalUndertime / 60;
+
+                            $newRecord['TotalUndertimeDed'] = $employee->HourlyRate * $UndertimetoHours;
                             // * $employee->HourlyRate;
                             // else {
                             // 	$netWorkedHours = $totalWorkedHours - $totalLateHours;
@@ -344,19 +321,8 @@ class PayrollController extends Controller
                             $afternoonStart = Carbon::createFromTime($In2Array[0], $In2Array[1], $In2Array[2]); // 1:00 PM
                             $afternoonEnd = Carbon::createFromTime($Out2Array[0], $Out2Array[1], $Out2Array[2]);  // 5:00 PM
 
-                            if (isset($attendances["Checkin_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_One"], 0, 5))) {
-                                $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkinOne = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
-                            
-                            if (isset($attendances["Checkout_One"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_One"], 0, 5))) {
-                                $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkoutOne = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
+                            $checkinOne = Carbon::createFromFormat('H:i', substr($attendances["Checkin_One"], 0, 5));
+                            $checkoutOne = Carbon::createFromFormat('H:i', substr($attendances["Checkout_One"], 0, 5));
 
                             // $lateMorningHours = $checkinOne->greaterThan($morningStart) ? $checkinOne->diffInMinutes($morningStart) / 60 : 0;
 
@@ -368,20 +334,8 @@ class PayrollController extends Controller
                             $workedMorningHours = $workedMorningMinutes / 60;
                             // $workedMorningHours = $checkinOne->diffInMinutes($morningEnd) / 60;
 
-                            if (isset($attendances["Checkin_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkin_Two"], 0, 5))) {
-                                $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkinTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
-                            
-                            if (isset($attendances["Checkout_Two"]) && preg_match('/^\d{2}:\d{2}$/', substr($attendances["Checkout_Two"], 0, 5))) {
-                                $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
-                            } else {
-                                // Handle the error or set a default value
-                                $checkoutTwo = Carbon::createFromTime(0, 0); // or any default value you prefer
-                            }
-
+                            $checkinTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkin_Two"], 0, 5));
+                            $checkoutTwo = Carbon::createFromFormat('H:i', substr($attendances["Checkout_Two"], 0, 5));
 
                             // $lateAfternoonHours = $checkinTwo->greaterThan($afternoonStart) ? $checkinTwo->diffInMinutes($afternoonEnd) / 60 : 0;
 
@@ -408,9 +362,14 @@ class PayrollController extends Controller
 
                             $newRecord['TotalTardiness'] = $TotalTardiness;
                             $newRecord['TotalUndertime'] = $TotalUndertime;
-                            $newRecord['TotalTardinessDed'] = $TotalTardiness ;
+                                                  $deduction = $employee->HourlyRate * ($TotalTardiness / 60);
+
+                             $newRecord['TotalTardinessDed'] = $deduction;
                             // * $employee->HourlyRate;
-                            $newRecord['TotalUndertimeDed'] = $TotalUndertime ;
+
+                            $UndertimetoHours = $TotalUndertime / 60;
+
+                            $newRecord['TotalUndertimeDed'] = $employee->HourlyRate * $UndertimetoHours;
                             // * $employee->HourlyRate;
                             $newRecord['TotalHours'] = $TotalHours;
                         }
@@ -452,7 +411,8 @@ class PayrollController extends Controller
                     if ($overtimeRecord) {
                         // Calculate overtime if attendance is outside regular work hours and there is an approved overtime schedule
                         $overtimeHoursForDay = 0;
-
+                        $totalOvertimeHours = 2.5;
+                        
                         // Check if check-in is before regular work hours
                         if ($attendanceCheckin->lt($workStart)) {
                             $overtimeMinutesBefore = $attendanceCheckin->diffInMinutes($workStart);
@@ -467,7 +427,7 @@ class PayrollController extends Controller
 
                         // If the attendance is outside regular work hours and overtime is approved, add to the total overtime hours
                         if ($overtimeHoursForDay > 0) {
-                            $totalOvertimeHours += $overtimeHoursForDay;
+                            $totalOvertimeHours = 2.5; // Add 2.5 hours for the break
                         }
                     }
                 }
@@ -476,6 +436,8 @@ class PayrollController extends Controller
                 if ($approvedOvertimeRecords->contains('Date', $attendanceRecord->Date) && !$GetWorkSched->$dayOfWeek) {
                     $overtimeRecord = $approvedOvertimeRecords->firstWhere('Date', $attendanceRecord->Date);
                     if ($overtimeRecord) {
+
+                        $totalOvertimeHours = 2.5;
                         // Calculate total hours based on check-in and check-out times without work schedule comparison
                         $attendanceCheckin = Carbon::parse($attendanceRecord->Checkin_One);
                         $attendanceCheckout = Carbon::parse($attendanceRecord->Checkout_Two);
@@ -490,7 +452,7 @@ class PayrollController extends Controller
 
                         // Add to total overtime hours
                         if ($overtimeHoursForDay > 0) {
-                            $totalOvertimeHours += $overtimeHoursForDay;
+                            $totalOvertimeHours = 2.5;
                         }
                     }
                 }
@@ -698,13 +660,25 @@ class PayrollController extends Controller
                     }
                 }
             }
-            $newRecord['WTAXDeduction'] = $newRecord['WTAXDeduction'] ?? 0;
+            $taxBrackets = [
+                ['min' => 1, 'max' => 10417, 'compensation' => 10417, 'wth_tax' => 0, 'excess_rate' => 0],
+                ['min' => 10417, 'max' => 16666, 'compensation' => 10417, 'wth_tax' => 0, 'excess_rate' => 0.15],
+                ['min' => 16667, 'max' => 33332, 'compensation' => 16667, 'wth_tax' => 937.5, 'excess_rate' => 0.20],
+                ['min' => 33333, 'max' => 83332, 'compensation' => 33333, 'wth_tax' => 4270.7, 'excess_rate' => 0.25],
+                ['min' => 83333, 'max' => 333332, 'compensation' => 83333, 'wth_tax' => 16770.7, 'excess_rate' => 0.30],
+                ['min' => 333333, 'max' => PHP_INT_MAX, 'compensation' => 333333, 'wth_tax' => 91770.7, 'excess_rate' => 0.35]
+            ];
+            
 
+            $newRecord['WTAXDeduction'] = $newRecord['WTAXDeduction'] ?? 0;
+            $roundd = round($TotalHours, 2);
             $BasicPay = $TotalHours * $employee->HourlyRate;
             $newRecord['BasicPay'] = $BasicPay;
+            
 
-            $TotalOvertimePay = $TotalOvertimeHours * $employee->HourlyRate * 1.25;
+            $TotalOvertimePay = $newRecord['TotalOvertimeHours'] * $employee->HourlyRate * 1.25;
             $newRecord['TotalOvertimePay'] = $TotalOvertimePay;
+            // dd($TotalOvertimePay);
 
             $SundayPay = $TotalHoursSunday * $employee->HourlyRate * 1.30;
             $newRecord['SundayPay'] = $SundayPay;
@@ -712,35 +686,42 @@ class PayrollController extends Controller
             $SpecialHolidayPay = $TotalHrsSpecialHol ? $TotalHrsSpecialHol * $employee->HourlyRate * 1.3 : 0;
             $newRecord['SpecialHolidayPay'] = $SpecialHolidayPay;
 
-            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate * 2: 0;
+            $RegularHolidayPay = $TotalHrsRegularHol ? $TotalHrsRegularHol * $employee->HourlyRate * 2 : 0;
             $newRecord['RegularHolidayPay'] = $RegularHolidayPay;
 
             $GrossPay = $EarningPay + $BasicPay + $SundayPay + $SpecialHolidayPay + $RegularHolidayPay + $TotalOvertimePay;
-            $testgross = $EarningPay;
             $newRecord['GrossPay'] = $GrossPay;
 
-            
+            // dd($TotalOvertimePay);
 
-            
-            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
-            $newGovDed = $TotalGovDeductions + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
-            $newRecord['TotalGovDeductions'] = $newGovDed;
+            $taxableIncome = $GrossPay - ($SSSDeduction + $PhilHealthDeduction + $PagIbigDeduction);
+            $withholdingTax = 0;
+            foreach ($taxBrackets as $bracket) {
+                if ($taxableIncome >= $bracket['min'] && $taxableIncome <= $bracket['max']) {
+                    $excess = $taxableIncome - $bracket['compensation'];
+                    $withholdingTax = $bracket['wth_tax'] + ($excess * $bracket['excess_rate']);
+                    break;
+                }
+            }
+            $taxDue = round($withholdingTax, 2);
 
-            $TotalOfficeDeductions = $DeductionFee;
-            $newRecord['TotalOfficeDeductions'] = $TotalOfficeDeductions;
+            // Update WTAXDeduction in payroll calculation
+            $newRecord['WTAXDeduction'] = $taxDue;
 
 
-            $totaltest = $TotalGovDeductions;
-            $TotalDeductions =$TotalGovDeductions + $TotalOfficeDeductions + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'];
-            $NewtotalDedcutions = $TotalDeductions + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
-
-            $newRecord['TotalDeductions'] = $NewtotalDedcutions;
 
             $TotalDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $DeductionFee + $newRecord['SSSLoan'] + $newRecord['PagibigLoan'] + $newRecord['SalaryLoan'] + $newRecord['WTAXDeduction'] + $newRecord['TotalTardinessDed'] + $newRecord['TotalUndertimeDed'];
             $newRecord['TotalDeductions'] = $TotalDeductions;
 
+            // dd($newRecord['TotalTardinessDed']);
+
+            $TotalGovDeductions = $PagIbigDeduction + $SSSDeduction + $PhilHealthDeduction + $newRecord['WTAXDeduction'];
+            $newRecord['TotalGovDeductions'] = $TotalGovDeductions;
+
+            $TotalOfficeDeductions = $DeductionFee;
+            $newRecord['TotalOfficeDeductions'] = $TotalOfficeDeductions;
+
             $NetPay = $GrossPay - $TotalDeductions;
-            $test = $TotalDeductions;
             $newRecord['NetPay'] = $NetPay;
             // dd(
             // 	$TotalHours,

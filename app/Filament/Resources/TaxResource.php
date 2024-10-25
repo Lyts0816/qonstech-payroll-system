@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TaxResource\Pages;
 use App\Filament\Resources\TaxResource\RelationManagers;
 use App\Models\Tax;
+use Dompdf\FrameDecorator\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
@@ -48,10 +49,16 @@ class TaxResource extends Resource
                     ->placeholder('Enter maximum salary for this bracket'),
     
                 // Contribution Amount
-                TextInput::make('base_rate')
-                    ->label('Base Rate')
+                TextInput::make('compensation')
+                    ->label('Compensation')
                     ->numeric()
                     ->required()
+                    ->placeholder('Enter base rate amount for this bracket'),
+
+                TextInput::make('wth_tax')
+                    ->label('wth_tax')
+                    ->numeric()
+                    ->required(fn (string $context) => $context === 'create')
                     ->placeholder('Enter base rate amount for this bracket'),
     
                 // Contribution Rate
@@ -76,7 +83,8 @@ class TaxResource extends Resource
                 TextColumn::make('MaxSalary')
                 ->searchable(),
                 
-                TextColumn::make('base_rate'),
+                TextColumn::make('compensation'),
+                TextColumn::make('wth_tax'),
                 TextColumn::make('excess_percent'),
             ])
             ->filters([

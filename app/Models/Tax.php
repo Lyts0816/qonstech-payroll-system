@@ -14,7 +14,9 @@ class Tax extends Model
     protected $fillable = [
         'MinSalary',
         'MaxSalary',
-        'base_rate',
+        'compensation',
+        'wth_tax',
         'excess_percent',
+
     ];
 }
